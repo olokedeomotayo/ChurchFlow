@@ -7,3 +7,81 @@
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
 }
+
+:root {
+    --cf-purple: #7021a8;
+    --cf-magenta: #b22962;
+
+    --cf-background: #f4f1f7;
+    --cf-text: #181525;
+    --cf-heading: #211b30;
+    --cf-muted: #8b8595;
+
+    --cf-border: #ddd9e5;
+    --cf-light-border: #eeeaf2;
+
+    --cf-gradient: linear-gradient(
+        90deg,
+        #7021a8,
+        #b22962
+    );
+
+    --cf-shadow: 0 20px 50px rgba(45, 20, 70, .10);
+}
+
+.cf-gradient-button {
+    background: linear-gradient(
+        90deg,
+        #7021a8,
+        #b22962
+    );
+
+    box-shadow:
+        0 8px 18px
+        rgba(112, 33, 168, .18);
+
+    transition: .2s ease;
+}
+
+.cf-gradient-button:hover {
+    transform: translateY(-1px);
+
+    box-shadow:
+        0 10px 22px
+        rgba(112, 33, 168, .24);
+}
+.cf-gradient-button {
+    background: linear-gradient(
+        90deg,
+        #7021a8,
+        #b22962
+    );
+
+    box-shadow:
+        0 8px 18px
+        rgba(112, 33, 168, .18);
+
+    transition: .2s ease;
+}
+
+.cf-gradient-button:hover {
+    transform: translateY(-1px);
+
+    box-shadow:
+        0 10px 22px
+        rgba(112, 33, 168, .24);
+}
+
+
+.cf-gradient-text {
+    background: linear-gradient(
+        90deg,
+        #7021a8,
+        #b22962
+    );
+
+    -webkit-background-clip: text;
+    background-clip: text;
+
+    color: transparent;
+}
