@@ -47,7 +47,6 @@
 
             </div>
 
-
             {{-- Actions --}}
             <div class="flex items-center gap-3">
 
@@ -55,7 +54,6 @@
                     href="{{ route('church.members.edit', $member) }}"
                     class="inline-flex cursor-pointer items-center justify-center gap-2 rounded-lg bg-purple-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
                 >
-
                     <svg
                         class="h-4 w-4"
                         fill="none"
@@ -71,13 +69,11 @@
                     </svg>
 
                     Edit Member
-
                 </a>
 
             </div>
 
         </div>
-
 
         {{-- Profile Summary --}}
         <div class="rounded-xl border border-purple-200 bg-purple-50 p-6">
@@ -106,7 +102,6 @@
 
                 </div>
 
-
                 {{-- Status --}}
                 <div>
 
@@ -132,7 +127,6 @@
 
         </div>
 
-
         {{-- Personal Information --}}
         <div class="rounded-xl border border-slate-200 bg-white shadow-sm">
 
@@ -143,7 +137,6 @@
                 </h3>
 
             </div>
-
 
             <div class="grid grid-cols-1 gap-6 p-6 sm:grid-cols-2 lg:grid-cols-3">
 
@@ -157,7 +150,6 @@
                     </p>
                 </div>
 
-
                 <div>
                     <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">
                         Middle Name
@@ -167,7 +159,6 @@
                         {{ $member->middle_name ?: '—' }}
                     </p>
                 </div>
-
 
                 <div>
                     <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">
@@ -179,7 +170,6 @@
                     </p>
                 </div>
 
-
                 <div>
                     <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">
                         Date of Birth
@@ -190,7 +180,6 @@
                     </p>
                 </div>
 
-
                 <div>
                     <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">
                         Gender
@@ -200,7 +189,6 @@
                         {{ $member->gender ? ucfirst($member->gender) : '—' }}
                     </p>
                 </div>
-
 
                 <div>
                     <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">
@@ -216,7 +204,6 @@
 
         </div>
 
-
         {{-- Contact Information --}}
         <div class="rounded-xl border border-slate-200 bg-white shadow-sm">
 
@@ -227,7 +214,6 @@
                 </h3>
 
             </div>
-
 
             <div class="grid grid-cols-1 gap-6 p-6 md:grid-cols-2">
 
@@ -254,7 +240,6 @@
                     @endif
                 </div>
 
-
                 <div>
                     <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">
                         Phone Number
@@ -278,7 +263,6 @@
                     @endif
                 </div>
 
-
                 <div class="md:col-span-2">
 
                     <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">
@@ -295,7 +279,6 @@
 
         </div>
 
-
         {{-- Membership Information --}}
         <div class="rounded-xl border border-slate-200 bg-white shadow-sm">
 
@@ -306,7 +289,6 @@
                 </h3>
 
             </div>
-
 
             <div class="grid grid-cols-1 gap-6 p-6 sm:grid-cols-2 lg:grid-cols-3">
 
@@ -320,7 +302,6 @@
                     </p>
                 </div>
 
-
                 <div>
                     <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">
                         Membership Type
@@ -330,7 +311,6 @@
                         {{ ucfirst($member->membership_type ?? '—') }}
                     </p>
                 </div>
-
 
                 <div>
                     <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">
@@ -342,7 +322,6 @@
                     </p>
                 </div>
 
-
                 <div>
                     <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">
                         Date Joined
@@ -353,7 +332,6 @@
                     </p>
                 </div>
 
-
                 <div>
                     <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">
                         Created
@@ -363,7 +341,6 @@
                         {{ $member->created_at?->format('d M Y, h:i A') ?? '—' }}
                     </p>
                 </div>
-
 
                 <div>
                     <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">
@@ -379,6 +356,302 @@
 
         </div>
 
+        {{-- Attendance Summary --}}
+        @php
+            $attendanceCount = $attendanceHistory->count();
+
+            $lastAttendance = $attendanceHistory->first();
+        @endphp
+
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+
+            {{-- Total Attendance --}}
+            <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+
+                <div class="flex items-center justify-between">
+
+                    <div>
+                        <p class="text-sm font-medium text-slate-500">
+                            Total Attendance
+                        </p>
+
+                        <p class="mt-2 text-2xl font-bold text-slate-900">
+                            {{ $attendanceCount }}
+                        </p>
+                    </div>
+
+                    <div class="flex h-11 w-11 items-center justify-center rounded-lg bg-purple-100 text-purple-600">
+
+                        <svg
+                            class="h-5 w-5"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M17 20h5v-2a4 4 0 00-4-4h-1m-4 6H3v-2a4 4 0 014-4h4a4 4 0 014 4v2zm-2-10a4 4 0 11-8 0 4 4 0 018 0zm6 2a3 3 0 10-2.83-4"
+                            />
+                        </svg>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            {{-- Last Attendance --}}
+            <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+
+                <div class="flex items-center justify-between">
+
+                    <div>
+
+                        <p class="text-sm font-medium text-slate-500">
+                            Last Attendance
+                        </p>
+
+                        <p class="mt-2 text-lg font-bold text-slate-900">
+                            {{ $lastAttendance?->service?->name ?? '—' }}
+                        </p>
+
+                        @if ($lastAttendance?->checked_in_at)
+                            <p class="mt-1 text-xs text-slate-500">
+                                {{ $lastAttendance->checked_in_at->format('d M Y, h:i A') }}
+                            </p>
+                        @endif
+
+                    </div>
+
+                    <div class="flex h-11 w-11 items-center justify-center rounded-lg bg-green-100 text-green-600">
+
+                        <svg
+                            class="h-5 w-5"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M5 13l4 4L19 7"
+                            />
+                        </svg>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            {{-- Membership Since --}}
+            <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+
+                <div class="flex items-center justify-between">
+
+                    <div>
+
+                        <p class="text-sm font-medium text-slate-500">
+                            Member Since
+                        </p>
+
+                        <p class="mt-2 text-lg font-bold text-slate-900">
+                            {{ $member->joined_at?->format('d M Y') ?? '—' }}
+                        </p>
+
+                    </div>
+
+                    <div class="flex h-11 w-11 items-center justify-center rounded-lg bg-blue-100 text-blue-600">
+
+                        <svg
+                            class="h-5 w-5"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                            />
+                        </svg>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        {{-- Attendance History --}}
+        <div class="rounded-xl border border-slate-200 bg-white shadow-sm">
+
+            <div class="flex flex-col gap-3 border-b border-slate-200 px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
+
+                <div>
+                    <h3 class="text-base font-bold text-slate-900">
+                        Attendance History
+                    </h3>
+
+                    <p class="mt-1 text-sm text-slate-500">
+                        Services attended by this member.
+                    </p>
+                </div>
+
+                <span class="inline-flex w-fit rounded-full bg-purple-100 px-3 py-1 text-xs font-semibold text-purple-700">
+                    {{ $attendanceCount }} Record{{ $attendanceCount === 1 ? '' : 's' }}
+                </span>
+
+            </div>
+
+            @if ($attendanceHistory->isNotEmpty())
+
+                <div class="overflow-x-auto">
+
+                    <table class="min-w-full divide-y divide-slate-200">
+
+                        <thead class="bg-slate-50">
+
+                            <tr>
+
+                                <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+                                    Service
+                                </th>
+
+                                <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+                                    Date
+                                </th>
+
+                                <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+                                    Check-In
+                                </th>
+
+                                <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+                                    Check-Out
+                                </th>
+
+                                <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+                                    Status
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+                        <tbody class="divide-y divide-slate-100 bg-white">
+
+                            @foreach ($attendanceHistory as $attendance)
+
+                                <tr class="transition hover:bg-slate-50">
+
+                                    <td class="whitespace-nowrap px-6 py-4">
+
+                                        <p class="text-sm font-semibold text-slate-900">
+                                            {{ $attendance->service?->name ?? 'Service' }}
+                                        </p>
+
+                                        @if ($attendance->service?->description)
+                                            <p class="mt-1 max-w-xs truncate text-xs text-slate-500">
+                                                {{ $attendance->service->description }}
+                                            </p>
+                                        @endif
+
+                                    </td>
+
+                                    <td class="whitespace-nowrap px-6 py-4 text-sm text-slate-600">
+
+                                        {{ $attendance->service?->service_date?->format('d M Y') ?? '—' }}
+
+                                    </td>
+
+                                    <td class="whitespace-nowrap px-6 py-4 text-sm text-slate-600">
+
+                                        {{ $attendance->checked_in_at?->format('h:i A') ?? '—' }}
+
+                                    </td>
+
+                                    <td class="whitespace-nowrap px-6 py-4 text-sm text-slate-600">
+
+                                        {{ $attendance->checked_out_at?->format('h:i A') ?? '—' }}
+
+                                    </td>
+
+                                    <td class="whitespace-nowrap px-6 py-4">
+
+                                        @php
+                                            $attendanceStatus = $attendance->status ?? 'present';
+
+                                            $attendanceStatusClasses = match ($attendanceStatus) {
+                                                'present' => 'bg-green-100 text-green-700',
+                                                'absent' => 'bg-red-100 text-red-700',
+                                                'late' => 'bg-amber-100 text-amber-700',
+                                                default => 'bg-slate-100 text-slate-600',
+                                            };
+                                        @endphp
+
+                                        <span class="inline-flex rounded-full px-3 py-1 text-xs font-semibold {{ $attendanceStatusClasses }}">
+                                            {{ ucfirst($attendanceStatus) }}
+                                        </span>
+
+                                    </td>
+
+                                </tr>
+
+                            @endforeach
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            @else
+
+                <div class="px-6 py-12 text-center">
+
+                    <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-slate-400">
+
+                        <svg
+                            class="h-6 w-6"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a3 3 0 016 0M9 5h6"
+                            />
+                        </svg>
+
+                    </div>
+
+                    <h4 class="mt-4 text-sm font-semibold text-slate-900">
+                        No attendance records yet
+                    </h4>
+
+                    <p class="mx-auto mt-1 max-w-md text-sm text-slate-500">
+                        Attendance records for this member will appear here after they are checked in for a service.
+                    </p>
+
+                    <a
+                        href="{{ route('church.checkin.index') }}"
+                        class="mt-5 inline-flex cursor-pointer items-center justify-center rounded-lg bg-purple-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-purple-700"
+                    >
+                        Go to Check-In
+                    </a>
+
+                </div>
+
+            @endif
+
+        </div>
 
         {{-- Emergency Contact --}}
         <div class="rounded-xl border border-slate-200 bg-white shadow-sm">
@@ -391,7 +664,6 @@
 
             </div>
 
-
             <div class="grid grid-cols-1 gap-6 p-6 sm:grid-cols-2 lg:grid-cols-3">
 
                 <div>
@@ -403,7 +675,6 @@
                         {{ $member->emergency_contact_name ?: '—' }}
                     </p>
                 </div>
-
 
                 <div>
                     <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">
@@ -428,7 +699,6 @@
                     @endif
                 </div>
 
-
                 <div>
                     <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">
                         Relationship
@@ -442,7 +712,6 @@
             </div>
 
         </div>
-
 
         {{-- Notes --}}
         @if ($member->notes)
@@ -468,7 +737,6 @@
             </div>
 
         @endif
-
 
         {{-- Bottom Actions --}}
         <div class="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">

@@ -4,9 +4,9 @@ namespace App\Http\Controllers\Church;
 
 use App\Http\Controllers\Controller;
 use App\Models\Member;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
-use Illuminate\Http\RedirectResponse;
 
 class MemberController extends Controller
 {
@@ -16,6 +16,10 @@ class MemberController extends Controller
     public function index(Request $request): View
     {
         $church = $request->user()->church;
+
+        if (!$church) {
+            abort(403, 'Your account is not associated with a church.');
+        }
 
         $members = $church->members()
             ->latest()
@@ -34,6 +38,10 @@ class MemberController extends Controller
     {
         $church = $request->user()->church;
 
+        if (!$church) {
+            abort(403, 'Your account is not associated with a church.');
+        }
+
         return view('church.members.create', [
             'church' => $church,
         ]);
@@ -45,6 +53,10 @@ class MemberController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $church = $request->user()->church;
+
+        if (!$church) {
+            abort(403, 'Your account is not associated with a church.');
+        }
 
         $validated = $request->validate([
             'first_name' => ['required', 'string', 'max:100'],
@@ -63,10 +75,12 @@ class MemberController extends Controller
             ],
 
             'joined_at' => ['nullable', 'date'],
+
             'membership_status' => [
                 'required',
                 'in:active,inactive,suspended',
             ],
+
             'membership_type' => [
                 'required',
                 'in:member,visitor,worker,leader',
@@ -108,7 +122,6 @@ class MemberController extends Controller
             STR_PAD_LEFT
         );
 
-
         /*
         |--------------------------------------------------------------------------
         | Create Member
@@ -120,7 +133,6 @@ class MemberController extends Controller
             'member_id' => $memberId,
         ]);
 
-
         /*
         |--------------------------------------------------------------------------
         | Redirect
@@ -129,10 +141,105 @@ class MemberController extends Controller
 
         return redirect()
             ->route('church.members.index')
-            ->with(
-                'success',
-                'Member added successfully.'
-            );
+            ->with('success', 'Member added successfully.');
+    }
+
+    /**
+     * Display a single member with attendance history.
+     */
+    public function show(Request $request, Member $member): View
+    {
+        $this->ensureBelongsToChurch($request, $member);
+
+        $member->load([
+            'attendances' => function ($query) {
+                $query
+                    ->with('service')
+                    ->orderByDesc('checked_in_at');
+            },
+        ]);
+
+        return view('church.members.show', [
+            'member' => $member,
+            'attendanceHistory' => $member->attendances,
+        ]);
+    }
+
+    /**
+     * Display the form for editing a member.
+     */
+    public function edit(Request $request, Member $member): View
+    {
+        $this->ensureBelongsToChurch($request, $member);
+
+        return view('church.members.edit', [
+            'member' => $member,
+        ]);
+    }
+
+    /**
+     * Update an existing member.
+     */
+    public function update(
+        Request $request,
+        Member $member
+    ): RedirectResponse {
+        $this->ensureBelongsToChurch($request, $member);
+
+        $validated = $request->validate([
+            'first_name' => ['required', 'string', 'max:100'],
+            'last_name' => ['required', 'string', 'max:100'],
+            'middle_name' => ['nullable', 'string', 'max:100'],
+
+            'email' => ['nullable', 'email', 'max:255'],
+            'phone' => ['nullable', 'string', 'max:30'],
+            'address' => ['nullable', 'string'],
+
+            'date_of_birth' => ['nullable', 'date'],
+            'gender' => ['nullable', 'in:male,female,other'],
+            'marital_status' => [
+                'nullable',
+                'in:single,married,widowed,divorced',
+            ],
+
+            'joined_at' => ['nullable', 'date'],
+
+            'membership_status' => [
+                'required',
+                'in:active,inactive,suspended',
+            ],
+
+            'membership_type' => [
+                'required',
+                'in:member,visitor,worker,leader',
+            ],
+
+            'emergency_contact_name' => [
+                'nullable',
+                'string',
+                'max:255',
+            ],
+
+            'emergency_contact_phone' => [
+                'nullable',
+                'string',
+                'max:30',
+            ],
+
+            'emergency_contact_relationship' => [
+                'nullable',
+                'string',
+                'max:100',
+            ],
+
+            'notes' => ['nullable', 'string'],
+        ]);
+
+        $member->update($validated);
+
+        return redirect()
+            ->route('church.members.show', $member)
+            ->with('success', 'Member updated successfully.');
     }
 
     /**
@@ -211,8 +318,7 @@ class MemberController extends Controller
             ],
         ]);
 
-        $user = $request->user();
-        $church = $user->church;
+        $church = $request->user()->church;
 
         if (!$church) {
             return back()->with(
@@ -281,12 +387,6 @@ class MemberController extends Controller
 
         while (($row = fgetcsv($handle)) !== false) {
 
-            /*
-            |----------------------------------------------------------------------
-            | Skip Empty Rows
-            |----------------------------------------------------------------------
-            */
-
             if (
                 count(array_filter(
                     $row,
@@ -296,12 +396,6 @@ class MemberController extends Controller
                 continue;
             }
 
-            /*
-            |----------------------------------------------------------------------
-            | Match CSV Columns
-            |----------------------------------------------------------------------
-            */
-
             $data = [];
 
             foreach ($headers as $index => $header) {
@@ -309,12 +403,6 @@ class MemberController extends Controller
                     ? trim($row[$index])
                     : null;
             }
-
-            /*
-            |----------------------------------------------------------------------
-            | Validate Required Fields
-            |----------------------------------------------------------------------
-            */
 
             if (
                 empty($data['first_name']) ||
@@ -326,13 +414,12 @@ class MemberController extends Controller
             }
 
             /*
-            |----------------------------------------------------------------------
+            |--------------------------------------------------------------------------
             | Prevent Duplicate Email
-            |----------------------------------------------------------------------
+            |--------------------------------------------------------------------------
             */
 
             if (!empty($data['email'])) {
-
                 $existingMember = $church->members()
                     ->where('email', $data['email'])
                     ->exists();
@@ -345,23 +432,35 @@ class MemberController extends Controller
             }
 
             /*
-            |----------------------------------------------------------------------
+            |--------------------------------------------------------------------------
+            | Generate Member ID
+            |--------------------------------------------------------------------------
+            */
+
+            $nextId = (Member::max('id') ?? 0) + 1;
+
+            $memberId = 'MEM-' . str_pad(
+                $nextId,
+                6,
+                '0',
+                STR_PAD_LEFT
+            );
+
+            /*
+            |--------------------------------------------------------------------------
             | Create Member
-            |----------------------------------------------------------------------
+            |--------------------------------------------------------------------------
             */
 
             $church->members()->create([
+                'member_id' => $memberId,
 
                 'first_name' => $data['first_name'],
-
                 'middle_name' => $data['middle_name'] ?? null,
-
                 'last_name' => $data['last_name'],
 
                 'email' => $data['email'] ?? null,
-
                 'phone' => $data['phone'] ?? null,
-
                 'address' => $data['address'] ?? null,
 
                 'date_of_birth' => !empty($data['date_of_birth'])
@@ -369,16 +468,17 @@ class MemberController extends Controller
                     : null,
 
                 'gender' => $data['gender'] ?? null,
-
                 'marital_status' => $data['marital_status'] ?? null,
 
                 'joined_at' => !empty($data['joined_at'])
                     ? $data['joined_at']
                     : now(),
 
-                'membership_type' => $data['membership_type'] ?? 'member',
+                'membership_type' =>
+                    $data['membership_type'] ?? 'member',
 
-                'membership_status' => $data['membership_status'] ?? 'active',
+                'membership_status' =>
+                    $data['membership_status'] ?? 'active',
 
                 'emergency_contact_name' =>
                     $data['emergency_contact_name'] ?? null,
@@ -415,104 +515,107 @@ class MemberController extends Controller
     }
 
     /**
- * Export all church members to CSV.
- */
-public function export(Request $request)
-{
-    $user = $request->user();
-    $church = $user->church;
+     * Export all church members to CSV.
+     */
+    public function export(Request $request)
+    {
+        $church = $request->user()->church;
 
-    if (!$church) {
-        return back()->with(
-            'error',
-            'Your account is not associated with a church.'
+        if (!$church) {
+            return back()->with(
+                'error',
+                'Your account is not associated with a church.'
+            );
+        }
+
+        $members = $church->members()
+            ->orderBy('first_name')
+            ->orderBy('last_name')
+            ->get();
+
+        $filename = 'churchflow_members_' .
+            now()->format('Y-m-d_H-i-s') .
+            '.csv';
+
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' =>
+                'attachment; filename="' . $filename . '"',
+        ];
+
+        $callback = function () use ($members) {
+
+            $file = fopen('php://output', 'w');
+
+            fputcsv($file, [
+                'first_name',
+                'middle_name',
+                'last_name',
+                'email',
+                'phone',
+                'address',
+                'date_of_birth',
+                'gender',
+                'marital_status',
+                'joined_at',
+                'membership_type',
+                'membership_status',
+                'emergency_contact_name',
+                'emergency_contact_phone',
+                'emergency_contact_relationship',
+                'notes',
+            ]);
+
+            foreach ($members as $member) {
+                fputcsv($file, [
+                    $member->first_name,
+                    $member->middle_name,
+                    $member->last_name,
+                    $member->email,
+                    $member->phone,
+                    $member->address,
+                    $member->date_of_birth?->format('Y-m-d'),
+                    $member->gender,
+                    $member->marital_status,
+                    $member->joined_at?->format('Y-m-d'),
+                    $member->membership_type,
+                    $member->membership_status,
+                    $member->emergency_contact_name,
+                    $member->emergency_contact_phone,
+                    $member->emergency_contact_relationship,
+                    $member->notes,
+                ]);
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream(
+            $callback,
+            200,
+            $headers
         );
     }
 
-    $members = $church->members()
-        ->orderBy('first_name')
-        ->orderBy('last_name')
-        ->get();
+    /**
+     * Show the member import page.
+     */
+    public function import(): View
+    {
+        return view('church.members.import');
+    }
 
-    $filename = 'churchflow_members_' . now()->format('Y-m-d_H-i-s') . '.csv';
+    /**
+     * Ensure the member belongs to the authenticated church.
+     */
+    private function ensureBelongsToChurch(
+        Request $request,
+        Member $member
+    ): void {
+        $church = $request->user()->church;
 
-    $headers = [
-        'Content-Type' => 'text/csv',
-        'Content-Disposition' => 'attachment; filename="' . $filename . '"',
-    ];
-
-    $callback = function () use ($members) {
-
-        $file = fopen('php://output', 'w');
-
-        /*
-        |--------------------------------------------------------------------------
-        | CSV Header
-        |--------------------------------------------------------------------------
-        */
-
-        fputcsv($file, [
-            'first_name',
-            'middle_name',
-            'last_name',
-            'email',
-            'phone',
-            'address',
-            'date_of_birth',
-            'gender',
-            'marital_status',
-            'joined_at',
-            'membership_type',
-            'membership_status',
-            'emergency_contact_name',
-            'emergency_contact_phone',
-            'emergency_contact_relationship',
-            'notes',
-        ]);
-
-        /*
-        |--------------------------------------------------------------------------
-        | Member Records
-        |--------------------------------------------------------------------------
-        */
-
-        foreach ($members as $member) {
-
-            fputcsv($file, [
-                $member->first_name,
-                $member->middle_name,
-                $member->last_name,
-                $member->email,
-                $member->phone,
-                $member->address,
-                $member->date_of_birth?->format('Y-m-d'),
-                $member->gender,
-                $member->marital_status,
-                $member->joined_at?->format('Y-m-d'),
-                $member->membership_type,
-                $member->membership_status,
-                $member->emergency_contact_name,
-                $member->emergency_contact_phone,
-                $member->emergency_contact_relationship,
-                $member->notes,
-            ]);
+        if (!$church || $member->church_id !== $church->id) {
+            abort(404);
         }
-
-        fclose($file);
-    };
-
-    return response()->stream(
-        $callback,
-        200,
-        $headers
-    );
-}
-
-/**
- * Show the member import page.
- */
-public function import(): View
-{
-    return view('church.members.import');
-}
+    }
 }

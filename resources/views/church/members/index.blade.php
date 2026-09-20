@@ -422,9 +422,9 @@
                                     {{-- Action --}}
                                     <td class="whitespace-nowrap px-6 py-4 text-right">
 
-                                        <a
-                                            href="#"
-                                            class="inline-flex cursor-pointer items-center rounded-lg px-3 py-2 text-sm font-medium text-purple-600 transition hover:bg-purple-50 hover:text-purple-700"
+                                       <a
+                                            href="{{ route('church.members.show', $member) }}"
+                                            class="cursor-pointer ..."
                                         >
                                             View
                                         </a>

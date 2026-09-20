@@ -70,7 +70,6 @@
                     ? 'bg-purple-600 text-white'
                     : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}"
         >
-
             <span class="w-5 text-center text-sm">
                 ▣
             </span>
@@ -78,7 +77,6 @@
             <span class="text-sm font-medium">
                 Dashboard
             </span>
-
         </a>
 
 
@@ -96,7 +94,6 @@
                     : 'text-slate-300 hover:bg-slate-800 hover:text-white'
                 }}"
         >
-
             <svg
                 class="h-5 w-5 shrink-0
                     {{ $membersActive
@@ -107,128 +104,220 @@
                 stroke="currentColor"
                 viewBox="0 0 24 24"
             >
-
                 <path
                     stroke-linecap="round"
                     stroke-linejoin="round"
                     stroke-width="2"
                     d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
                 />
-
             </svg>
 
             <span>
                 Members
             </span>
-
         </a>
 
 
         {{-- Check-In --}}
 
-        <a
-            href="#"
-            class="mb-1 flex items-center gap-3 rounded-lg px-3 py-2.5 text-slate-300 transition hover:bg-slate-800 hover:text-white"
-        >
+        @php
+            $checkinActive = request()->routeIs('church.checkin.*');
+        @endphp
 
-            <span class="w-5 text-center text-sm">
+        <a
+            href="{{ route('church.checkin.index') }}"
+            class="group mb-1 flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition
+                {{ $checkinActive
+                    ? 'bg-purple-600 text-white'
+                    : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                }}"
+        >
+            <span
+                class="w-5 text-center text-sm
+                    {{ $checkinActive
+                        ? 'text-white'
+                        : 'text-slate-400'
+                    }}"
+            >
                 ✓
             </span>
 
-            <span class="text-sm font-medium">
+            <span>
                 Check-In
             </span>
-
         </a>
 
 
         {{-- Attendance --}}
 
-        <a
-            href="#"
-            class="mb-1 flex items-center gap-3 rounded-lg px-3 py-2.5 text-slate-300 transition hover:bg-slate-800 hover:text-white"
-        >
+        @php
+            $attendanceActive = request()->routeIs('church.attendance.*');
+        @endphp
 
-            <span class="w-5 text-center text-sm">
+        <a
+            href="{{ route('church.attendance.index') }}"
+            class="group mb-1 flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition
+                {{ $attendanceActive
+                    ? 'bg-purple-600 text-white'
+                    : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                }}"
+        >
+            <span
+                class="w-5 text-center text-sm
+                    {{ $attendanceActive
+                        ? 'text-white'
+                        : 'text-slate-400'
+                    }}"
+            >
                 ◷
             </span>
 
-            <span class="text-sm font-medium">
+            <span>
                 Attendance
             </span>
-
         </a>
 
 
         {{-- =====================================================
-             FINANCE
+             SERVICES
         ====================================================== --}}
 
         <div class="pt-6">
 
             <p class="mb-3 px-3 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
-                Finance
+                Services
             </p>
 
-
-            {{-- Income --}}
-
-            <a
-                href="#"
-                class="mb-1 flex items-center gap-3 rounded-lg px-3 py-2.5 text-slate-300 transition hover:bg-slate-800 hover:text-white"
-            >
-
-                <span class="w-5 text-center text-sm">
-                    ↗
-                </span>
-
-                <span class="text-sm font-medium">
-                    Income
-                </span>
-
-            </a>
-
-
-            {{-- Expenses --}}
+            @php
+                $servicesActive = request()->routeIs('church.services.*');
+            @endphp
 
             <a
-                href="#"
-                class="mb-1 flex items-center gap-3 rounded-lg px-3 py-2.5 text-slate-300 transition hover:bg-slate-800 hover:text-white"
-            >
-
-                <span class="w-5 text-center text-sm">
-                    ↘
-                </span>
-
-                <span class="text-sm font-medium">
-                    Expenses
-                </span>
-
-            </a>
-
-
-            {{-- Billing --}}
-
-            <a
-                href="{{ route('church.payments.index') }}"
-                class="mb-1 flex items-center gap-3 rounded-lg px-3 py-2.5 transition
-                    {{ request()->routeIs('church.payments.*')
+                href="{{ route('church.services.index') }}"
+                class="group mb-1 flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition
+                    {{ $servicesActive
                         ? 'bg-purple-600 text-white'
-                        : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}"
+                        : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                    }}"
             >
-
-                <span class="w-5 text-center text-sm">
-                    ₦
+                <span
+                    class="w-5 text-center text-sm
+                        {{ $servicesActive
+                            ? 'text-white'
+                            : 'text-slate-400'
+                        }}"
+                >
+                    ◫
                 </span>
 
-                <span class="text-sm font-medium">
-                    Billing
+                <span>
+                    Services
                 </span>
-
             </a>
 
         </div>
 
+
+       {{-- =====================================================
+     FINANCE
+====================================================== --}}
+
+<div class="pt-6">
+
+    <p class="mb-3 px-3 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+        Finance
+    </p>
+
+
+    {{-- Income --}}
+
+    @php
+        $incomeActive = request()->routeIs('church.income.*');
+    @endphp
+
+    <a
+        href="{{ route('church.income.index') }}"
+        class="group mb-1 flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition
+            {{ $incomeActive
+                ? 'bg-purple-600 text-white'
+                : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+            }}"
+    >
+        <span
+            class="w-5 text-center text-sm
+                {{ $incomeActive
+                    ? 'text-white'
+                    : 'text-slate-400 group-hover:text-white'
+                }}"
+        >
+            ↗
+        </span>
+
+        <span>
+            Income
+        </span>
+    </a>
+
+
+    {{-- Expenses --}}
+
+    @php
+    $expensesActive = request()->routeIs('church.expenses.*');
+@endphp
+
+<a
+    href="{{ route('church.expenses.index') }}"
+    class="group mb-1 flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition
+        {{ $expensesActive
+            ? 'bg-purple-600 text-white'
+            : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+        }}"
+>
+    <span
+        class="w-5 text-center text-sm
+            {{ $expensesActive
+                ? 'text-white'
+                : 'text-slate-400 group-hover:text-white'
+            }}"
+    >
+        ↘
+    </span>
+
+    <span>
+        Expenses
+    </span>
+</a>
+
+    {{-- Billing --}}
+
+    @php
+        $billingActive = request()->routeIs('church.payments.*');
+    @endphp
+
+    <a
+        href="{{ route('church.payments.index') }}"
+        class="group mb-1 flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition
+            {{ $billingActive
+                ? 'bg-purple-600 text-white'
+                : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+            }}"
+    >
+        <span
+            class="w-5 text-center text-sm
+                {{ $billingActive
+                    ? 'text-white'
+                    : 'text-slate-400 group-hover:text-white'
+                }}"
+        >
+            ₦
+        </span>
+
+        <span>
+            Billing
+        </span>
+    </a>
+
+</div>
 
         {{-- =====================================================
              MANAGEMENT
@@ -255,7 +344,6 @@
                         : 'text-slate-300 hover:bg-slate-800 hover:text-white'
                     }}"
             >
-
                 <svg
                     class="h-5 w-5 shrink-0
                         {{ $groupsActive
@@ -266,7 +354,6 @@
                     stroke="currentColor"
                     viewBox="0 0 24 24"
                 >
-
                     <path
                         stroke-linecap="round"
                         stroke-linejoin="round"
@@ -277,13 +364,11 @@
                            M17 8a3 3 0 100-6
                            M7 8a3 3 0 110-6"
                     />
-
                 </svg>
 
                 <span class="text-sm font-medium">
                     Groups & Departments
                 </span>
-
             </a>
 
 
@@ -293,7 +378,6 @@
                 href="#"
                 class="mb-1 flex items-center gap-3 rounded-lg px-3 py-2.5 text-slate-300 transition hover:bg-slate-800 hover:text-white"
             >
-
                 <span class="w-5 text-center text-sm">
                     ♟
                 </span>
@@ -301,7 +385,6 @@
                 <span class="text-sm font-medium">
                     Staff
                 </span>
-
             </a>
 
 
@@ -311,7 +394,6 @@
                 href="#"
                 class="mb-1 flex items-center gap-3 rounded-lg px-3 py-2.5 text-slate-300 transition hover:bg-slate-800 hover:text-white"
             >
-
                 <span class="w-5 text-center text-sm">
                     ♙
                 </span>
@@ -319,15 +401,18 @@
                 <span class="text-sm font-medium">
                     Users & Roles
                 </span>
-
             </a>
 
         </div>
 
 
-        {{-- =====================================================
-             REPORTS
+       {{-- =====================================================
+            REPORTS
         ====================================================== --}}
+
+        @php
+            $reportsActive = request()->routeIs('church.reports.*');
+        @endphp
 
         <div class="pt-6">
 
@@ -335,26 +420,30 @@
                 Reports
             </p>
 
-
-            {{-- Church Reports --}}
-
             <a
-                href="#"
-                class="mb-1 flex items-center gap-3 rounded-lg px-3 py-2.5 text-slate-300 transition hover:bg-slate-800 hover:text-white"
+                href="{{ route('church.reports.index') }}"
+                class="group mb-1 flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition
+                    {{ $reportsActive
+                        ? 'bg-purple-600 text-white'
+                        : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                    }}"
             >
-
-                <span class="w-5 text-center text-sm">
+                <span
+                    class="w-5 text-center text-sm
+                        {{ $reportsActive
+                            ? 'text-white'
+                            : 'text-slate-400 group-hover:text-white'
+                        }}"
+                >
                     ▤
                 </span>
 
-                <span class="text-sm font-medium">
+                <span>
                     Church Reports
                 </span>
-
             </a>
 
         </div>
-
 
         {{-- =====================================================
              SETTINGS
@@ -366,14 +455,10 @@
                 Settings
             </p>
 
-
-            {{-- Church Settings --}}
-
             <a
                 href="#"
                 class="mb-1 flex items-center gap-3 rounded-lg px-3 py-2.5 text-slate-300 transition hover:bg-slate-800 hover:text-white"
             >
-
                 <span class="w-5 text-center text-sm">
                     ⚙
                 </span>
@@ -381,7 +466,6 @@
                 <span class="text-sm font-medium">
                     Church Settings
                 </span>
-
             </a>
 
         </div>
@@ -406,7 +490,6 @@
                 type="submit"
                 class="flex w-full cursor-pointer items-center gap-3 rounded-lg px-3 py-2.5 text-slate-300 transition hover:bg-red-500/10 hover:text-red-400"
             >
-
                 <span class="w-5 text-center text-sm">
                     ↪
                 </span>
@@ -414,7 +497,6 @@
                 <span class="text-sm font-medium">
                     Logout
                 </span>
-
             </button>
 
         </form>

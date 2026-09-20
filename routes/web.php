@@ -15,6 +15,12 @@ use App\Http\Controllers\Church\ChurchDashboardController;
 use App\Http\Controllers\Church\PaymentController;
 use App\Http\Controllers\Church\MemberController;
 use App\Http\Controllers\Church\GroupController;
+use App\Http\Controllers\Church\CheckInController;
+use App\Http\Controllers\Church\ServiceController;
+use App\Http\Controllers\Church\AttendanceController;
+use App\Http\Controllers\Church\IncomeController;
+use App\Http\Controllers\Church\ExpenseController;
+use App\Http\Controllers\Church\ReportController;
 
 
 /*
@@ -318,35 +324,15 @@ Route::middleware('auth')->group(function () {
         ->name('church.payments.')
         ->group(function () {
 
-            /*
-            |----------------------------------------------------------------------
-            | Payment Page
-            |----------------------------------------------------------------------
-            */
-
             Route::get(
                 '/',
                 [PaymentController::class, 'index']
             )->name('index');
 
-
-            /*
-            |----------------------------------------------------------------------
-            | Initialize Paystack Payment
-            |----------------------------------------------------------------------
-            */
-
             Route::post(
                 '/{plan}/initialize',
                 [PaymentController::class, 'initialize']
             )->name('initialize');
-
-
-            /*
-            |----------------------------------------------------------------------
-            | Paystack Callback
-            |----------------------------------------------------------------------
-            */
 
             Route::get(
                 '/callback',
@@ -355,71 +341,243 @@ Route::middleware('auth')->group(function () {
 
         });
 
-        Route::prefix('church')
-            ->name('church.')
-            ->middleware(['auth'])
-            ->group(function () {
 
-                // Members
-                Route::get('/members', [MemberController::class, 'index'])
-                    ->name('members.index');
+    /*
+    |--------------------------------------------------------------------------
+    | Church Management Routes
+    |--------------------------------------------------------------------------
+    */
 
-                Route::get('/members/create', [MemberController::class, 'create'])
-                    ->name('members.create');
+    Route::prefix('church')
+        ->name('church.')
+        ->middleware('church.access')
+        ->group(function () {
 
-                Route::post('/members', [MemberController::class, 'store'])
-                    ->name('members.store');
+            /*
+            |--------------------------------------------------------------------------
+            | Members
+            |--------------------------------------------------------------------------
+            */
 
-                // Member Import / Export
-                Route::get('/members/template', [MemberController::class, 'downloadTemplate'])
-                    ->name('members.template');
+            Route::get(
+                '/members',
+                [MemberController::class, 'index']
+            )->name('members.index');
 
-                Route::get('/members/import', [MemberController::class, 'import'])
-                    ->name('members.import');
+            Route::get(
+                '/members/create',
+                [MemberController::class, 'create']
+            )->name('members.create');
 
-                Route::get('/members/export', [MemberController::class, 'export'])
-                    ->name('members.export');
+            Route::post(
+                '/members',
+                [MemberController::class, 'store']
+            )->name('members.store');
 
-                Route::post('/members/import', [MemberController::class, 'importStore'])
-                    ->name('members.import.store');
+            Route::get(
+                '/members/{member}',
+                [MemberController::class, 'show']
+            )->name('members.show');
 
-                Route::get('/members/export', [MemberController::class, 'export'])
-                    ->name('members.export');
+            Route::get(
+                '/members/{member}/edit',
+                [MemberController::class, 'edit']
+            )->name('members.edit');
 
-                Route::put('/members/{member}', [MemberController::class, 'update'])
-                    ->name('members.update');
-
-                Route::get('/groups', [GroupController::class, 'index'])
-                    ->name('groups.index');
-
-                Route::get('/groups/create', [GroupController::class, 'create'])
-                    ->name('groups.create');
-
-                Route::post('/groups', [GroupController::class, 'store'])
-                    ->name('groups.store');
-
-                Route::get('/groups/{group}/members/edit', [GroupController::class, 'editMembers'])
-                    ->name('groups.members.edit');
-
-                Route::put('/groups/{group}/members', [GroupController::class, 'updateMembers'])
-                    ->name('groups.members.update');
-
-                Route::get('/groups/{group}', [GroupController::class, 'show'])
-                    ->name('groups.show');
-
-                Route::get('/groups/{group}/edit', [GroupController::class, 'edit'])
-                    ->name('groups.edit');
-
-                Route::put('/groups/{group}', [GroupController::class, 'update'])
-                    ->name('groups.update');
-
-                Route::delete('/groups/{group}', [GroupController::class, 'destroy'])
-                    ->name('groups.destroy');
-
-                
+            Route::put(
+                '/members/{member}',
+                [MemberController::class, 'update']
+            )->name('members.update');
 
 
-            });
-            
+            /*
+            |--------------------------------------------------------------------------
+            | Member Import / Export
+            |--------------------------------------------------------------------------
+            */
+
+            Route::get(
+                '/members/template',
+                [MemberController::class, 'downloadTemplate']
+            )->name('members.template');
+
+            Route::get(
+                '/members/import',
+                [MemberController::class, 'import']
+            )->name('members.import');
+
+            Route::post(
+                '/members/import',
+                [MemberController::class, 'importStore']
+            )->name('members.import.store');
+
+            Route::get(
+                '/members/export',
+                [MemberController::class, 'export']
+            )->name('members.export');
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Groups & Departments
+            |--------------------------------------------------------------------------
+            */
+
+            Route::get(
+                '/groups',
+                [GroupController::class, 'index']
+            )->name('groups.index');
+
+            Route::get(
+                '/groups/create',
+                [GroupController::class, 'create']
+            )->name('groups.create');
+
+            Route::post(
+                '/groups',
+                [GroupController::class, 'store']
+            )->name('groups.store');
+
+            Route::get(
+                '/groups/{group}/members/edit',
+                [GroupController::class, 'editMembers']
+            )->name('groups.members.edit');
+
+            Route::put(
+                '/groups/{group}/members',
+                [GroupController::class, 'updateMembers']
+            )->name('groups.members.update');
+
+            Route::get(
+                '/groups/{group}',
+                [GroupController::class, 'show']
+            )->name('groups.show');
+
+            Route::get(
+                '/groups/{group}/edit',
+                [GroupController::class, 'edit']
+            )->name('groups.edit');
+
+            Route::put(
+                '/groups/{group}',
+                [GroupController::class, 'update']
+            )->name('groups.update');
+
+            Route::delete(
+                '/groups/{group}',
+                [GroupController::class, 'destroy']
+            )->name('groups.destroy');
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Check-In
+            |--------------------------------------------------------------------------
+            */
+
+            Route::get(
+                '/check-in',
+                [CheckInController::class, 'index']
+            )->name('checkin.index');
+
+            Route::post(
+                '/check-in',
+                [CheckInController::class, 'store']
+            )->name('checkin.store');
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Services
+            |--------------------------------------------------------------------------
+            */
+
+            Route::resource(
+                '/services',
+                ServiceController::class
+            )->names('services');
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Attendance
+            |--------------------------------------------------------------------------
+            */
+
+            Route::get(
+                '/attendance',
+                [AttendanceController::class, 'index']
+            )->name('attendance.index');
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Income
+            |--------------------------------------------------------------------------
+            */
+
+            // Income Import & Export
+            Route::get('/income/export', [IncomeController::class, 'export'])
+                ->name('income.export');
+
+            Route::get('/income/import', [IncomeController::class, 'import'])
+                ->name('income.import');
+
+            Route::post('/income/import', [IncomeController::class, 'importStore'])
+                ->name('income.import.store');
+
+            Route::get('/income/template', [IncomeController::class, 'downloadTemplate'])
+                ->name('income.template');
+
+            // Income Resource
+            Route::resource('/income', IncomeController::class)
+                ->whereNumber('income')
+                ->names('income');
+
+
+
+            // =====================================================
+            // EXPENSES
+            // =====================================================
+
+            Route::get('/expenses/export', [ExpenseController::class, 'export'])
+                ->name('expenses.export');
+
+            Route::get('/expenses/import', [ExpenseController::class, 'import'])
+                ->name('expenses.import');
+
+            Route::post('/expenses/import', [ExpenseController::class, 'importStore'])
+                ->name('expenses.import.store');
+
+            Route::get('/expenses/template', [ExpenseController::class, 'downloadTemplate'])
+                ->name('expenses.template');
+
+            Route::resource('/expenses', ExpenseController::class)
+                ->whereNumber('expense')
+                ->names('expenses');
+
+            // =====================================================
+            // REPORTS
+            // =====================================================
+
+            Route::get('/reports/export', [ReportController::class, 'export'])
+                ->name('reports.export');
+
+            /*
+            |--------------------------------------------------------------------------
+            | Reports
+            |--------------------------------------------------------------------------
+            */
+
+            Route::get('/reports', [ReportController::class, 'index'])
+                ->name('reports.index');
+
+            Route::get('/reports/export', [ReportController::class, 'export'])
+                ->name('reports.export');
+
+            Route::get('/reports/export/pdf', [ReportController::class, 'exportPdf'])
+                ->name('reports.export.pdf');
+
+        });
 
 });

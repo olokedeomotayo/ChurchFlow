@@ -62,7 +62,27 @@ class Church extends Model
     }
 
     public function groups(): HasMany
-{
-    return $this->hasMany(Group::class);
-}
+    {
+        return $this->hasMany(Group::class);
+    }
+
+    public function services(): HasMany
+    {
+        return $this->hasMany(Service::class);
+    }
+
+    public function attendance(): HasMany
+    {
+        return $this->hasMany(Attendance::class);
+    }
+
+    public function incomes(): HasMany
+    {
+        return $this->hasMany(Income::class);
+    }
+
+    public function expenses()
+    {
+        return $this->hasMany(Expense::class);
+    }
 }
