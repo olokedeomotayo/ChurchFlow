@@ -5,8 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-
-
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 #[Fillable([
     'code',
@@ -84,5 +83,10 @@ class Church extends Model
     public function expenses()
     {
         return $this->hasMany(Expense::class);
+    }
+
+    public function financialSetting(): HasOne
+    {
+        return $this->hasOne(ChurchFinancialSetting::class);
     }
 }

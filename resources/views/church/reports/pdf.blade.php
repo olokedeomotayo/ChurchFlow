@@ -42,27 +42,47 @@
             font-size: 10px;
         }
 
-        .summary {
-            width: 100%;
-            margin-bottom: 25px;
+        .section-title {
+            font-size: 13px;
+            font-weight: bold;
+            color: #581c87;
+            margin-top: 20px;
+            margin-bottom: 10px;
         }
 
-        .summary td {
-            width: 33.33%;
+        /*
+        |--------------------------------------------------------------------------
+        | Financial Position
+        |--------------------------------------------------------------------------
+        */
+
+        .position-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        .position-table td {
+            width: 25%;
             padding: 10px;
             border: 1px solid #e2e8f0;
+            vertical-align: top;
         }
 
-        .summary-label {
-            font-size: 9px;
+        .position-label {
+            font-size: 8px;
             color: #64748b;
             text-transform: uppercase;
             margin-bottom: 5px;
         }
 
-        .summary-value {
-            font-size: 16px;
+        .position-value {
+            font-size: 15px;
             font-weight: bold;
+        }
+
+        .opening-value {
+            color: #334155;
         }
 
         .income-value {
@@ -73,17 +93,58 @@
             color: #b91c1c;
         }
 
-        .balance-value {
+        .closing-value {
             color: #7e22ce;
         }
 
-        .section-title {
-            font-size: 13px;
-            font-weight: bold;
-            color: #581c87;
-            margin-top: 20px;
-            margin-bottom: 10px;
+        .position-note {
+            margin-top: 4px;
+            font-size: 8px;
+            color: #94a3b8;
         }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Net Movement
+        |--------------------------------------------------------------------------
+        */
+
+        .net-movement {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 25px;
+        }
+
+        .net-movement td {
+            padding: 10px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .net-label {
+            font-size: 9px;
+            font-weight: bold;
+            color: #475569;
+        }
+
+        .net-value {
+            text-align: right;
+            font-size: 15px;
+            font-weight: bold;
+        }
+
+        .positive {
+            color: #7e22ce;
+        }
+
+        .negative {
+            color: #b91c1c;
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Data Tables
+        |--------------------------------------------------------------------------
+        */
 
         table.data-table {
             width: 100%;
@@ -116,6 +177,12 @@
             background: #f8fafc;
         }
 
+        /*
+        |--------------------------------------------------------------------------
+        | Footer
+        |--------------------------------------------------------------------------
+        */
+
         .footer {
             margin-top: 30px;
             padding-top: 10px;
@@ -133,8 +200,12 @@
 
 <body>
 
+    {{-- ============================================================= --}}
     {{-- HEADER --}}
+    {{-- ============================================================= --}}
+
     <div class="header">
+
         <div class="church-name">
             {{ $church?->name ?? 'Church' }}
         </div>
@@ -146,55 +217,209 @@
         <div class="period">
             Reporting Period: {{ $reportLabel }}
         </div>
+
     </div>
 
 
-    {{-- SUMMARY --}}
-    <table class="summary">
+    {{-- ============================================================= --}}
+    {{-- FINANCIAL POSITION --}}
+    {{-- ============================================================= --}}
+
+    <div class="section-title">
+        Financial Position
+    </div>
+
+    <table class="position-table">
+
         <tr>
-            <td>
-                <div class="summary-label">Total Income</div>
 
-                <div class="summary-value income-value">
-                    ₦{{ number_format((float) $totalIncome, 2) }}
+            {{-- Opening Balance --}}
+            <td>
+
+                <div class="position-label">
+                    Opening Balance
                 </div>
+
+                <div class="position-value opening-value">
+                    ₦{{ number_format((float) $periodOpeningBalance, 2) }}
+                </div>
+
+                <div class="position-note">
+                    Balance at start of report period
+                </div>
+
             </td>
 
-            <td>
-                <div class="summary-label">Total Expenses</div>
 
-                <div class="summary-value expense-value">
-                    ₦{{ number_format((float) $totalExpenses, 2) }}
+            {{-- Income --}}
+            <td>
+
+                <div class="position-label">
+                    Income During Period
                 </div>
+
+                <div class="position-value income-value">
+                    + ₦{{ number_format((float) $totalIncome, 2) }}
+                </div>
+
+                <div class="position-note">
+                    Total recorded income
+                </div>
+
             </td>
 
-            <td>
-                <div class="summary-label">Net Balance</div>
 
-                <div class="summary-value balance-value">
-                    ₦{{ number_format((float) $netBalance, 2) }}
+            {{-- Expenses --}}
+            <td>
+
+                <div class="position-label">
+                    Expenses During Period
                 </div>
+
+                <div class="position-value expense-value">
+                    − ₦{{ number_format((float) $totalExpenses, 2) }}
+                </div>
+
+                <div class="position-note">
+                    Total recorded expenses
+                </div>
+
             </td>
+
+
+            {{-- Closing Balance --}}
+            <td>
+
+                <div class="position-label">
+                    Closing Balance
+                </div>
+
+                <div
+                    class="position-value
+                        {{ $closingBalance >= 0
+                            ? 'closing-value'
+                            : 'negative'
+                        }}"
+                >
+                    ₦{{ number_format((float) $closingBalance, 2) }}
+                </div>
+
+                <div class="position-note">
+                    Opening balance + net movement
+                </div>
+
+            </td>
+
         </tr>
+
     </table>
 
 
+    {{-- ============================================================= --}}
+    {{-- BALANCE CALCULATION --}}
+    {{-- ============================================================= --}}
+
+    <table class="net-movement">
+
+        <tr>
+
+            <td>
+                <div class="net-label">
+                    Balance Calculation
+                </div>
+
+                <div style="margin-top: 4px; font-size: 9px; color: #64748b;">
+                    Opening Balance + Income During Period − Expenses During Period
+                </div>
+            </td>
+
+            <td class="net-value {{ $closingBalance >= 0 ? 'positive' : 'negative' }}">
+
+                ₦{{ number_format((float) $periodOpeningBalance, 2) }}
+                +
+                ₦{{ number_format((float) $totalIncome, 2) }}
+                −
+                ₦{{ number_format((float) $totalExpenses, 2) }}
+
+                =
+                ₦{{ number_format((float) $closingBalance, 2) }}
+
+            </td>
+
+        </tr>
+
+    </table>
+
+
+    {{-- ============================================================= --}}
+    {{-- NET MOVEMENT --}}
+    {{-- ============================================================= --}}
+
+    <div class="section-title">
+        Net Movement
+    </div>
+
+    <table class="net-movement">
+
+        <tr>
+
+            <td>
+                <div class="net-label">
+                    Net Movement
+                </div>
+
+                <div style="margin-top: 4px; font-size: 9px; color: #64748b;">
+                    Total income less total expenses for the selected period
+                </div>
+            </td>
+
+            <td
+                class="net-value
+                    {{ $netBalance >= 0
+                        ? 'positive'
+                        : 'negative'
+                    }}"
+            >
+                ₦{{ number_format((float) $netBalance, 2) }}
+            </td>
+
+        </tr>
+
+    </table>
+
+
+    {{-- ============================================================= --}}
     {{-- INCOME BY CATEGORY --}}
+    {{-- ============================================================= --}}
+
     <div class="section-title">
         Income by Category
     </div>
 
     <table class="data-table">
+
         <thead>
+
             <tr>
-                <th>Category</th>
-                <th style="text-align: right;">Total</th>
+
+                <th>
+                    Category
+                </th>
+
+                <th style="text-align: right;">
+                    Total
+                </th>
+
             </tr>
+
         </thead>
 
         <tbody>
+
             @forelse ($incomeByCategory as $item)
+
                 <tr>
+
                     <td>
                         {{ $item->category }}
                     </td>
@@ -202,34 +427,74 @@
                     <td class="amount">
                         ₦{{ number_format((float) $item->total, 2) }}
                     </td>
+
                 </tr>
+
             @empty
+
                 <tr>
+
                     <td colspan="2">
                         No income recorded for this period.
                     </td>
+
                 </tr>
+
             @endforelse
+
         </tbody>
+
+        <tfoot>
+
+            <tr class="total-row">
+
+                <td style="text-align: right;">
+                    Total Income
+                </td>
+
+                <td class="amount">
+                    ₦{{ number_format((float) $totalIncome, 2) }}
+                </td>
+
+            </tr>
+
+        </tfoot>
+
     </table>
 
 
+    {{-- ============================================================= --}}
     {{-- EXPENSES BY CATEGORY --}}
+    {{-- ============================================================= --}}
+
     <div class="section-title">
         Expenses by Category
     </div>
 
     <table class="data-table">
+
         <thead>
+
             <tr>
-                <th>Category</th>
-                <th style="text-align: right;">Total</th>
+
+                <th>
+                    Category
+                </th>
+
+                <th style="text-align: right;">
+                    Total
+                </th>
+
             </tr>
+
         </thead>
 
         <tbody>
+
             @forelse ($expensesByCategory as $item)
+
                 <tr>
+
                     <td>
                         {{ $item->category }}
                     </td>
@@ -237,40 +502,97 @@
                     <td class="amount">
                         ₦{{ number_format((float) $item->total, 2) }}
                     </td>
+
                 </tr>
+
             @empty
+
                 <tr>
+
                     <td colspan="2">
                         No expenses recorded for this period.
                     </td>
+
                 </tr>
+
             @endforelse
+
         </tbody>
+
+        <tfoot>
+
+            <tr class="total-row">
+
+                <td style="text-align: right;">
+                    Total Expenses
+                </td>
+
+                <td class="amount">
+                    ₦{{ number_format((float) $totalExpenses, 2) }}
+                </td>
+
+            </tr>
+
+        </tfoot>
+
     </table>
 
 
+    {{-- ============================================================= --}}
     {{-- TRANSACTIONS --}}
+    {{-- ============================================================= --}}
+
     <div class="page-break"></div>
+
+
+    {{-- ============================================================= --}}
+    {{-- INCOME TRANSACTIONS --}}
+    {{-- ============================================================= --}}
 
     <div class="section-title">
         Income Transactions
     </div>
 
     <table class="data-table">
+
         <thead>
+
             <tr>
-                <th>Date</th>
-                <th>Category</th>
-                <th>Source</th>
-                <th>Payment Method</th>
-                <th>Reference</th>
-                <th style="text-align: right;">Amount</th>
+
+                <th>
+                    Date
+                </th>
+
+                <th>
+                    Category
+                </th>
+
+                <th>
+                    Source
+                </th>
+
+                <th>
+                    Payment Method
+                </th>
+
+                <th>
+                    Reference
+                </th>
+
+                <th style="text-align: right;">
+                    Amount
+                </th>
+
             </tr>
+
         </thead>
 
         <tbody>
+
             @forelse ($incomeTransactions as $income)
+
                 <tr>
+
                     <td>
                         {{ $income->income_date?->format('d M Y') }}
                     </td>
@@ -294,37 +616,90 @@
                     <td class="amount">
                         ₦{{ number_format((float) $income->amount, 2) }}
                     </td>
+
                 </tr>
+
             @empty
+
                 <tr>
+
                     <td colspan="6">
                         No income transactions found.
                     </td>
+
                 </tr>
+
             @endforelse
+
         </tbody>
+
+        <tfoot>
+
+            <tr class="total-row">
+
+                <td colspan="5" style="text-align: right;">
+                    Total Income
+                </td>
+
+                <td class="amount">
+                    ₦{{ number_format((float) $totalIncome, 2) }}
+                </td>
+
+            </tr>
+
+        </tfoot>
+
     </table>
 
+
+    {{-- ============================================================= --}}
+    {{-- EXPENSE TRANSACTIONS --}}
+    {{-- ============================================================= --}}
 
     <div class="section-title">
         Expense Transactions
     </div>
 
     <table class="data-table">
+
         <thead>
+
             <tr>
-                <th>Date</th>
-                <th>Category</th>
-                <th>Vendor</th>
-                <th>Payment Method</th>
-                <th>Reference</th>
-                <th style="text-align: right;">Amount</th>
+
+                <th>
+                    Date
+                </th>
+
+                <th>
+                    Category
+                </th>
+
+                <th>
+                    Vendor
+                </th>
+
+                <th>
+                    Payment Method
+                </th>
+
+                <th>
+                    Reference
+                </th>
+
+                <th style="text-align: right;">
+                    Amount
+                </th>
+
             </tr>
+
         </thead>
 
         <tbody>
+
             @forelse ($expenseTransactions as $expense)
+
                 <tr>
+
                     <td>
                         {{ $expense->expense_date?->format('d M Y') }}
                     </td>
@@ -348,23 +723,54 @@
                     <td class="amount">
                         ₦{{ number_format((float) $expense->amount, 2) }}
                     </td>
+
                 </tr>
+
             @empty
+
                 <tr>
+
                     <td colspan="6">
                         No expense transactions found.
                     </td>
+
                 </tr>
+
             @endforelse
+
         </tbody>
+
+        <tfoot>
+
+            <tr class="total-row">
+
+                <td colspan="5" style="text-align: right;">
+                    Total Expenses
+                </td>
+
+                <td class="amount">
+                    ₦{{ number_format((float) $totalExpenses, 2) }}
+                </td>
+
+            </tr>
+
+        </tfoot>
+
     </table>
 
 
+    {{-- ============================================================= --}}
     {{-- FOOTER --}}
+    {{-- ============================================================= --}}
+
     <div class="footer">
+
         Generated by ChurchFlow
+
         &nbsp; | &nbsp;
+
         {{ now()->format('d M Y H:i') }}
+
     </div>
 
 </body>

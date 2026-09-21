@@ -223,197 +223,219 @@
             </div>
 
         </div>
+{{-- ============================================================= --}}
+{{-- FINANCIAL OVERVIEW --}}
+{{-- ============================================================= --}}
 
+<div class="space-y-6">
 
-        {{-- ============================================================= --}}
-        {{-- FINANCIAL OVERVIEW --}}
-        {{-- ============================================================= --}}
+    {{-- ============================================================= --}}
+    {{-- CURRENT FINANCIAL POSITION --}}
+    {{-- ============================================================= --}}
 
-        <div class="grid grid-cols-1 gap-6 xl:grid-cols-3">
+    <div class="rounded-xl border border-purple-200 bg-purple-50 shadow-sm">
 
-            {{-- Monthly Financial Summary --}}
-            <div class="rounded-xl border border-slate-200 bg-white shadow-sm">
+        <div class="border-b border-purple-200 px-5 py-4">
 
-                <div class="border-b border-slate-200 px-5 py-4">
+            <h2 class="text-sm font-semibold text-purple-900">
+                Current Financial Position
+            </h2>
 
-                    <h2 class="text-sm font-semibold text-slate-900">
-                        Monthly Financial Summary
-                    </h2>
+            <p class="mt-1 text-xs text-purple-700">
+                Your church's financial position from the opening balance date
+            </p>
 
-                    <p class="mt-1 text-xs text-slate-500">
-                        Current month's financial position
+        </div>
+
+        <div class="grid grid-cols-1 gap-4 p-5 sm:grid-cols-2 xl:grid-cols-4">
+
+            {{-- Opening Balance --}}
+            <div class="rounded-lg border border-purple-100 bg-white p-4">
+
+                <p class="text-xs font-medium uppercase tracking-wide text-slate-400">
+                    Opening Balance
+                </p>
+
+                <p class="mt-2 text-xl font-bold text-slate-900">
+                    ₦{{ number_format((float) $openingBalance, 2) }}
+                </p>
+
+                @if ($openingBalanceDate)
+                    <p class="mt-1 text-[11px] text-slate-400">
+                        As at {{ $openingBalanceDate->format('d M Y') }}
                     </p>
+                @endif
+
+            </div>
+
+
+            {{-- Income Since Opening --}}
+            <div class="rounded-lg border border-green-100 bg-green-50 p-4">
+
+                <p class="text-xs font-medium uppercase tracking-wide text-green-600">
+                    Income Since Opening
+                </p>
+
+                <p class="mt-2 text-xl font-bold text-green-700">
+                    + ₦{{ number_format((float) $incomeSinceOpeningBalance, 2) }}
+                </p>
+
+                <p class="mt-1 text-[11px] text-green-600">
+                    Income recorded from opening date
+                </p>
+
+            </div>
+
+
+            {{-- Expenses Since Opening --}}
+            <div class="rounded-lg border border-red-100 bg-red-50 p-4">
+
+                <p class="text-xs font-medium uppercase tracking-wide text-red-600">
+                    Expenses Since Opening
+                </p>
+
+                <p class="mt-2 text-xl font-bold text-red-700">
+                    − ₦{{ number_format((float) $expensesSinceOpeningBalance, 2) }}
+                </p>
+
+                <p class="mt-1 text-[11px] text-red-600">
+                    Expenses recorded from opening date
+                </p>
+
+            </div>
+
+
+            {{-- Current Balance --}}
+            <div class="rounded-lg border border-purple-200 bg-white p-4">
+
+                <p class="text-xs font-medium uppercase tracking-wide text-purple-600">
+                    Current Balance
+                </p>
+
+                <p
+                    class="mt-2 text-xl font-bold
+                        {{ $currentBalance >= 0
+                            ? 'text-purple-700'
+                            : 'text-red-700'
+                        }}"
+                >
+                    ₦{{ number_format((float) $currentBalance, 2) }}
+                </p>
+
+                <p class="mt-1 text-[11px] text-slate-400">
+                    Current financial position
+                </p>
+
+            </div>
+
+        </div>
+
+        {{-- Financial Formula --}}
+        <div class="border-t border-purple-200 px-5 py-4">
+
+            <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+
+                <div>
+                    <p class="text-xs font-medium text-purple-800">
+                        Balance Calculation
+                    </p>
+
+                    <p class="mt-1 text-xs text-purple-600">
+                        Opening Balance + Income Since Opening − Expenses Since Opening
+                    </p>
+                </div>
+
+                <a
+                    href="{{ route('church.settings.financial.edit') }}"
+                    class="cursor-pointer rounded-lg border border-purple-200 bg-white px-4 py-2 text-center text-xs font-semibold text-purple-700 transition hover:border-purple-300 hover:bg-purple-100"
+                >
+                    Manage Opening Balance
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    {{-- ============================================================= --}}
+    {{-- MONTHLY + ANNUAL FINANCIAL SUMMARY --}}
+    {{-- ============================================================= --}}
+
+    <div class="grid grid-cols-1 gap-6 xl:grid-cols-2">
+
+        {{-- Monthly Financial Summary --}}
+        <div class="rounded-xl border border-slate-200 bg-white shadow-sm">
+
+            <div class="border-b border-slate-200 px-5 py-4">
+
+                <h2 class="text-sm font-semibold text-slate-900">
+                    Monthly Financial Summary
+                </h2>
+
+                <p class="mt-1 text-xs text-slate-500">
+                    Financial activity for {{ now()->format('F Y') }}
+                </p>
+
+            </div>
+
+            <div class="space-y-5 p-5">
+
+                {{-- Income --}}
+                <div class="flex items-center justify-between">
+
+                    <span class="text-sm text-slate-500">
+                        Income
+                    </span>
+
+                    <span class="text-sm font-semibold text-green-600">
+                        ₦{{ number_format((float) $incomeThisMonth, 2) }}
+                    </span>
 
                 </div>
 
-                <div class="space-y-5 p-5">
+
+                {{-- Expenses --}}
+                <div class="flex items-center justify-between">
+
+                    <span class="text-sm text-slate-500">
+                        Expenses
+                    </span>
+
+                    <span class="text-sm font-semibold text-red-600">
+                        ₦{{ number_format((float) $expensesThisMonth, 2) }}
+                    </span>
+
+                </div>
+
+
+                {{-- Net Movement --}}
+                <div class="border-t border-slate-200 pt-4">
 
                     <div class="flex items-center justify-between">
 
-                        <span class="text-sm text-slate-500">
-                            Income
-                        </span>
+                        <div>
+                            <p class="text-sm font-semibold text-slate-700">
+                                Net Movement
+                            </p>
 
-                        <span class="text-sm font-semibold text-green-600">
-                            ₦{{ number_format((float) $incomeThisMonth, 2) }}
-                        </span>
+                            <p class="mt-0.5 text-[11px] text-slate-400">
+                                Income minus expenses
+                            </p>
+                        </div>
 
-                    </div>
-
-                    <div class="flex items-center justify-between">
-
-                        <span class="text-sm text-slate-500">
-                            Expenses
-                        </span>
-
-                        <span class="text-sm font-semibold text-red-600">
-                            ₦{{ number_format((float) $expensesThisMonth, 2) }}
-                        </span>
-
-                    </div>
-
-                    <div class="border-t border-slate-200 pt-4">
-
-                        <div class="flex items-center justify-between">
-
-                            <span class="text-sm font-semibold text-slate-700">
-                                Net Balance
-                            </span>
-
-                            <span class="text-lg font-bold
+                        <span
+                            class="text-lg font-bold
                                 {{ $netBalanceThisMonth >= 0
                                     ? 'text-purple-700'
                                     : 'text-red-700'
                                 }}"
-                            >
-                                ₦{{ number_format((float) $netBalanceThisMonth, 2) }}
-                            </span>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            {{-- Annual Financial Summary --}}
-            <div class="rounded-xl border border-slate-200 bg-white shadow-sm">
-
-                <div class="border-b border-slate-200 px-5 py-4">
-
-                    <h2 class="text-sm font-semibold text-slate-900">
-                        Annual Financial Summary
-                    </h2>
-
-                    <p class="mt-1 text-xs text-slate-500">
-                        Current year's financial position
-                    </p>
-
-                </div>
-
-                <div class="space-y-5 p-5">
-
-                    <div class="flex items-center justify-between">
-
-                        <span class="text-sm text-slate-500">
-                            Income
-                        </span>
-
-                        <span class="text-sm font-semibold text-green-600">
-                            ₦{{ number_format((float) $incomeThisYear, 2) }}
+                        >
+                            ₦{{ number_format((float) $netBalanceThisMonth, 2) }}
                         </span>
 
                     </div>
-
-                    <div class="flex items-center justify-between">
-
-                        <span class="text-sm text-slate-500">
-                            Expenses
-                        </span>
-
-                        <span class="text-sm font-semibold text-red-600">
-                            ₦{{ number_format((float) $expensesThisYear, 2) }}
-                        </span>
-
-                    </div>
-
-                    <div class="border-t border-slate-200 pt-4">
-
-                        <div class="flex items-center justify-between">
-
-                            <span class="text-sm font-semibold text-slate-700">
-                                Net Balance
-                            </span>
-
-                            <span class="text-lg font-bold
-                                {{ $netBalanceThisYear >= 0
-                                    ? 'text-purple-700'
-                                    : 'text-red-700'
-                                }}"
-                            >
-                                ₦{{ number_format((float) $netBalanceThisYear, 2) }}
-                            </span>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            {{-- Financial Actions --}}
-            <div class="rounded-xl border border-slate-200 bg-white shadow-sm">
-
-                <div class="border-b border-slate-200 px-5 py-4">
-
-                    <h2 class="text-sm font-semibold text-slate-900">
-                        Financial Management
-                    </h2>
-
-                    <p class="mt-1 text-xs text-slate-500">
-                        Manage and review church finances
-                    </p>
-
-                </div>
-
-                <div class="space-y-3 p-5">
-
-                    <a
-                        href="{{ route('church.income.create') }}"
-                        class="block cursor-pointer rounded-lg border border-slate-200 p-4 transition hover:border-green-300 hover:bg-green-50"
-                    >
-                        <p class="text-sm font-semibold text-slate-900">
-                            Record Income
-                        </p>
-
-                        <p class="mt-1 text-xs text-slate-500">
-                            Add church income
-                        </p>
-                    </a>
-
-                    <a
-                        href="{{ route('church.expenses.create') }}"
-                        class="block cursor-pointer rounded-lg border border-slate-200 p-4 transition hover:border-red-300 hover:bg-red-50"
-                    >
-                        <p class="text-sm font-semibold text-slate-900">
-                            Record Expense
-                        </p>
-
-                        <p class="mt-1 text-xs text-slate-500">
-                            Add a church expense
-                        </p>
-                    </a>
-
-                    <a
-                        href="{{ route('church.reports.index') }}"
-                        class="block cursor-pointer rounded-lg bg-purple-600 px-4 py-3 text-center text-sm font-semibold text-white transition hover:bg-purple-700"
-                    >
-                        View Financial Reports
-                    </a>
 
                 </div>
 
@@ -421,6 +443,158 @@
 
         </div>
 
+
+        {{-- Annual Financial Summary --}}
+        <div class="rounded-xl border border-slate-200 bg-white shadow-sm">
+
+            <div class="border-b border-slate-200 px-5 py-4">
+
+                <h2 class="text-sm font-semibold text-slate-900">
+                    Annual Financial Summary
+                </h2>
+
+                <p class="mt-1 text-xs text-slate-500">
+                    Financial activity for {{ now()->format('Y') }}
+                </p>
+
+            </div>
+
+            <div class="space-y-5 p-5">
+
+                {{-- Income --}}
+                <div class="flex items-center justify-between">
+
+                    <span class="text-sm text-slate-500">
+                        Income
+                    </span>
+
+                    <span class="text-sm font-semibold text-green-600">
+                        ₦{{ number_format((float) $incomeThisYear, 2) }}
+                    </span>
+
+                </div>
+
+
+                {{-- Expenses --}}
+                <div class="flex items-center justify-between">
+
+                    <span class="text-sm text-slate-500">
+                        Expenses
+                    </span>
+
+                    <span class="text-sm font-semibold text-red-600">
+                        ₦{{ number_format((float) $expensesThisYear, 2) }}
+                    </span>
+
+                </div>
+
+
+                {{-- Net Movement --}}
+                <div class="border-t border-slate-200 pt-4">
+
+                    <div class="flex items-center justify-between">
+
+                        <div>
+                            <p class="text-sm font-semibold text-slate-700">
+                                Net Movement
+                            </p>
+
+                            <p class="mt-0.5 text-[11px] text-slate-400">
+                                Income minus expenses
+                            </p>
+                        </div>
+
+                        <span
+                            class="text-lg font-bold
+                                {{ $netBalanceThisYear >= 0
+                                    ? 'text-purple-700'
+                                    : 'text-red-700'
+                                }}"
+                        >
+                            ₦{{ number_format((float) $netBalanceThisYear, 2) }}
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    {{-- ============================================================= --}}
+    {{-- FINANCIAL MANAGEMENT --}}
+    {{-- ============================================================= --}}
+
+    <div class="rounded-xl border border-slate-200 bg-white shadow-sm">
+
+        <div class="border-b border-slate-200 px-5 py-4">
+
+            <h2 class="text-sm font-semibold text-slate-900">
+                Financial Management
+            </h2>
+
+            <p class="mt-1 text-xs text-slate-500">
+                Manage and review church finances
+            </p>
+
+        </div>
+
+        <div class="grid grid-cols-1 gap-4 p-5 sm:grid-cols-3">
+
+            {{-- Record Income --}}
+            <a
+                href="{{ route('church.income.create') }}"
+                class="block cursor-pointer rounded-lg border border-slate-200 p-4 transition hover:border-green-300 hover:bg-green-50"
+            >
+                <p class="text-sm font-semibold text-slate-900">
+                    Record Income
+                </p>
+
+                <p class="mt-1 text-xs text-slate-500">
+                    Add church income
+                </p>
+            </a>
+
+
+            {{-- Record Expense --}}
+            <a
+                href="{{ route('church.expenses.create') }}"
+                class="block cursor-pointer rounded-lg border border-slate-200 p-4 transition hover:border-red-300 hover:bg-red-50"
+            >
+                <p class="text-sm font-semibold text-slate-900">
+                    Record Expense
+                </p>
+
+                <p class="mt-1 text-xs text-slate-500">
+                    Add a church expense
+                </p>
+            </a>
+
+
+            {{-- Reports --}}
+            <a
+                href="{{ route('church.reports.index') }}"
+                class="block cursor-pointer rounded-lg bg-purple-600 p-4 transition hover:bg-purple-700"
+            >
+                <p class="text-sm font-semibold text-white">
+                    View Financial Reports
+                </p>
+
+                <p class="mt-1 text-xs text-purple-100">
+                    Review and export financial reports
+                </p>
+            </a>
+
+        </div>
+
+    </div>
+
+</div>
+      
 
         {{-- ============================================================= --}}
         {{-- QUICK ACTIONS + SUBSCRIPTION --}}

@@ -21,6 +21,7 @@ use App\Http\Controllers\Church\AttendanceController;
 use App\Http\Controllers\Church\IncomeController;
 use App\Http\Controllers\Church\ExpenseController;
 use App\Http\Controllers\Church\ReportController;
+use App\Http\Controllers\Church\FinancialSettingController;
 
 
 /*
@@ -577,6 +578,12 @@ Route::middleware('auth')->group(function () {
 
             Route::get('/reports/export/pdf', [ReportController::class, 'exportPdf'])
                 ->name('reports.export.pdf');
+
+            Route::get('/settings/financial', [FinancialSettingController::class, 'edit'])
+                ->name('settings.financial.edit');
+
+            Route::put('/settings/financial', [FinancialSettingController::class, 'update'])
+                ->name('settings.financial.update');
 
         });
 

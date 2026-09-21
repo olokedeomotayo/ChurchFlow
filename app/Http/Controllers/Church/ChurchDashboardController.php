@@ -9,6 +9,7 @@ use App\Models\Income;
 use App\Models\Member;
 use App\Models\Setting;
 use App\Models\Subscription;
+use App\Services\ChurchFinancialService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 
@@ -17,7 +18,7 @@ class ChurchDashboardController extends Controller
     /**
      * Display the church dashboard.
      */
-    public function index(): View
+    public function index(ChurchFinancialService $financialService): View
     {
         $user = Auth::user();
         $church = $user?->church;
@@ -36,9 +37,6 @@ class ChurchDashboardController extends Controller
         |--------------------------------------------------------------------------
         | Current Subscription
         |--------------------------------------------------------------------------
-        |
-        | Always prioritize the church's active paid subscription.
-        |
         */
 
         $subscription = null;
@@ -56,10 +54,6 @@ class ChurchDashboardController extends Controller
         |--------------------------------------------------------------------------
         | Trial Subscription
         |--------------------------------------------------------------------------
-        |
-        | Only retrieve the trial subscription when there is
-        | no active paid subscription.
-        |
         */
 
         $trialSubscription = null;
@@ -77,17 +71,38 @@ class ChurchDashboardController extends Controller
         |--------------------------------------------------------------------------
         | Dashboard Statistics
         |--------------------------------------------------------------------------
-        |
-        | All figures are restricted to the authenticated church.
-        |
         */
 
         $totalMembers = 0;
         $todayCheckIns = 0;
 
+        /*
+        |--------------------------------------------------------------------------
+        | Financial Position
+        |--------------------------------------------------------------------------
+        */
+
+        $openingBalance = 0;
+        $openingBalanceDate = null;
+        $incomeSinceOpeningBalance = 0;
+        $expensesSinceOpeningBalance = 0;
+        $currentBalance = 0;
+
+        /*
+        |--------------------------------------------------------------------------
+        | Monthly Financial Summary
+        |--------------------------------------------------------------------------
+        */
+
         $incomeThisMonth = 0;
         $expensesThisMonth = 0;
         $netBalanceThisMonth = 0;
+
+        /*
+        |--------------------------------------------------------------------------
+        | Annual Financial Summary
+        |--------------------------------------------------------------------------
+        */
 
         $incomeThisYear = 0;
         $expensesThisYear = 0;
@@ -97,7 +112,7 @@ class ChurchDashboardController extends Controller
 
             /*
             |--------------------------------------------------------------------------
-            | Total Members
+            | Membership
             |--------------------------------------------------------------------------
             */
 
@@ -107,7 +122,7 @@ class ChurchDashboardController extends Controller
 
             /*
             |--------------------------------------------------------------------------
-            | Today's Check-Ins
+            | Today's Attendance
             |--------------------------------------------------------------------------
             */
 
@@ -115,6 +130,50 @@ class ChurchDashboardController extends Controller
                 ->where('church_id', $church->id)
                 ->whereDate('checked_in_at', today())
                 ->count();
+
+            /*
+            |--------------------------------------------------------------------------
+            | Opening Balance
+            |--------------------------------------------------------------------------
+            */
+
+            $openingBalance = $financialService->openingBalance($church);
+
+            $openingBalanceDate = $financialService->openingBalanceDate($church);
+
+            /*
+            |--------------------------------------------------------------------------
+            | Financial Activity Since Opening Balance
+            |--------------------------------------------------------------------------
+            |
+            | These values are calculated using the opening balance date.
+            |
+            | Income on/after opening date
+            | - Expenses on/after opening date
+            | = Movement since opening
+            |
+            */
+
+            $incomeSinceOpeningBalance =
+                $financialService->incomeSinceOpeningBalance($church);
+
+            $expensesSinceOpeningBalance =
+                $financialService->expensesSinceOpeningBalance($church);
+
+            /*
+            |--------------------------------------------------------------------------
+            | Current Financial Balance
+            |--------------------------------------------------------------------------
+            |
+            | Opening Balance
+            | + Income since opening date
+            | - Expenses since opening date
+            | = Current Balance
+            |
+            */
+
+            $currentBalance =
+                $financialService->currentBalance($church);
 
             /*
             |--------------------------------------------------------------------------
@@ -141,7 +200,8 @@ class ChurchDashboardController extends Controller
                 ])
                 ->sum('amount');
 
-            $netBalanceThisMonth = $incomeThisMonth - $expensesThisMonth;
+            $netBalanceThisMonth =
+                $incomeThisMonth - $expensesThisMonth;
 
             /*
             |--------------------------------------------------------------------------
@@ -168,7 +228,8 @@ class ChurchDashboardController extends Controller
                 ])
                 ->sum('amount');
 
-            $netBalanceThisYear = $incomeThisYear - $expensesThisYear;
+            $netBalanceThisYear =
+                $incomeThisYear - $expensesThisYear;
         }
 
         /*
@@ -189,10 +250,25 @@ class ChurchDashboardController extends Controller
             'totalMembers' => $totalMembers,
             'todayCheckIns' => $todayCheckIns,
 
+            /*
+            | Financial Position
+            */
+            'openingBalance' => $openingBalance,
+            'openingBalanceDate' => $openingBalanceDate,
+            'incomeSinceOpeningBalance' => $incomeSinceOpeningBalance,
+            'expensesSinceOpeningBalance' => $expensesSinceOpeningBalance,
+            'currentBalance' => $currentBalance,
+
+            /*
+            | Monthly Financial Summary
+            */
             'incomeThisMonth' => $incomeThisMonth,
             'expensesThisMonth' => $expensesThisMonth,
             'netBalanceThisMonth' => $netBalanceThisMonth,
 
+            /*
+            | Annual Financial Summary
+            */
             'incomeThisYear' => $incomeThisYear,
             'expensesThisYear' => $expensesThisYear,
             'netBalanceThisYear' => $netBalanceThisYear,

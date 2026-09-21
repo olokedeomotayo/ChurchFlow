@@ -130,9 +130,6 @@
                     {{-- Actions --}}
                     <div class="flex items-end gap-2">
 
-                        {{-- Actions --}}
-                    <div class="flex items-end gap-2">
-
                         <button
                             type="submit"
                             class="inline-flex flex-1 cursor-pointer items-center justify-center rounded-lg bg-purple-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-purple-700"
@@ -149,7 +146,7 @@
 
                         <a
                             href="{{ route('church.reports.export.pdf', request()->query()) }}"
-                            class="cursor-pointer inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-700"
+                            class="inline-flex cursor-pointer items-center gap-2 rounded-lg bg-red-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-red-700"
                         >
                             PDF
                         </a>
@@ -163,20 +160,17 @@
 
                     </div>
 
-
-                    </div>
-
                 </div>
 
 
                 {{-- Selected Period --}}
-                <div class="flex items-center justify-between border-t border-slate-100 pt-4">
+                <div class="flex flex-col gap-2 border-t border-slate-100 pt-4 sm:flex-row sm:items-center sm:justify-between">
 
                     <p class="text-xs text-slate-500">
                         Showing financial figures for:
                     </p>
 
-                    <span class="rounded-full bg-purple-50 px-3 py-1 text-xs font-semibold text-purple-700">
+                    <span class="w-fit rounded-full bg-purple-50 px-3 py-1 text-xs font-semibold text-purple-700">
                         {{ $reportLabel }}
                     </span>
 
@@ -188,56 +182,197 @@
 
 
         {{-- ============================================================= --}}
+        {{-- FINANCIAL POSITION --}}
+        {{-- ============================================================= --}}
+
+        <div class="rounded-xl border border-purple-200 bg-purple-50 shadow-sm">
+
+            <div class="border-b border-purple-200 px-6 py-5">
+
+                <h2 class="font-semibold text-purple-900">
+                    Financial Position
+                </h2>
+
+                <p class="mt-1 text-xs text-purple-700">
+                    Opening position, financial activity and closing position for {{ $reportLabel }}.
+                </p>
+
+            </div>
+
+            <div class="grid grid-cols-1 gap-4 p-6 sm:grid-cols-2 xl:grid-cols-4">
+
+                {{-- Period Opening Balance --}}
+                <div class="rounded-lg border border-purple-100 bg-white p-4">
+
+                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                        Opening Balance
+                    </p>
+
+                    <p class="mt-2 text-2xl font-bold text-slate-900">
+                        ₦{{ number_format((float) $periodOpeningBalance, 2) }}
+                    </p>
+
+                    @if ($openingBalanceDate)
+                        <p class="mt-1 text-[11px] text-slate-400">
+                            Original opening date:
+                            {{ $openingBalanceDate->format('d M Y') }}
+                        </p>
+                    @else
+                        <p class="mt-1 text-[11px] text-slate-400">
+                            No opening balance date configured.
+                        </p>
+                    @endif
+
+                </div>
+
+
+                {{-- Total Income --}}
+                <div class="rounded-lg border border-green-100 bg-green-50 p-4">
+
+                    <p class="text-xs font-semibold uppercase tracking-wide text-green-600">
+                        Income During Period
+                    </p>
+
+                    <p class="mt-2 text-2xl font-bold text-green-700">
+                        + ₦{{ number_format((float) $totalIncome, 2) }}
+                    </p>
+
+                    <p class="mt-1 text-[11px] text-green-600">
+                        Total income recorded
+                    </p>
+
+                </div>
+
+
+                {{-- Total Expenses --}}
+                <div class="rounded-lg border border-red-100 bg-red-50 p-4">
+
+                    <p class="text-xs font-semibold uppercase tracking-wide text-red-600">
+                        Expenses During Period
+                    </p>
+
+                    <p class="mt-2 text-2xl font-bold text-red-700">
+                        − ₦{{ number_format((float) $totalExpenses, 2) }}
+                    </p>
+
+                    <p class="mt-1 text-[11px] text-red-600">
+                        Total expenses recorded
+                    </p>
+
+                </div>
+
+
+                {{-- Closing Balance --}}
+                <div class="rounded-lg border border-purple-200 bg-white p-4">
+
+                    <p class="text-xs font-semibold uppercase tracking-wide text-purple-600">
+                        Closing Balance
+                    </p>
+
+                    <p
+                        class="mt-2 text-2xl font-bold
+                            {{ $closingBalance >= 0
+                                ? 'text-purple-700'
+                                : 'text-red-700'
+                            }}"
+                    >
+                        ₦{{ number_format((float) $closingBalance, 2) }}
+                    </p>
+
+                    <p class="mt-1 text-[11px] text-slate-400">
+                        Opening balance + net movement
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            {{-- Calculation --}}
+            <div class="border-t border-purple-200 px-6 py-4">
+
+                <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+
+                    <div>
+                        <p class="text-xs font-semibold text-purple-900">
+                            Balance Calculation
+                        </p>
+
+                        <p class="mt-1 text-xs text-purple-700">
+                            ₦{{ number_format((float) $periodOpeningBalance, 2) }}
+                            + ₦{{ number_format((float) $totalIncome, 2) }}
+                            − ₦{{ number_format((float) $totalExpenses, 2) }}
+                        </p>
+                    </div>
+
+                    <span class="text-sm font-bold text-purple-900">
+                        = ₦{{ number_format((float) $closingBalance, 2) }}
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        {{-- ============================================================= --}}
         {{-- FINANCIAL SUMMARY --}}
         {{-- ============================================================= --}}
 
         <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
 
             {{-- Total Income --}}
-            <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div class="rounded-xl border border-green-200 bg-green-50 p-5 shadow-sm">
 
-                <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                <p class="text-xs font-semibold uppercase tracking-wide text-green-600">
                     Total Income
                 </p>
 
-                <p class="mt-2 text-2xl font-bold text-green-600">
-                    ₦{{ number_format($totalIncome, 2) }}
+                <p class="mt-2 text-2xl font-bold text-green-700">
+                    ₦{{ number_format((float) $totalIncome, 2) }}
                 </p>
 
-                <p class="mt-1 text-xs text-slate-500">
-                    All recorded church income
+                <p class="mt-1 text-xs text-green-600">
+                    Income recorded during {{ $reportLabel }}
                 </p>
 
             </div>
 
 
             {{-- Total Expenses --}}
-            <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div class="rounded-xl border border-red-200 bg-red-50 p-5 shadow-sm">
 
-                <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                <p class="text-xs font-semibold uppercase tracking-wide text-red-600">
                     Total Expenses
                 </p>
 
-                <p class="mt-2 text-2xl font-bold text-red-600">
-                    ₦{{ number_format($totalExpenses, 2) }}
+                <p class="mt-2 text-2xl font-bold text-red-700">
+                    ₦{{ number_format((float) $totalExpenses, 2) }}
                 </p>
 
-                <p class="mt-1 text-xs text-slate-500">
-                    All recorded church expenses
+                <p class="mt-1 text-xs text-red-600">
+                    Expenses recorded during {{ $reportLabel }}
                 </p>
 
             </div>
 
 
-            {{-- Net Balance --}}
+            {{-- Net Movement --}}
             <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
 
                 <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">
-                    Net Balance
+                    Net Movement
                 </p>
 
-                <p class="mt-2 text-2xl font-bold {{ $netBalance >= 0 ? 'text-purple-600' : 'text-red-600' }}">
-                    ₦{{ number_format($netBalance, 2) }}
+                <p
+                    class="mt-2 text-2xl font-bold
+                        {{ $netBalance >= 0
+                            ? 'text-purple-600'
+                            : 'text-red-600'
+                        }}"
+                >
+                    ₦{{ number_format((float) $netBalance, 2) }}
                 </p>
 
                 <p class="mt-1 text-xs text-slate-500">
@@ -291,7 +426,7 @@
                                 <div class="text-right">
 
                                     <p class="text-sm font-semibold text-green-600">
-                                        ₦{{ number_format($income->total, 2) }}
+                                        ₦{{ number_format((float) $income->total, 2) }}
                                     </p>
 
                                     <p class="text-[11px] text-slate-400">
@@ -370,7 +505,7 @@
                                 <div class="text-right">
 
                                     <p class="text-sm font-semibold text-red-600">
-                                        ₦{{ number_format($expense->total, 2) }}
+                                        ₦{{ number_format((float) $expense->total, 2) }}
                                     </p>
 
                                     <p class="text-[11px] text-slate-400">
@@ -498,7 +633,7 @@
                                     </td>
 
                                     <td class="whitespace-nowrap px-6 py-4 text-right font-semibold text-green-600">
-                                        ₦{{ number_format($income->amount, 2) }}
+                                        ₦{{ number_format((float) $income->amount, 2) }}
                                     </td>
 
                                 </tr>
@@ -519,7 +654,7 @@
                                 </td>
 
                                 <td class="px-6 py-4 text-right font-bold text-green-600">
-                                    ₦{{ number_format($totalIncome, 2) }}
+                                    ₦{{ number_format((float) $totalIncome, 2) }}
                                 </td>
 
                             </tr>
@@ -548,138 +683,139 @@
 
         </div>
 
+
         {{-- ============================================================= --}}
-{{-- EXPENSE TRANSACTIONS --}}
-{{-- ============================================================= --}}
+        {{-- EXPENSE TRANSACTIONS --}}
+        {{-- ============================================================= --}}
 
-<div class="rounded-xl border border-slate-200 bg-white shadow-sm">
+        <div class="rounded-xl border border-slate-200 bg-white shadow-sm">
 
-    <div class="border-b border-slate-200 px-6 py-5">
+            <div class="border-b border-slate-200 px-6 py-5">
 
-        <h2 class="font-semibold text-slate-900">
-            Expense Transactions
-        </h2>
-
-        <p class="mt-1 text-xs text-slate-500">
-            Detailed expense transactions for {{ $reportLabel }}
-        </p>
-
-    </div>
-
-    <div class="overflow-x-auto">
-
-        @if ($expenseTransactions->count())
-
-            <table class="min-w-full text-left text-sm">
-
-                <thead class="border-b border-slate-200 bg-slate-50">
-
-                    <tr>
-
-                        <th class="px-6 py-3 font-semibold text-slate-600">
-                            Date
-                        </th>
-
-                        <th class="px-6 py-3 font-semibold text-slate-600">
-                            Category
-                        </th>
-
-                        <th class="px-6 py-3 font-semibold text-slate-600">
-                            Vendor
-                        </th>
-
-                        <th class="px-6 py-3 font-semibold text-slate-600">
-                            Payment Method
-                        </th>
-
-                        <th class="px-6 py-3 font-semibold text-slate-600">
-                            Reference
-                        </th>
-
-                        <th class="px-6 py-3 text-right font-semibold text-slate-600">
-                            Amount
-                        </th>
-
-                    </tr>
-
-                </thead>
-
-                <tbody class="divide-y divide-slate-100">
-
-                    @foreach ($expenseTransactions as $expense)
-
-                        <tr class="transition hover:bg-slate-50">
-
-                            <td class="whitespace-nowrap px-6 py-4 text-slate-700">
-                                {{ $expense->expense_date?->format('d M Y') }}
-                            </td>
-
-                            <td class="px-6 py-4 font-medium text-slate-900">
-                                {{ $expense->category }}
-                            </td>
-
-                            <td class="px-6 py-4 text-slate-600">
-                                {{ $expense->vendor ?: '—' }}
-                            </td>
-
-                            <td class="px-6 py-4 text-slate-600">
-                                {{ $expense->payment_method ?: '—' }}
-                            </td>
-
-                            <td class="px-6 py-4 text-slate-600">
-                                {{ $expense->reference ?: '—' }}
-                            </td>
-
-                            <td class="whitespace-nowrap px-6 py-4 text-right font-semibold text-red-600">
-                                ₦{{ number_format($expense->amount, 2) }}
-                            </td>
-
-                        </tr>
-
-                    @endforeach
-
-                </tbody>
-
-                <tfoot class="border-t border-slate-200 bg-slate-50">
-
-                    <tr>
-
-                        <td
-                            colspan="5"
-                            class="px-6 py-4 text-right font-semibold text-slate-700"
-                        >
-                            Total Expenses
-                        </td>
-
-                        <td class="px-6 py-4 text-right font-bold text-red-600">
-                            ₦{{ number_format($totalExpenses, 2) }}
-                        </td>
-
-                    </tr>
-
-                </tfoot>
-
-            </table>
-
-        @else
-
-            <div class="px-6 py-12 text-center">
-
-                <p class="text-sm font-semibold text-slate-700">
-                    No expense transactions
-                </p>
+                <h2 class="font-semibold text-slate-900">
+                    Expense Transactions
+                </h2>
 
                 <p class="mt-1 text-xs text-slate-500">
-                    There are no expense transactions for the selected period.
+                    Detailed expense transactions for {{ $reportLabel }}
                 </p>
 
             </div>
 
-        @endif
+            <div class="overflow-x-auto">
 
-    </div>
+                @if ($expenseTransactions->count())
 
-</div>
+                    <table class="min-w-full text-left text-sm">
+
+                        <thead class="border-b border-slate-200 bg-slate-50">
+
+                            <tr>
+
+                                <th class="px-6 py-3 font-semibold text-slate-600">
+                                    Date
+                                </th>
+
+                                <th class="px-6 py-3 font-semibold text-slate-600">
+                                    Category
+                                </th>
+
+                                <th class="px-6 py-3 font-semibold text-slate-600">
+                                    Vendor
+                                </th>
+
+                                <th class="px-6 py-3 font-semibold text-slate-600">
+                                    Payment Method
+                                </th>
+
+                                <th class="px-6 py-3 font-semibold text-slate-600">
+                                    Reference
+                                </th>
+
+                                <th class="px-6 py-3 text-right font-semibold text-slate-600">
+                                    Amount
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+                        <tbody class="divide-y divide-slate-100">
+
+                            @foreach ($expenseTransactions as $expense)
+
+                                <tr class="transition hover:bg-slate-50">
+
+                                    <td class="whitespace-nowrap px-6 py-4 text-slate-700">
+                                        {{ $expense->expense_date?->format('d M Y') }}
+                                    </td>
+
+                                    <td class="px-6 py-4 font-medium text-slate-900">
+                                        {{ $expense->category }}
+                                    </td>
+
+                                    <td class="px-6 py-4 text-slate-600">
+                                        {{ $expense->vendor ?: '—' }}
+                                    </td>
+
+                                    <td class="px-6 py-4 text-slate-600">
+                                        {{ $expense->payment_method ?: '—' }}
+                                    </td>
+
+                                    <td class="px-6 py-4 text-slate-600">
+                                        {{ $expense->reference ?: '—' }}
+                                    </td>
+
+                                    <td class="whitespace-nowrap px-6 py-4 text-right font-semibold text-red-600">
+                                        ₦{{ number_format((float) $expense->amount, 2) }}
+                                    </td>
+
+                                </tr>
+
+                            @endforeach
+
+                        </tbody>
+
+                        <tfoot class="border-t border-slate-200 bg-slate-50">
+
+                            <tr>
+
+                                <td
+                                    colspan="5"
+                                    class="px-6 py-4 text-right font-semibold text-slate-700"
+                                >
+                                    Total Expenses
+                                </td>
+
+                                <td class="px-6 py-4 text-right font-bold text-red-600">
+                                    ₦{{ number_format((float) $totalExpenses, 2) }}
+                                </td>
+
+                            </tr>
+
+                        </tfoot>
+
+                    </table>
+
+                @else
+
+                    <div class="px-6 py-12 text-center">
+
+                        <p class="text-sm font-semibold text-slate-700">
+                            No expense transactions
+                        </p>
+
+                        <p class="mt-1 text-xs text-slate-500">
+                            There are no expense transactions for the selected period.
+                        </p>
+
+                    </div>
+
+                @endif
+
+            </div>
+
+        </div>
 
 
         {{-- ============================================================= --}}
@@ -867,6 +1003,10 @@
                 endDateField.classList.add('hidden');
             }
         }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            toggleCustomDateFields();
+        });
     </script>
 
 @endsection
