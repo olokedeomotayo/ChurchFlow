@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Church;
 
 use App\Http\Controllers\Controller;
 use App\Models\ChurchFinancialSetting;
+use App\Services\ActivityLogService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -39,8 +40,10 @@ class FinancialSettingController extends Controller
     /**
      * Update church financial settings.
      */
-    public function update(Request $request): RedirectResponse
-    {
+    public function update(
+        Request $request,
+        ActivityLogService $activityLog
+    ): RedirectResponse {
         $user = Auth::user();
         $church = $user?->church;
 
@@ -59,7 +62,7 @@ class FinancialSettingController extends Controller
             ],
         ]);
 
-        ChurchFinancialSetting::updateOrCreate(
+        $financialSetting = ChurchFinancialSetting::updateOrCreate(
             ['church_id' => $church->id],
             [
                 'opening_balance' => $validated['opening_balance'],
@@ -67,8 +70,24 @@ class FinancialSettingController extends Controller
             ]
         );
 
+        $activityLog->record(
+            action: 'updated',
+            subject: $financialSetting,
+            description: sprintf(
+                'Financial settings updated. Opening balance: ₦%s, opening balance date: %s.',
+                number_format(
+                    (float) $financialSetting->opening_balance,
+                    2
+                ),
+                $financialSetting->opening_balance_date?->format('d M Y')
+            )
+        );
+
         return redirect()
             ->route('church.settings.financial.edit')
-            ->with('success', 'Opening balance updated successfully.');
+            ->with(
+                'success',
+                'Opening balance updated successfully.'
+            );
     }
 }

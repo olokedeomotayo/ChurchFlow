@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Church;
 
 use App\Http\Controllers\Controller;
 use App\Models\Member;
+use App\Services\ActivityLogService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -17,7 +18,7 @@ class MemberController extends Controller
     {
         $church = $request->user()->church;
 
-        if (!$church) {
+        if (! $church) {
             abort(403, 'Your account is not associated with a church.');
         }
 
@@ -38,7 +39,7 @@ class MemberController extends Controller
     {
         $church = $request->user()->church;
 
-        if (!$church) {
+        if (! $church) {
             abort(403, 'Your account is not associated with a church.');
         }
 
@@ -50,11 +51,13 @@ class MemberController extends Controller
     /**
      * Store a newly created member.
      */
-    public function store(Request $request): RedirectResponse
-    {
+    public function store(
+        Request $request,
+        ActivityLogService $activityLog
+    ): RedirectResponse {
         $church = $request->user()->church;
 
-        if (!$church) {
+        if (! $church) {
             abort(403, 'Your account is not associated with a church.');
         }
 
@@ -128,10 +131,27 @@ class MemberController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        $church->members()->create([
+        $member = $church->members()->create([
             ...$validated,
             'member_id' => $memberId,
         ]);
+
+        /*
+        |--------------------------------------------------------------------------
+        | Audit Log
+        |--------------------------------------------------------------------------
+        */
+
+        $activityLog->record(
+            action: 'created',
+            subject: $member,
+            description: sprintf(
+                'Member created: %s %s (%s).',
+                $member->first_name,
+                $member->last_name,
+                $member->member_id
+            )
+        );
 
         /*
         |--------------------------------------------------------------------------
@@ -147,8 +167,10 @@ class MemberController extends Controller
     /**
      * Display a single member with attendance history.
      */
-    public function show(Request $request, Member $member): View
-    {
+    public function show(
+        Request $request,
+        Member $member
+    ): View {
         $this->ensureBelongsToChurch($request, $member);
 
         $member->load([
@@ -168,8 +190,10 @@ class MemberController extends Controller
     /**
      * Display the form for editing a member.
      */
-    public function edit(Request $request, Member $member): View
-    {
+    public function edit(
+        Request $request,
+        Member $member
+    ): View {
         $this->ensureBelongsToChurch($request, $member);
 
         return view('church.members.edit', [
@@ -182,7 +206,8 @@ class MemberController extends Controller
      */
     public function update(
         Request $request,
-        Member $member
+        Member $member,
+        ActivityLogService $activityLog
     ): RedirectResponse {
         $this->ensureBelongsToChurch($request, $member);
 
@@ -237,9 +262,71 @@ class MemberController extends Controller
 
         $member->update($validated);
 
+        /*
+        |--------------------------------------------------------------------------
+        | Audit Log
+        |--------------------------------------------------------------------------
+        */
+
+        $activityLog->record(
+            action: 'updated',
+            subject: $member,
+            description: sprintf(
+                'Member updated: %s %s (%s).',
+                $member->first_name,
+                $member->last_name,
+                $member->member_id
+            )
+        );
+
         return redirect()
             ->route('church.members.show', $member)
             ->with('success', 'Member updated successfully.');
+    }
+
+    /**
+     * Delete a member.
+     */
+    public function destroy(
+        Request $request,
+        Member $member,
+        ActivityLogService $activityLog
+    ): RedirectResponse {
+        $this->ensureBelongsToChurch($request, $member);
+
+        $memberName = trim(
+            $member->first_name . ' ' . $member->last_name
+        );
+
+        $memberId = $member->member_id;
+
+        /*
+        |--------------------------------------------------------------------------
+        | Audit Log
+        |--------------------------------------------------------------------------
+        */
+
+        $activityLog->record(
+            action: 'deleted',
+            subject: $member,
+            description: sprintf(
+                'Member deleted: %s (%s).',
+                $memberName,
+                $memberId
+            )
+        );
+
+        /*
+        |--------------------------------------------------------------------------
+        | Delete Member
+        |--------------------------------------------------------------------------
+        */
+
+        $member->delete();
+
+        return redirect()
+            ->route('church.members.index')
+            ->with('success', 'Member deleted successfully.');
     }
 
     /**
@@ -307,8 +394,10 @@ class MemberController extends Controller
     /**
      * Import members from a CSV file.
      */
-    public function importStore(Request $request): RedirectResponse
-    {
+    public function importStore(
+        Request $request,
+        ActivityLogService $activityLog
+    ): RedirectResponse {
         $request->validate([
             'file' => [
                 'required',
@@ -320,7 +409,7 @@ class MemberController extends Controller
 
         $church = $request->user()->church;
 
-        if (!$church) {
+        if (! $church) {
             return back()->with(
                 'error',
                 'Your account is not associated with a church.'
@@ -331,7 +420,7 @@ class MemberController extends Controller
 
         $handle = fopen($file->getRealPath(), 'r');
 
-        if (!$handle) {
+        if (! $handle) {
             return back()->with(
                 'error',
                 'The uploaded file could not be opened.'
@@ -346,7 +435,7 @@ class MemberController extends Controller
 
         $headers = fgetcsv($handle);
 
-        if (!$headers) {
+        if (! $headers) {
             fclose($handle);
 
             return back()->with(
@@ -366,7 +455,7 @@ class MemberController extends Controller
         ];
 
         foreach ($requiredHeaders as $requiredHeader) {
-            if (!in_array($requiredHeader, $headers, true)) {
+            if (! in_array($requiredHeader, $headers, true)) {
                 fclose($handle);
 
                 return back()->with(
@@ -419,7 +508,7 @@ class MemberController extends Controller
             |--------------------------------------------------------------------------
             */
 
-            if (!empty($data['email'])) {
+            if (! empty($data['email'])) {
                 $existingMember = $church->members()
                     ->where('email', $data['email'])
                     ->exists();
@@ -463,14 +552,14 @@ class MemberController extends Controller
                 'phone' => $data['phone'] ?? null,
                 'address' => $data['address'] ?? null,
 
-                'date_of_birth' => !empty($data['date_of_birth'])
+                'date_of_birth' => ! empty($data['date_of_birth'])
                     ? $data['date_of_birth']
                     : null,
 
                 'gender' => $data['gender'] ?? null,
                 'marital_status' => $data['marital_status'] ?? null,
 
-                'joined_at' => !empty($data['joined_at'])
+                'joined_at' => ! empty($data['joined_at'])
                     ? $data['joined_at']
                     : now(),
 
@@ -499,6 +588,25 @@ class MemberController extends Controller
 
         /*
         |--------------------------------------------------------------------------
+        | Audit Log
+        |--------------------------------------------------------------------------
+        */
+
+        if ($imported > 0) {
+            $activityLog->record(
+                action: 'imported',
+                description: sprintf(
+                    '%d member(s) imported from CSV%s.',
+                    $imported,
+                    $skipped > 0
+                        ? " with {$skipped} row(s) skipped"
+                        : ''
+                )
+            );
+        }
+
+        /*
+        |--------------------------------------------------------------------------
         | Import Result
         |--------------------------------------------------------------------------
         */
@@ -521,7 +629,7 @@ class MemberController extends Controller
     {
         $church = $request->user()->church;
 
-        if (!$church) {
+        if (! $church) {
             return back()->with(
                 'error',
                 'Your account is not associated with a church.'
@@ -614,7 +722,7 @@ class MemberController extends Controller
     ): void {
         $church = $request->user()->church;
 
-        if (!$church || $member->church_id !== $church->id) {
+        if (! $church || $member->church_id !== $church->id) {
             abort(404);
         }
     }

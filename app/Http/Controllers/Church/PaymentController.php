@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Payment;
 use App\Models\Plan;
 use App\Models\Subscription;
+use App\Services\ActivityLogService;
 use App\Services\PaystackService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -34,19 +35,17 @@ class PaymentController extends Controller
         );
     }
 
-
     /**
      * Initialize a Paystack payment.
      */
     public function initialize(
         Request $request,
         Plan $plan,
-        PaystackService $paystack
+        PaystackService $paystack,
+        ActivityLogService $activityLog
     ): RedirectResponse {
-
         $user = $request->user();
         $church = $user->church;
-
 
         /*
         |--------------------------------------------------------------------------
@@ -63,20 +62,18 @@ class PaymentController extends Controller
 
         $billingCycle = $validated['billing_cycle'];
 
-
         /*
         |--------------------------------------------------------------------------
         | Validate Church
         |--------------------------------------------------------------------------
         */
 
-        if (!$church) {
+        if (! $church) {
             return back()->with(
                 'error',
                 'Church account could not be found.'
             );
         }
-
 
         /*
         |--------------------------------------------------------------------------
@@ -84,13 +81,12 @@ class PaymentController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        if (!$plan->is_active) {
+        if (! $plan->is_active) {
             return back()->with(
                 'error',
                 'This subscription plan is currently unavailable.'
             );
         }
-
 
         /*
         |--------------------------------------------------------------------------
@@ -101,7 +97,6 @@ class PaymentController extends Controller
         $price = $billingCycle === 'annual'
             ? $plan->annual_price
             : $plan->monthly_price;
-
 
         /*
         |--------------------------------------------------------------------------
@@ -116,7 +111,6 @@ class PaymentController extends Controller
             );
         }
 
-
         /*
         |--------------------------------------------------------------------------
         | Generate Payment Reference
@@ -126,7 +120,6 @@ class PaymentController extends Controller
         $reference = 'CF-' . strtoupper(
             Str::random(12)
         );
-
 
         /*
         |--------------------------------------------------------------------------
@@ -138,7 +131,6 @@ class PaymentController extends Controller
             ((float) $price) * 100
         );
 
-
         /*
         |--------------------------------------------------------------------------
         | Create Payment Record
@@ -146,51 +138,31 @@ class PaymentController extends Controller
         */
 
         $payment = Payment::create([
-
             'church_id' => $church->id,
-
             'subscription_id' => null,
-
             'plan_id' => $plan->id,
-
             'reference' => $reference,
-
             'gateway' => 'paystack',
-
             'amount' => $price,
-
             'currency' => config(
                 'app.currency',
                 'NGN'
             ),
-
             'status' => 'pending',
-
             'metadata' => [
-
                 'church_id' => $church->id,
-
                 'church_name' => $church->name,
-
                 'user_id' => $user->id,
-
                 'user_email' => $user->email,
-
                 'plan_id' => $plan->id,
-
                 'plan_name' => $plan->name,
-
                 'billing_cycle' => $billingCycle,
-
                 'billing_cycle_label' => $billingCycle === 'annual'
                     ? 'Annual'
                     : 'Monthly',
-
                 'amount' => $price,
-
             ],
         ]);
-
 
         /*
         |--------------------------------------------------------------------------
@@ -199,37 +171,34 @@ class PaymentController extends Controller
         */
 
         try {
-
             $transaction = $paystack->initializeTransaction(
-
                 email: $user->email,
-
                 amount: $amount,
-
                 reference: $reference,
-
                 callbackUrl: route(
                     'church.payments.callback'
                 ),
-
                 metadata: [
-
                     'payment_id' => $payment->id,
-
                     'church_id' => $church->id,
-
                     'plan_id' => $plan->id,
-
                     'billing_cycle' => $billingCycle,
-
                 ]
             );
-
         } catch (RuntimeException $exception) {
-
             $payment->update([
                 'status' => 'failed',
             ]);
+
+            $activityLog->record(
+                action: 'payment_failed',
+                subject: $payment,
+                description: sprintf(
+                    'Paystack payment initialization failed for %s plan (%s).',
+                    $plan->name,
+                    $billingCycle
+                )
+            );
 
             return back()->with(
                 'error',
@@ -237,6 +206,22 @@ class PaymentController extends Controller
             );
         }
 
+        /*
+        |--------------------------------------------------------------------------
+        | Audit Log
+        |--------------------------------------------------------------------------
+        */
+
+        $activityLog->record(
+            action: 'payment_initialized',
+            subject: $payment,
+            description: sprintf(
+                'Payment initialized for %s %s subscription: ₦%s.',
+                $plan->name,
+                $billingCycle,
+                number_format((float) $price, 2)
+            )
+        );
 
         /*
         |--------------------------------------------------------------------------
@@ -249,17 +234,15 @@ class PaymentController extends Controller
         );
     }
 
-
     /**
      * Handle Paystack callback.
      */
     public function callback(
         Request $request,
-        PaystackService $paystack
+        PaystackService $paystack,
+        ActivityLogService $activityLog
     ): RedirectResponse {
-
         $reference = $request->query('reference');
-
 
         /*
         |--------------------------------------------------------------------------
@@ -267,8 +250,7 @@ class PaymentController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        if (!$reference) {
-
+        if (! $reference) {
             return redirect()
                 ->route('church.dashboard')
                 ->with(
@@ -276,7 +258,6 @@ class PaymentController extends Controller
                     'Payment reference was not provided.'
                 );
         }
-
 
         /*
         |--------------------------------------------------------------------------
@@ -288,9 +269,7 @@ class PaymentController extends Controller
             ->where('reference', $reference)
             ->first();
 
-
-        if (!$payment) {
-
+        if (! $payment) {
             return redirect()
                 ->route('church.dashboard')
                 ->with(
@@ -299,7 +278,6 @@ class PaymentController extends Controller
                 );
         }
 
-
         /*
         |--------------------------------------------------------------------------
         | Prevent Duplicate Processing
@@ -307,7 +285,6 @@ class PaymentController extends Controller
         */
 
         if ($payment->status === 'success') {
-
             return redirect()
                 ->route('church.dashboard')
                 ->with(
@@ -316,7 +293,6 @@ class PaymentController extends Controller
                 );
         }
 
-
         /*
         |--------------------------------------------------------------------------
         | Verify Payment
@@ -324,12 +300,18 @@ class PaymentController extends Controller
         */
 
         try {
-
             $transaction = $paystack->verifyTransaction(
                 $reference
             );
-
         } catch (RuntimeException $exception) {
+            $activityLog->record(
+                action: 'payment_failed',
+                subject: $payment,
+                description: sprintf(
+                    'Payment verification failed for reference %s.',
+                    $reference
+                )
+            );
 
             return redirect()
                 ->route('church.dashboard')
@@ -339,7 +321,6 @@ class PaymentController extends Controller
                 );
         }
 
-
         /*
         |--------------------------------------------------------------------------
         | Payment Failed
@@ -347,18 +328,22 @@ class PaymentController extends Controller
         */
 
         if (($transaction['status'] ?? null) !== 'success') {
-
             $payment->update([
-
                 'status' => 'failed',
-
                 'gateway_transaction_id' =>
                     $transaction['id'] ?? null,
-
                 'gateway_response' =>
                     $transaction,
-
             ]);
+
+            $activityLog->record(
+                action: 'payment_failed',
+                subject: $payment,
+                description: sprintf(
+                    'Payment failed for reference %s.',
+                    $reference
+                )
+            );
 
             return redirect()
                 ->route('church.dashboard')
@@ -368,20 +353,16 @@ class PaymentController extends Controller
                 );
         }
 
-
         /*
         |--------------------------------------------------------------------------
         | Retrieve Billing Cycle
         |--------------------------------------------------------------------------
         */
 
-        $billingCycle =
-            data_get(
-                $payment->metadata,
-                'billing_cycle'
-            )
-            ?? 'monthly';
-
+        $billingCycle = data_get(
+            $payment->metadata,
+            'billing_cycle'
+        ) ?? 'monthly';
 
         /*
         |--------------------------------------------------------------------------
@@ -390,115 +371,90 @@ class PaymentController extends Controller
         */
 
         try {
+            $subscription = DB::transaction(
+                function () use (
+                    $payment,
+                    $billingCycle,
+                    $transaction
+                ) {
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Update Payment
+                    |--------------------------------------------------------------------------
+                    */
 
-            DB::transaction(function () use (
-                $payment,
-                $billingCycle,
-                $transaction
-            ) {
-
-                /*
-                |--------------------------------------------------------------------------
-                | Update Payment
-                |--------------------------------------------------------------------------
-                */
-
-                $payment->update([
-
-                    'status' => 'success',
-
-                    'gateway_transaction_id' =>
-                        $transaction['id'] ?? null,
-
-                    'payment_method' =>
-                        $transaction['channel'] ?? null,
-
-                    'paid_at' => now(),
-
-                    'gateway_response' =>
-                        $transaction,
-
-                ]);
-
-
-                /*
-                |--------------------------------------------------------------------------
-                | Cancel Existing Active Subscriptions
-                |--------------------------------------------------------------------------
-                */
-
-                Subscription::query()
-                    ->where('church_id', $payment->church_id)
-                    ->whereIn('status', [
-                        'active',
-                        'trial',
-                    ])
-                    ->update([
-
-                        'status' => 'cancelled',
-
-                        'cancelled_at' => now(),
-
+                    $payment->update([
+                        'status' => 'success',
+                        'gateway_transaction_id' =>
+                            $transaction['id'] ?? null,
+                        'payment_method' =>
+                            $transaction['channel'] ?? null,
+                        'paid_at' => now(),
+                        'gateway_response' =>
+                            $transaction,
                     ]);
 
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Cancel Existing Active Subscriptions
+                    |--------------------------------------------------------------------------
+                    */
 
-                /*
-                |--------------------------------------------------------------------------
-                | Calculate Subscription Dates
-                |--------------------------------------------------------------------------
-                */
+                    Subscription::query()
+                        ->where('church_id', $payment->church_id)
+                        ->whereIn('status', [
+                            'active',
+                            'trial',
+                        ])
+                        ->update([
+                            'status' => 'cancelled',
+                            'cancelled_at' => now(),
+                        ]);
 
-                $startsAt = now();
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Calculate Subscription Dates
+                    |--------------------------------------------------------------------------
+                    */
 
-                $endsAt = $billingCycle === 'annual'
-                    ? $startsAt->copy()->addYear()
-                    : $startsAt->copy()->addMonth();
+                    $startsAt = now();
 
+                    $endsAt = $billingCycle === 'annual'
+                        ? $startsAt->copy()->addYear()
+                        : $startsAt->copy()->addMonth();
 
-                /*
-                |--------------------------------------------------------------------------
-                | Create Active Subscription
-                |--------------------------------------------------------------------------
-                */
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Create Active Subscription
+                    |--------------------------------------------------------------------------
+                    */
 
-                $subscription = Subscription::create([
+                    $subscription = Subscription::create([
+                        'church_id' => $payment->church_id,
+                        'plan_id' => $payment->plan_id,
+                        'status' => 'active',
+                        'billing_cycle' => $billingCycle,
+                        'starts_at' => $startsAt,
+                        'ends_at' => $endsAt,
+                        'trial_ends_at' => null,
+                        'cancelled_at' => null,
+                    ]);
 
-                    'church_id' => $payment->church_id,
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Link Payment to Subscription
+                    |--------------------------------------------------------------------------
+                    */
 
-                    'plan_id' => $payment->plan_id,
+                    $payment->update([
+                        'subscription_id' =>
+                            $subscription->id,
+                    ]);
 
-                    'status' => 'active',
-
-                    'billing_cycle' => $billingCycle,
-
-                    'starts_at' => $startsAt,
-
-                    'ends_at' => $endsAt,
-
-                    'trial_ends_at' => null,
-
-                    'cancelled_at' => null,
-
-                ]);
-
-
-                /*
-                |--------------------------------------------------------------------------
-                | Link Payment to Subscription
-                |--------------------------------------------------------------------------
-                */
-
-                $payment->update([
-
-                    'subscription_id' =>
-                        $subscription->id,
-
-                ]);
-
-            });
-
+                    return $subscription;
+                }
+            );
         } catch (\Throwable $exception) {
-
             report($exception);
 
             return redirect()
@@ -509,6 +465,39 @@ class PaymentController extends Controller
                 );
         }
 
+        /*
+        |--------------------------------------------------------------------------
+        | Audit Successful Payment
+        |--------------------------------------------------------------------------
+        */
+
+        $activityLog->record(
+            action: 'payment_completed',
+            subject: $payment,
+            description: sprintf(
+                'Payment completed successfully: ₦%s via Paystack.',
+                number_format((float) $payment->amount, 2)
+            )
+        );
+
+        /*
+        |--------------------------------------------------------------------------
+        | Audit Subscription Activation
+        |--------------------------------------------------------------------------
+        */
+
+        $plan = $payment->plan;
+
+        $activityLog->record(
+            action: 'subscription_activated',
+            subject: $subscription,
+            description: sprintf(
+                '%s %s subscription activated for %s.',
+                $plan?->name ?? 'Subscription',
+                $billingCycle,
+                $payment->church_id
+            )
+        );
 
         /*
         |--------------------------------------------------------------------------
@@ -519,7 +508,6 @@ class PaymentController extends Controller
         $billingLabel = $billingCycle === 'annual'
             ? 'annual'
             : 'monthly';
-
 
         return redirect()
             ->route('church.dashboard')

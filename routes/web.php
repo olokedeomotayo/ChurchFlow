@@ -22,6 +22,7 @@ use App\Http\Controllers\Church\IncomeController;
 use App\Http\Controllers\Church\ExpenseController;
 use App\Http\Controllers\Church\ReportController;
 use App\Http\Controllers\Church\FinancialSettingController;
+use App\Http\Controllers\Church\AuditLogController;
 
 
 /*
@@ -584,6 +585,9 @@ Route::middleware('auth')->group(function () {
 
             Route::put('/settings/financial', [FinancialSettingController::class, 'update'])
                 ->name('settings.financial.update');
+
+            Route::get('/audit-logs', [AuditLogController::class, 'index'])
+                ->name('audit-logs.index');
 
         });
 

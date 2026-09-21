@@ -4,17 +4,21 @@ namespace App\Http\Controllers\Church;
 
 use App\Http\Controllers\Controller;
 use App\Models\Service;
+use App\Services\ActivityLogService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class ServiceController extends Controller
 {
+    /**
+     * Display all services belonging to the church.
+     */
     public function index(Request $request): View
     {
         $church = $request->user()->church;
 
-        if (!$church) {
+        if (! $church) {
             abort(403, 'Your account is not associated with a church.');
         }
 
@@ -27,22 +31,30 @@ class ServiceController extends Controller
         return view('church.services.index', compact('services'));
     }
 
+    /**
+     * Show the create service form.
+     */
     public function create(Request $request): View
     {
         $church = $request->user()->church;
 
-        if (!$church) {
+        if (! $church) {
             abort(403, 'Your account is not associated with a church.');
         }
 
         return view('church.services.create');
     }
 
-    public function store(Request $request): RedirectResponse
-    {
+    /**
+     * Store a new service.
+     */
+    public function store(
+        Request $request,
+        ActivityLogService $activityLog
+    ): RedirectResponse {
         $church = $request->user()->church;
 
-        if (!$church) {
+        if (! $church) {
             abort(403, 'Your account is not associated with a church.');
         }
 
@@ -52,18 +64,36 @@ class ServiceController extends Controller
             'service_date' => ['required', 'date'],
             'start_time' => ['nullable', 'date_format:H:i'],
             'end_time' => ['nullable', 'date_format:H:i'],
-            'status' => ['required', 'in:scheduled,completed,cancelled'],
+            'status' => [
+                'required',
+                'in:scheduled,completed,cancelled',
+            ],
         ]);
 
-        $church->services()->create($validated);
+        $service = $church->services()->create($validated);
+
+        $activityLog->record(
+            action: 'created',
+            subject: $service,
+            description: sprintf(
+                'Service created: %s on %s.',
+                $service->name,
+                $service->service_date?->format('d M Y')
+            )
+        );
 
         return redirect()
             ->route('church.services.index')
             ->with('success', 'Service created successfully.');
     }
 
-    public function show(Request $request, Service $service): View
-    {
+    /**
+     * Display a single service.
+     */
+    public function show(
+        Request $request,
+        Service $service
+    ): View {
         $this->ensureBelongsToChurch($request, $service);
 
         $service->loadCount('attendances');
@@ -71,15 +101,26 @@ class ServiceController extends Controller
         return view('church.services.show', compact('service'));
     }
 
-    public function edit(Request $request, Service $service): View
-    {
+    /**
+     * Show the edit service form.
+     */
+    public function edit(
+        Request $request,
+        Service $service
+    ): View {
         $this->ensureBelongsToChurch($request, $service);
 
         return view('church.services.edit', compact('service'));
     }
 
-    public function update(Request $request, Service $service): RedirectResponse
-    {
+    /**
+     * Update a service.
+     */
+    public function update(
+        Request $request,
+        Service $service,
+        ActivityLogService $activityLog
+    ): RedirectResponse {
         $this->ensureBelongsToChurch($request, $service);
 
         $validated = $request->validate([
@@ -88,19 +129,51 @@ class ServiceController extends Controller
             'service_date' => ['required', 'date'],
             'start_time' => ['nullable', 'date_format:H:i'],
             'end_time' => ['nullable', 'date_format:H:i'],
-            'status' => ['required', 'in:scheduled,completed,cancelled'],
+            'status' => [
+                'required',
+                'in:scheduled,completed,cancelled',
+            ],
         ]);
 
         $service->update($validated);
+
+        $activityLog->record(
+            action: 'updated',
+            subject: $service,
+            description: sprintf(
+                'Service updated: %s on %s.',
+                $service->name,
+                $service->service_date?->format('d M Y')
+            )
+        );
 
         return redirect()
             ->route('church.services.index')
             ->with('success', 'Service updated successfully.');
     }
 
-    public function destroy(Request $request, Service $service): RedirectResponse
-    {
+    /**
+     * Delete a service.
+     */
+    public function destroy(
+        Request $request,
+        Service $service,
+        ActivityLogService $activityLog
+    ): RedirectResponse {
         $this->ensureBelongsToChurch($request, $service);
+
+        $serviceName = $service->name;
+        $serviceDate = $service->service_date?->format('d M Y');
+
+        $activityLog->record(
+            action: 'deleted',
+            subject: $service,
+            description: sprintf(
+                'Service deleted: %s on %s.',
+                $serviceName,
+                $serviceDate
+            )
+        );
 
         $service->delete();
 
@@ -109,13 +182,16 @@ class ServiceController extends Controller
             ->with('success', 'Service deleted successfully.');
     }
 
+    /**
+     * Ensure the service belongs to the authenticated user's church.
+     */
     private function ensureBelongsToChurch(
         Request $request,
         Service $service
     ): void {
         $church = $request->user()->church;
 
-        if (!$church || $service->church_id !== $church->id) {
+        if (! $church || $service->church_id !== $church->id) {
             abort(404);
         }
     }

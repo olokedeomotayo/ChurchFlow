@@ -435,6 +435,36 @@
                 </span>
             </a>
 
+
+            {{-- Audit Logs --}}
+
+            @php
+                $auditLogsActive = request()->routeIs('church.audit-logs.*');
+            @endphp
+
+            <a
+                href="{{ route('church.audit-logs.index') }}"
+                class="group mb-1 flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition
+                    {{ $auditLogsActive
+                        ? 'bg-purple-600 text-white'
+                        : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                    }}"
+            >
+                <span
+                    class="w-5 text-center text-sm
+                        {{ $auditLogsActive
+                            ? 'text-white'
+                            : 'text-slate-400 group-hover:text-white'
+                        }}"
+                >
+                    ◷
+                </span>
+
+                <span>
+                    Audit Logs
+                </span>
+            </a>
+
         </div>
 
 

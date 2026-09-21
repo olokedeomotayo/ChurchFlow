@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Church;
 
 use App\Http\Controllers\Controller;
 use App\Models\Group;
-use App\Models\Member;
+use App\Services\ActivityLogService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -18,7 +18,7 @@ class GroupController extends Controller
     {
         $church = $request->user()->church;
 
-        if (!$church) {
+        if (! $church) {
             abort(403, 'Your account is not associated with a church.');
         }
 
@@ -39,7 +39,7 @@ class GroupController extends Controller
     {
         $church = $request->user()->church;
 
-        if (!$church) {
+        if (! $church) {
             abort(403, 'Your account is not associated with a church.');
         }
 
@@ -54,11 +54,13 @@ class GroupController extends Controller
     /**
      * Store a new group or department.
      */
-    public function store(Request $request): RedirectResponse
-    {
+    public function store(
+        Request $request,
+        ActivityLogService $activityLog
+    ): RedirectResponse {
         $church = $request->user()->church;
 
-        if (!$church) {
+        if (! $church) {
             abort(403, 'Your account is not associated with a church.');
         }
 
@@ -74,22 +76,50 @@ class GroupController extends Controller
             ],
         ]);
 
-        // Make sure the selected leader belongs to this church.
-        if (!empty($validated['leader_id'])) {
+        /*
+        |--------------------------------------------------------------------------
+        | Validate Leader
+        |--------------------------------------------------------------------------
+        */
+
+        if (! empty($validated['leader_id'])) {
             $leaderBelongsToChurch = $church->members()
                 ->whereKey($validated['leader_id'])
                 ->exists();
 
-            if (!$leaderBelongsToChurch) {
+            if (! $leaderBelongsToChurch) {
                 return back()
                     ->withInput()
                     ->withErrors([
-                        'leader_id' => 'The selected leader does not belong to your church.',
+                        'leader_id' =>
+                            'The selected leader does not belong to your church.',
                     ]);
             }
         }
 
-        $church->groups()->create($validated);
+        /*
+        |--------------------------------------------------------------------------
+        | Create Group
+        |--------------------------------------------------------------------------
+        */
+
+        $group = $church->groups()->create($validated);
+
+        /*
+        |--------------------------------------------------------------------------
+        | Audit Log
+        |--------------------------------------------------------------------------
+        */
+
+        $activityLog->record(
+            action: 'created',
+            subject: $group,
+            description: sprintf(
+                '%s created: %s.',
+                ucfirst($group->type),
+                $group->name
+            )
+        );
 
         return redirect()
             ->route('church.groups.index')
@@ -99,8 +129,10 @@ class GroupController extends Controller
     /**
      * Display a group or department.
      */
-    public function show(Request $request, Group $group): View
-    {
+    public function show(
+        Request $request,
+        Group $group
+    ): View {
         $this->ensureBelongsToChurch($request, $group);
 
         $group->load(['leader', 'members']);
@@ -111,8 +143,10 @@ class GroupController extends Controller
     /**
      * Show the edit form.
      */
-    public function edit(Request $request, Group $group): View
-    {
+    public function edit(
+        Request $request,
+        Group $group
+    ): View {
         $this->ensureBelongsToChurch($request, $group);
 
         $members = $request->user()->church->members()
@@ -128,7 +162,8 @@ class GroupController extends Controller
      */
     public function update(
         Request $request,
-        Group $group
+        Group $group,
+        ActivityLogService $activityLog
     ): RedirectResponse {
         $this->ensureBelongsToChurch($request, $group);
 
@@ -144,23 +179,51 @@ class GroupController extends Controller
             ],
         ]);
 
-        // Make sure the selected leader belongs to this church.
-        if (!empty($validated['leader_id'])) {
+        /*
+        |--------------------------------------------------------------------------
+        | Validate Leader
+        |--------------------------------------------------------------------------
+        */
+
+        if (! empty($validated['leader_id'])) {
             $leaderBelongsToChurch = $request->user()->church
                 ->members()
                 ->whereKey($validated['leader_id'])
                 ->exists();
 
-            if (!$leaderBelongsToChurch) {
+            if (! $leaderBelongsToChurch) {
                 return back()
                     ->withInput()
                     ->withErrors([
-                        'leader_id' => 'The selected leader does not belong to your church.',
+                        'leader_id' =>
+                            'The selected leader does not belong to your church.',
                     ]);
             }
         }
 
+        /*
+        |--------------------------------------------------------------------------
+        | Update Group
+        |--------------------------------------------------------------------------
+        */
+
         $group->update($validated);
+
+        /*
+        |--------------------------------------------------------------------------
+        | Audit Log
+        |--------------------------------------------------------------------------
+        */
+
+        $activityLog->record(
+            action: 'updated',
+            subject: $group,
+            description: sprintf(
+                '%s updated: %s.',
+                ucfirst($group->type),
+                $group->name
+            )
+        );
 
         return redirect()
             ->route('church.groups.index')
@@ -172,15 +235,133 @@ class GroupController extends Controller
      */
     public function destroy(
         Request $request,
-        Group $group
+        Group $group,
+        ActivityLogService $activityLog
     ): RedirectResponse {
         $this->ensureBelongsToChurch($request, $group);
+
+        $groupName = $group->name;
+        $groupType = $group->type;
+
+        /*
+        |--------------------------------------------------------------------------
+        | Audit Log
+        |--------------------------------------------------------------------------
+        */
+
+        $activityLog->record(
+            action: 'deleted',
+            subject: $group,
+            description: sprintf(
+                '%s deleted: %s.',
+                ucfirst($groupType),
+                $groupName
+            )
+        );
+
+        /*
+        |--------------------------------------------------------------------------
+        | Delete Group
+        |--------------------------------------------------------------------------
+        */
 
         $group->delete();
 
         return redirect()
             ->route('church.groups.index')
             ->with('success', 'Group/Department deleted successfully.');
+    }
+
+    /**
+     * Show the member assignment form.
+     */
+    public function editMembers(
+        Request $request,
+        Group $group
+    ): View {
+        $this->ensureBelongsToChurch($request, $group);
+
+        $church = $request->user()->church;
+
+        $members = $church->members()
+            ->orderBy('first_name')
+            ->orderBy('last_name')
+            ->get();
+
+        $group->load('members');
+
+        $assignedMemberIds = $group->members
+            ->pluck('id')
+            ->toArray();
+
+        return view('church.groups.members', [
+            'group' => $group,
+            'members' => $members,
+            'assignedMemberIds' => $assignedMemberIds,
+        ]);
+    }
+
+    /**
+     * Update the members assigned to the group.
+     */
+    public function updateMembers(
+        Request $request,
+        Group $group,
+        ActivityLogService $activityLog
+    ): RedirectResponse {
+        $this->ensureBelongsToChurch($request, $group);
+
+        $church = $request->user()->church;
+
+        $validated = $request->validate([
+            'member_ids' => ['nullable', 'array'],
+            'member_ids.*' => [
+                'integer',
+                'exists:members,id',
+            ],
+        ]);
+
+        $memberIds = $validated['member_ids'] ?? [];
+
+        /*
+        |--------------------------------------------------------------------------
+        | Only Allow Members From Current Church
+        |--------------------------------------------------------------------------
+        */
+
+        $validMemberIds = $church->members()
+            ->whereIn('id', $memberIds)
+            ->pluck('id')
+            ->toArray();
+
+        /*
+        |--------------------------------------------------------------------------
+        | Update Group Members
+        |--------------------------------------------------------------------------
+        */
+
+        $group->members()->sync($validMemberIds);
+
+        /*
+        |--------------------------------------------------------------------------
+        | Audit Log
+        |--------------------------------------------------------------------------
+        */
+
+        $activityLog->record(
+            action: 'updated',
+            subject: $group,
+            description: sprintf(
+                'Members assigned to %s "%s" updated. Total assigned members: %d.',
+                ucfirst($group->type),
+                $group->name,
+                count($validMemberIds)
+            )
+        );
+
+        return redirect()
+            ->route('church.groups.show', $group)
+            ->with('success', 'Group members updated successfully.');
     }
 
     /**
@@ -192,69 +373,8 @@ class GroupController extends Controller
     ): void {
         $church = $request->user()->church;
 
-        if (!$church || $group->church_id !== $church->id) {
+        if (! $church || $group->church_id !== $church->id) {
             abort(404);
         }
     }
-
-    /**
- * Show the member assignment form.
- */
-public function editMembers(
-    Request $request,
-    Group $group
-): View {
-    $this->ensureBelongsToChurch($request, $group);
-
-    $church = $request->user()->church;
-
-    $members = $church->members()
-        ->orderBy('first_name')
-        ->orderBy('last_name')
-        ->get();
-
-    $group->load('members');
-
-    $assignedMemberIds = $group->members
-        ->pluck('id')
-        ->toArray();
-
-    return view('church.groups.members', [
-        'group' => $group,
-        'members' => $members,
-        'assignedMemberIds' => $assignedMemberIds,
-    ]);
-}
-
-
-/**
- * Update the members assigned to the group.
- */
-public function updateMembers(
-    Request $request,
-    Group $group
-): RedirectResponse {
-    $this->ensureBelongsToChurch($request, $group);
-
-    $church = $request->user()->church;
-
-    $validated = $request->validate([
-        'member_ids' => ['nullable', 'array'],
-        'member_ids.*' => ['integer', 'exists:members,id'],
-    ]);
-
-    $memberIds = $validated['member_ids'] ?? [];
-
-    // Only allow members belonging to the current church.
-    $validMemberIds = $church->members()
-        ->whereIn('id', $memberIds)
-        ->pluck('id')
-        ->toArray();
-
-    $group->members()->sync($validMemberIds);
-
-    return redirect()
-        ->route('church.groups.show', $group)
-        ->with('success', 'Group members updated successfully.');
-}
 }

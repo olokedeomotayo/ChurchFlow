@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Church;
 
 use App\Http\Controllers\Controller;
 use App\Models\Income;
+use App\Services\ActivityLogService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -19,7 +20,7 @@ class IncomeController extends Controller
     {
         $church = $request->user()->church;
 
-        if (!$church) {
+        if (! $church) {
             abort(403, 'Your account is not associated with a church.');
         }
 
@@ -89,7 +90,7 @@ class IncomeController extends Controller
     {
         $church = $request->user()->church;
 
-        if (!$church) {
+        if (! $church) {
             abort(403, 'Your account is not associated with a church.');
         }
 
@@ -107,11 +108,13 @@ class IncomeController extends Controller
     /**
      * Store a new income record.
      */
-    public function store(Request $request): RedirectResponse
-    {
+    public function store(
+        Request $request,
+        ActivityLogService $activityLog
+    ): RedirectResponse {
         $church = $request->user()->church;
 
-        if (!$church) {
+        if (! $church) {
             abort(403, 'Your account is not associated with a church.');
         }
 
@@ -161,7 +164,17 @@ class IncomeController extends Controller
             $validated['member_id'] ?? null
         );
 
-        $church->incomes()->create($validated);
+        $income = $church->incomes()->create($validated);
+
+        $activityLog->record(
+            action: 'created',
+            subject: $income,
+            description: sprintf(
+                'Income record created: ₦%s under %s.',
+                number_format((float) $income->amount, 2),
+                $income->category
+            )
+        );
 
         return redirect()
             ->route('church.income.index')
@@ -211,7 +224,8 @@ class IncomeController extends Controller
      */
     public function update(
         Request $request,
-        Income $income
+        Income $income,
+        ActivityLogService $activityLog
     ): RedirectResponse {
         $this->ensureBelongsToChurch($request, $income);
 
@@ -265,6 +279,16 @@ class IncomeController extends Controller
 
         $income->update($validated);
 
+        $activityLog->record(
+            action: 'updated',
+            subject: $income,
+            description: sprintf(
+                'Income record updated: ₦%s under %s.',
+                number_format((float) $income->amount, 2),
+                $income->category
+            )
+        );
+
         return redirect()
             ->route('church.income.show', $income)
             ->with('success', 'Income updated successfully.');
@@ -275,9 +299,23 @@ class IncomeController extends Controller
      */
     public function destroy(
         Request $request,
-        Income $income
+        Income $income,
+        ActivityLogService $activityLog
     ): RedirectResponse {
         $this->ensureBelongsToChurch($request, $income);
+
+        $amount = (float) $income->amount;
+        $category = $income->category;
+
+        $activityLog->record(
+            action: 'deleted',
+            subject: $income,
+            description: sprintf(
+                'Income record deleted: ₦%s under %s.',
+                number_format($amount, 2),
+                $category
+            )
+        );
 
         $income->delete();
 
@@ -293,7 +331,7 @@ class IncomeController extends Controller
     {
         $church = $request->user()->church;
 
-        if (!$church) {
+        if (! $church) {
             abort(403, 'Your account is not associated with a church.');
         }
 
@@ -356,7 +394,7 @@ class IncomeController extends Controller
     {
         $church = $request->user()->church;
 
-        if (!$church) {
+        if (! $church) {
             abort(403, 'Your account is not associated with a church.');
         }
 
@@ -364,14 +402,17 @@ class IncomeController extends Controller
             'church' => $church,
         ]);
     }
+
     /**
      * Import income records from CSV.
      */
-    public function importStore(Request $request): RedirectResponse
-    {
+    public function importStore(
+        Request $request,
+        ActivityLogService $activityLog
+    ): RedirectResponse {
         $church = $request->user()->church;
 
-        if (!$church) {
+        if (! $church) {
             abort(403, 'Your account is not associated with a church.');
         }
 
@@ -388,7 +429,7 @@ class IncomeController extends Controller
 
         $handle = fopen($file->getRealPath(), 'r');
 
-        if (!$handle) {
+        if (! $handle) {
             return back()->with(
                 'error',
                 'The uploaded file could not be opened.'
@@ -397,7 +438,7 @@ class IncomeController extends Controller
 
         $header = fgetcsv($handle);
 
-        if (!$header) {
+        if (! $header) {
             fclose($handle);
 
             return back()->with(
@@ -418,7 +459,7 @@ class IncomeController extends Controller
         ];
 
         foreach ($requiredColumns as $requiredColumn) {
-            if (!in_array($requiredColumn, $header, true)) {
+            if (! in_array($requiredColumn, $header, true)) {
                 fclose($handle);
 
                 return back()->with(
@@ -451,7 +492,7 @@ class IncomeController extends Controller
                 $row
             );
 
-            if (!$data) {
+            if (! $data) {
                 $skipped++;
                 continue;
             }
@@ -478,7 +519,7 @@ class IncomeController extends Controller
             }
 
             if (
-                !is_numeric($amount) ||
+                ! is_numeric($amount) ||
                 (float) $amount < 0.01
             ) {
                 $skipped++;
@@ -496,7 +537,7 @@ class IncomeController extends Controller
 
             $memberId = null;
 
-            if (!empty($data['member id'])) {
+            if (! empty($data['member id'])) {
 
                 $member = $church->members()
                     ->where(
@@ -513,7 +554,7 @@ class IncomeController extends Controller
             $church->incomes()->create([
                 'category' => $category,
 
-                'source' => !empty($data['source'])
+                'source' => ! empty($data['source'])
                     ? trim($data['source'])
                     : null,
 
@@ -521,15 +562,15 @@ class IncomeController extends Controller
 
                 'income_date' => $parsedDate,
 
-                'payment_method' => !empty($data['payment method'])
+                'payment_method' => ! empty($data['payment method'])
                     ? trim($data['payment method'])
                     : null,
 
-                'reference' => !empty($data['reference'])
+                'reference' => ! empty($data['reference'])
                     ? trim($data['reference'])
                     : null,
 
-                'description' => !empty($data['description'])
+                'description' => ! empty($data['description'])
                     ? trim($data['description'])
                     : null,
 
@@ -540,6 +581,19 @@ class IncomeController extends Controller
         }
 
         fclose($handle);
+
+        if ($imported > 0) {
+            $activityLog->record(
+                action: 'imported',
+                description: sprintf(
+                    '%d income record(s) imported from CSV%s.',
+                    $imported,
+                    $skipped > 0
+                        ? " with {$skipped} row(s) skipped"
+                        : ''
+                )
+            );
+        }
 
         $message = "{$imported} income record(s) imported successfully.";
 
@@ -555,11 +609,12 @@ class IncomeController extends Controller
     /**
      * Download a CSV import template.
      */
-    public function downloadTemplate(Request $request): \Symfony\Component\HttpFoundation\StreamedResponse
-    {
+    public function downloadTemplate(
+        Request $request
+    ): \Symfony\Component\HttpFoundation\StreamedResponse {
         $church = $request->user()->church;
 
-        if (!$church) {
+        if (! $church) {
             abort(403, 'Your account is not associated with a church.');
         }
 
@@ -612,7 +667,7 @@ class IncomeController extends Controller
         $church,
         ?int $memberId
     ): void {
-        if (!$memberId) {
+        if (! $memberId) {
             return;
         }
 
@@ -621,8 +676,11 @@ class IncomeController extends Controller
             ->whereKey($memberId)
             ->exists();
 
-        if (!$belongsToChurch) {
-            abort(403, 'The selected member does not belong to your church.');
+        if (! $belongsToChurch) {
+            abort(
+                403,
+                'The selected member does not belong to your church.'
+            );
         }
     }
 
@@ -636,7 +694,7 @@ class IncomeController extends Controller
         $church = $request->user()->church;
 
         if (
-            !$church ||
+            ! $church ||
             $income->church_id !== $church->id
         ) {
             abort(404);
