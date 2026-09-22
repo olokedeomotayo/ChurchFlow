@@ -31,7 +31,7 @@
             </a>
 
             <a
-                href="{{ route('church.expenses.export') }}"
+                href="{{ route('church.expenses.export', request()->query()) }}"
                 class="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50"
             >
                 <span>↑</span>
@@ -56,15 +56,108 @@
     ====================================================== --}}
 
     @if(session('success'))
-        <div class="rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
+        <div class="rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
             {{ session('success') }}
         </div>
     @endif
 
     @if(session('error'))
-        <div class="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <div class="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
             {{ session('error') }}
         </div>
+    @endif
+
+
+    {{-- =====================================================
+         FINANCIAL ACCOUNT CONTEXT
+    ====================================================== --}}
+
+    @if($selectedAccount)
+
+        <div class="rounded-xl border border-purple-200 bg-purple-50 px-5 py-4">
+
+            <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+
+                <div>
+
+                    <div class="flex flex-wrap items-center gap-2">
+
+                        <span class="text-xs font-semibold uppercase tracking-wide text-purple-600">
+                            Financial Account
+                        </span>
+
+                        @if($selectedAccount->is_default)
+                            <span class="rounded-full bg-purple-100 px-2.5 py-1 text-[11px] font-semibold text-purple-700">
+                                Default
+                            </span>
+                        @endif
+
+                    </div>
+
+                    <h2 class="mt-1 text-lg font-bold text-slate-900">
+                        {{ $selectedAccount->name }}
+                    </h2>
+
+                    <p class="mt-1 text-sm capitalize text-slate-600">
+                        {{ str_replace('_', ' ', $selectedAccount->type) }}
+
+                        @if($selectedAccount->provider_name)
+                            · {{ $selectedAccount->provider_name }}
+                        @endif
+                    </p>
+
+                </div>
+
+                <div class="rounded-lg border border-purple-200 bg-white px-4 py-3">
+
+                    <p class="text-xs font-medium text-slate-500">
+                        Current Balance
+                    </p>
+
+                    <p class="mt-1 text-lg font-bold text-slate-900">
+                        {{ $selectedAccount->currency }}
+                        {{ number_format((float) $selectedAccount->current_balance, 2) }}
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    @else
+
+        <div class="rounded-xl border border-slate-200 bg-white px-5 py-4 shadow-sm">
+
+            <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+
+                <div>
+
+                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                        Financial Accounts
+                    </p>
+
+                    <h2 class="mt-1 text-lg font-bold text-slate-900">
+                        All Accounts
+                    </h2>
+
+                    <p class="mt-1 text-sm text-slate-500">
+                        Showing expenses across all financial accounts.
+                    </p>
+
+                </div>
+
+                <a
+                    href="{{ route('church.settings.financial-accounts.index') }}"
+                    class="inline-flex cursor-pointer items-center justify-center rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                >
+                    Manage Accounts
+                </a>
+
+            </div>
+
+        </div>
+
     @endif
 
 
@@ -81,13 +174,15 @@
             <div class="flex items-center justify-between">
 
                 <div>
+
                     <p class="text-sm font-medium text-slate-500">
-                        Total Expenses
+                        {{ $selectedAccount ? 'Account Expenses' : 'Total Expenses' }}
                     </p>
 
                     <p class="mt-2 text-2xl font-bold text-slate-900">
                         ₦{{ number_format((float) $totalExpenses, 2) }}
                     </p>
+
                 </div>
 
                 <div class="flex h-11 w-11 items-center justify-center rounded-lg bg-red-50 text-lg text-red-600">
@@ -99,13 +194,14 @@
         </div>
 
 
-        {{-- Current Month --}}
+        {{-- This Month --}}
 
         <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
 
             <div class="flex items-center justify-between">
 
                 <div>
+
                     <p class="text-sm font-medium text-slate-500">
                         This Month
                     </p>
@@ -113,6 +209,7 @@
                     <p class="mt-2 text-2xl font-bold text-slate-900">
                         ₦{{ number_format((float) $currentMonthExpenses, 2) }}
                     </p>
+
                 </div>
 
                 <div class="flex h-11 w-11 items-center justify-center rounded-lg bg-purple-50 text-lg text-purple-600">
@@ -127,147 +224,225 @@
 
 
     {{-- =====================================================
-         FILTERS
+         FILTER EXPENSES
     ====================================================== --}}
 
     <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
 
-        <div class="mb-4">
+        <div class="mb-5">
+
             <h2 class="text-sm font-semibold text-slate-900">
                 Filter Expenses
             </h2>
+
+            <p class="mt-1 text-xs text-slate-500">
+                Narrow down the expense records displayed below.
+            </p>
+
         </div>
+
 
         <form
             method="GET"
             action="{{ route('church.expenses.index') }}"
-            class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-5"
+            class="space-y-4"
         >
 
-            {{-- Category --}}
+            {{-- Filter Fields --}}
 
-            <div>
-                <label
-                    for="category"
-                    class="mb-1.5 block text-xs font-semibold text-slate-600"
-                >
-                    Category
-                </label>
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-5">
 
-                <select
-                    id="category"
-                    name="category"
-                    class="w-full rounded-lg border-slate-300 text-sm focus:border-purple-500 focus:ring-purple-500"
-                >
-                    <option value="">All Categories</option>
+                {{-- Financial Account --}}
 
-                    @foreach($categories as $category)
-                        <option
-                            value="{{ $category }}"
-                            @selected(request('category') === $category)
-                        >
-                            {{ $category }}
-                        </option>
-                    @endforeach
-                </select>
-            </div>
+                <div>
 
+                    <label
+                        for="financial_account_id"
+                        class="mb-2 block text-xs font-medium text-slate-700"
+                    >
+                        Financial Account
+                    </label>
 
-            {{-- Payment Method --}}
+                    <select
+                        id="financial_account_id"
+                        name="financial_account_id"
+                        class="h-11 w-full cursor-pointer rounded-lg border border-slate-300 bg-white px-3 text-sm text-slate-700 shadow-sm focus:border-purple-500 focus:ring-2 focus:ring-purple-100"
+                    >
 
-            <div>
-                <label
-                    for="payment_method"
-                    class="mb-1.5 block text-xs font-semibold text-slate-600"
-                >
-                    Payment Method
-                </label>
-
-                <select
-                    id="payment_method"
-                    name="payment_method"
-                    class="w-full rounded-lg border-slate-300 text-sm focus:border-purple-500 focus:ring-purple-500"
-                >
-                    <option value="">All Methods</option>
-
-                    @foreach([
-                        'cash' => 'Cash',
-                        'bank transfer' => 'Bank Transfer',
-                        'card' => 'Card',
-                        'cheque' => 'Cheque',
-                        'other' => 'Other',
-                    ] as $value => $label)
-
-                        <option
-                            value="{{ $value }}"
-                            @selected(request('payment_method') === $value)
-                        >
-                            {{ $label }}
+                        <option value="">
+                            All Accounts
                         </option>
 
-                    @endforeach
+                        @foreach($accounts as $account)
 
-                </select>
+                            <option
+                                value="{{ $account->id }}"
+                                @selected((int) request('financial_account_id') === $account->id)
+                            >
+                                {{ $account->name }}
+                                @if($account->is_default)
+                                    — Default
+                                @endif
+                            </option>
+
+                        @endforeach
+
+                    </select>
+
+                </div>
+
+
+                {{-- Category --}}
+
+                <div>
+
+                    <label
+                        for="category"
+                        class="mb-2 block text-xs font-medium text-slate-700"
+                    >
+                        Category
+                    </label>
+
+                    <select
+                        id="category"
+                        name="category"
+                        class="h-11 w-full cursor-pointer rounded-lg border border-slate-300 bg-white px-3 text-sm text-slate-700 shadow-sm focus:border-purple-500 focus:ring-2 focus:ring-purple-100"
+                    >
+
+                        <option value="">
+                            All Categories
+                        </option>
+
+                        @foreach($categories as $category)
+
+                            <option
+                                value="{{ $category }}"
+                                @selected(request('category') === $category)
+                            >
+                                {{ $category }}
+                            </option>
+
+                        @endforeach
+
+                    </select>
+
+                </div>
+
+
+                {{-- Payment Method --}}
+
+                <div>
+
+                    <label
+                        for="payment_method"
+                        class="mb-2 block text-xs font-medium text-slate-700"
+                    >
+                        Payment Method
+                    </label>
+
+                    <select
+                        id="payment_method"
+                        name="payment_method"
+                        class="h-11 w-full cursor-pointer rounded-lg border border-slate-300 bg-white px-3 text-sm text-slate-700 shadow-sm focus:border-purple-500 focus:ring-2 focus:ring-purple-100"
+                    >
+
+                        <option value="">
+                            All Methods
+                        </option>
+
+                        @foreach([
+                            'cash' => 'Cash',
+                            'bank transfer' => 'Bank Transfer',
+                            'card' => 'Card',
+                            'cheque' => 'Cheque',
+                            'other' => 'Other',
+                        ] as $value => $label)
+
+                            <option
+                                value="{{ $value }}"
+                                @selected(request('payment_method') === $value)
+                            >
+                                {{ $label }}
+                            </option>
+
+                        @endforeach
+
+                    </select>
+
+                </div>
+
+
+                {{-- Date From --}}
+
+                <div>
+
+                    <label
+                        for="date_from"
+                        class="mb-2 block text-xs font-medium text-slate-700"
+                    >
+                        Date From
+                    </label>
+
+                    <input
+                        type="date"
+                        id="date_from"
+                        name="date_from"
+                        value="{{ request('date_from') }}"
+                        class="h-11 w-full cursor-pointer rounded-lg border border-slate-300 bg-white px-3 text-sm text-slate-700 shadow-sm focus:border-purple-500 focus:ring-2 focus:ring-purple-100"
+                    >
+
+                </div>
+
+
+                {{-- Date To --}}
+
+                <div>
+
+                    <label
+                        for="date_to"
+                        class="mb-2 block text-xs font-medium text-slate-700"
+                    >
+                        Date To
+                    </label>
+
+                    <input
+                        type="date"
+                        id="date_to"
+                        name="date_to"
+                        value="{{ request('date_to') }}"
+                        class="h-11 w-full cursor-pointer rounded-lg border border-slate-300 bg-white px-3 text-sm text-slate-700 shadow-sm focus:border-purple-500 focus:ring-2 focus:ring-purple-100"
+                    >
+
+                </div>
+
             </div>
 
 
-            {{-- Date From --}}
+            {{-- Apply Filters --}}
 
-            <div>
-                <label
-                    for="date_from"
-                    class="mb-1.5 block text-xs font-semibold text-slate-600"
-                >
-                    From
-                </label>
-
-                <input
-                    type="date"
-                    id="date_from"
-                    name="date_from"
-                    value="{{ request('date_from') }}"
-                    class="w-full rounded-lg border-slate-300 text-sm focus:border-purple-500 focus:ring-purple-500"
-                >
-            </div>
-
-
-            {{-- Date To --}}
-
-            <div>
-                <label
-                    for="date_to"
-                    class="mb-1.5 block text-xs font-semibold text-slate-600"
-                >
-                    To
-                </label>
-
-                <input
-                    type="date"
-                    id="date_to"
-                    name="date_to"
-                    value="{{ request('date_to') }}"
-                    class="w-full rounded-lg border-slate-300 text-sm focus:border-purple-500 focus:ring-purple-500"
-                >
-            </div>
-
-
-            {{-- Buttons --}}
-
-            <div class="flex items-end gap-2">
+            <div class="flex justify-end">
 
                 <button
                     type="submit"
-                    class="inline-flex w-full cursor-pointer items-center justify-center rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800"
+                    class="inline-flex cursor-pointer items-center gap-2 rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
                 >
-                    Filter
-                </button>
 
-                <a
-                    href="{{ route('church.expenses.index') }}"
-                    class="inline-flex cursor-pointer items-center justify-center rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
-                >
-                    Clear
-                </a>
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        class="h-4 w-4"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                    >
+                        <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+                    </svg>
+
+                    Apply Filters
+
+                </button>
 
             </div>
 
@@ -277,20 +452,99 @@
 
 
     {{-- =====================================================
-         EXPENSE TABLE
+         ACTIVE FILTERS
+    ====================================================== --}}
+
+    @if(
+        request()->filled('financial_account_id')
+        || request()->filled('category')
+        || request()->filled('payment_method')
+        || request()->filled('date_from')
+        || request()->filled('date_to')
+    )
+
+        <div class="flex flex-wrap items-center gap-2">
+
+            <span class="text-xs font-semibold text-slate-500">
+                Active filters:
+            </span>
+
+            @if($selectedAccount)
+
+                <span class="rounded-full bg-purple-100 px-3 py-1 text-xs font-semibold text-purple-700">
+                    Account: {{ $selectedAccount->name }}
+                </span>
+
+            @endif
+
+            @if(request('category'))
+
+                <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
+                    Category: {{ request('category') }}
+                </span>
+
+            @endif
+
+            @if(request('payment_method'))
+
+                <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold capitalize text-slate-700">
+                    Payment: {{ request('payment_method') }}
+                </span>
+
+            @endif
+
+            @if(request('date_from'))
+
+                <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
+                    From: {{ request('date_from') }}
+                </span>
+
+            @endif
+
+            @if(request('date_to'))
+
+                <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
+                    To: {{ request('date_to') }}
+                </span>
+
+            @endif
+
+        </div>
+
+    @endif
+
+
+    {{-- =====================================================
+         EXPENSE RECORDS
     ====================================================== --}}
 
     <div class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
 
         <div class="border-b border-slate-200 px-5 py-4">
 
-            <h2 class="font-semibold text-slate-900">
-                Expense Records
-            </h2>
+            <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
 
-            <p class="mt-1 text-xs text-slate-500">
-                {{ $expenses->total() }} record(s)
-            </p>
+                <div>
+
+                    <h2 class="font-semibold text-slate-900">
+                        Expense Records
+                    </h2>
+
+                    <p class="mt-1 text-xs text-slate-500">
+                        {{ $expenses->total() }} record(s)
+                    </p>
+
+                </div>
+
+                @if($selectedAccount)
+
+                    <span class="inline-flex w-fit items-center rounded-full bg-purple-50 px-3 py-1.5 text-xs font-semibold text-purple-700">
+                        {{ $selectedAccount->name }}
+                    </span>
+
+                @endif
+
+            </div>
 
         </div>
 
@@ -308,6 +562,14 @@
                             <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
                                 Date
                             </th>
+
+                            @if(!$selectedAccount)
+
+                                <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                                    Financial Account
+                                </th>
+
+                            @endif
 
                             <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
                                 Category
@@ -333,15 +595,58 @@
 
                     </thead>
 
+
                     <tbody class="divide-y divide-slate-100">
 
                         @foreach($expenses as $expense)
 
                             <tr class="transition hover:bg-slate-50">
 
+                                {{-- Date --}}
+
                                 <td class="whitespace-nowrap px-5 py-4 text-sm text-slate-600">
                                     {{ $expense->expense_date?->format('d M Y') }}
                                 </td>
+
+
+                                {{-- Financial Account --}}
+
+                                @if(!$selectedAccount)
+
+                                    <td class="px-5 py-4">
+
+                                        @if($expense->financialAccount)
+
+                                            <div>
+
+                                                <p class="text-sm font-medium text-slate-900">
+                                                    {{ $expense->financialAccount->name }}
+                                                </p>
+
+                                                @if($expense->financialAccount->is_default)
+
+                                                    <span class="mt-1 inline-flex rounded-full bg-purple-50 px-2 py-0.5 text-[10px] font-semibold text-purple-700">
+                                                        Default
+                                                    </span>
+
+                                                @endif
+
+                                            </div>
+
+                                        @else
+
+                                            <span class="text-sm text-amber-600">
+                                                Unassigned
+                                            </span>
+
+                                        @endif
+
+                                    </td>
+
+                                @endif
+
+
+                                {{-- Category --}}
 
                                 <td class="px-5 py-4">
 
@@ -351,17 +656,29 @@
 
                                 </td>
 
+
+                                {{-- Description --}}
+
                                 <td class="max-w-xs px-5 py-4 text-sm text-slate-600">
                                     {{ $expense->description ?: '—' }}
                                 </td>
+
+
+                                {{-- Vendor --}}
 
                                 <td class="px-5 py-4 text-sm text-slate-600">
                                     {{ $expense->vendor ?: '—' }}
                                 </td>
 
+
+                                {{-- Amount --}}
+
                                 <td class="whitespace-nowrap px-5 py-4 text-right text-sm font-semibold text-slate-900">
                                     ₦{{ number_format((float) $expense->amount, 2) }}
                                 </td>
+
+
+                                {{-- Actions --}}
 
                                 <td class="whitespace-nowrap px-5 py-4 text-right">
 
@@ -419,7 +736,13 @@
                 </h3>
 
                 <p class="mt-1 text-sm text-slate-500">
-                    Start by recording your first church expense.
+
+                    @if($selectedAccount)
+                        There are no expenses matching the selected account and filters.
+                    @else
+                        Start by recording your first church expense.
+                    @endif
+
                 </p>
 
                 <a

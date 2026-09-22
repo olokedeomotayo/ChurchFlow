@@ -207,6 +207,83 @@
 
             </div>
 
+            {{-- Financial Account --}}
+            <div>
+                <label
+                    for="financial_account_id"
+                    class="mb-1.5 block text-sm font-medium text-slate-700"
+                >
+                    Financial Account <span class="text-red-500">*</span>
+                </label>
+
+                @if($accounts->isNotEmpty())
+
+                    <select
+                        id="financial_account_id"
+                        name="financial_account_id"
+                        required
+                        class="w-full cursor-pointer rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    >
+                        <option value="">Select Financial Account</option>
+
+                        @foreach($accounts as $account)
+                            <option
+                                value="{{ $account->id }}"
+                                @selected(
+                                    (string) old(
+                                        'financial_account_id',
+                                        $income->financial_account_id
+                                    ) === (string) $account->id
+                                )
+                            >
+                                {{ $account->name }}
+
+                                @if($account->is_default)
+                                    — Default
+                                @endif
+
+                                @if(
+                                    $account->id === $income->financial_account_id &&
+                                    !$account->is_active
+                                )
+                                    — Inactive
+                                @endif
+                            </option>
+                        @endforeach
+                    </select>
+
+                    <p class="mt-1.5 text-xs text-slate-500">
+                        Select the account where this income was received.
+                    </p>
+
+                @else
+
+                    <div class="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3">
+                        <p class="text-sm font-medium text-amber-800">
+                            No financial account is available.
+                        </p>
+
+                        <p class="mt-1 text-sm text-amber-700">
+                            Please create or activate a financial account before updating this income.
+                        </p>
+
+                        <a
+                            href="{{ route('church.settings.financial-accounts.create') }}"
+                            class="mt-3 inline-flex cursor-pointer items-center rounded-lg bg-amber-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-amber-700"
+                        >
+                            Create Financial Account
+                        </a>
+                    </div>
+
+                @endif
+
+                @error('financial_account_id')
+                    <p class="mt-1.5 text-sm text-red-600">
+                        {{ $message }}
+                    </p>
+                @enderror
+            </div>
+
             {{-- Payment Method / Reference --}}
             <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
 
@@ -300,7 +377,12 @@
                     @foreach($members as $member)
                         <option
                             value="{{ $member->id }}"
-                            @selected((string) old('member_id', $income->member_id) === (string) $member->id)
+                            @selected(
+                                (string) old(
+                                    'member_id',
+                                    $income->member_id
+                                ) === (string) $member->id
+                            )
                         >
                             {{ $member->first_name }}
                             {{ $member->middle_name ? $member->middle_name . ' ' : '' }}
@@ -362,7 +444,7 @@
                             stroke-linecap="round"
                             stroke-linejoin="round"
                             stroke-width="2"
-                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3m-4 0h14"
+                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v-3m4 3v6m1-10V4a1 1 0 01-1-1h-4a1 1 0 01-1 1v3m-4 0h14"
                         />
                     </svg>
 
@@ -381,7 +463,8 @@
 
                     <button
                         type="submit"
-                        class="inline-flex cursor-pointer items-center justify-center rounded-lg bg-purple-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
+                        @disabled($accounts->isEmpty())
+                        class="inline-flex cursor-pointer items-center justify-center rounded-lg bg-purple-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                     >
                         <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path

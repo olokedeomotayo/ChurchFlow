@@ -5,10 +5,10 @@ namespace App\Http\Controllers\Church;
 use App\Http\Controllers\Controller;
 use App\Models\Attendance;
 use App\Models\Expense;
+use App\Models\FinancialAccount;
 use App\Models\Income;
 use App\Models\Member;
 use App\Models\Service;
-use App\Services\ChurchFinancialService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -21,20 +21,18 @@ class ReportController extends Controller
     /**
      * Display the church financial report.
      */
-    public function index(
-        Request $request,
-        ChurchFinancialService $financialService
-    ): View {
+    public function index(Request $request): View
+    {
         $user = Auth::user();
         $church = $user?->church;
 
         [$period, $startDate, $endDate] = $this->resolveReportPeriod($request);
 
-        /*
-        |--------------------------------------------------------------------------
-        | Default Values
-        |--------------------------------------------------------------------------
-        */
+        $selectedAccountId = $request->filled('financial_account_id')
+            ? (int) $request->financial_account_id
+            : null;
+
+        $selectedAccount = null;
 
         $totalIncome = 0;
         $totalExpenses = 0;
@@ -55,6 +53,8 @@ class ReportController extends Controller
         $incomeTransactions = collect();
         $expenseTransactions = collect();
 
+        $accounts = collect();
+
         /*
         |--------------------------------------------------------------------------
         | Church Financial Data
@@ -65,13 +65,68 @@ class ReportController extends Controller
 
             /*
             |--------------------------------------------------------------------------
-            | Original Church Opening Position
+            | Financial Accounts
             |--------------------------------------------------------------------------
             */
 
-            $openingBalance = $financialService->openingBalance($church);
+            $accounts = FinancialAccount::query()
+                ->where('church_id', $church->id)
+                ->orderByDesc('is_default')
+                ->orderBy('name')
+                ->get();
 
-            $openingBalanceDate = $financialService->openingBalanceDate($church);
+            /*
+            |--------------------------------------------------------------------------
+            | Selected Financial Account
+            |--------------------------------------------------------------------------
+            */
+
+            if ($selectedAccountId) {
+
+                $selectedAccount = $accounts
+                    ->firstWhere('id', $selectedAccountId);
+
+                abort_unless(
+                    $selectedAccount,
+                    404,
+                    'The selected financial account was not found.'
+                );
+
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | Base Income Query
+            |--------------------------------------------------------------------------
+            */
+
+            $incomeQuery = Income::query()
+                ->where('church_id', $church->id)
+                ->with(['member', 'financialAccount']);
+
+            if ($selectedAccount) {
+                $incomeQuery->where(
+                    'financial_account_id',
+                    $selectedAccount->id
+                );
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | Base Expense Query
+            |--------------------------------------------------------------------------
+            */
+
+            $expenseQuery = Expense::query()
+                ->where('church_id', $church->id)
+                ->with(['member', 'financialAccount']);
+
+            if ($selectedAccount) {
+                $expenseQuery->where(
+                    'financial_account_id',
+                    $selectedAccount->id
+                );
+            }
 
             /*
             |--------------------------------------------------------------------------
@@ -79,13 +134,13 @@ class ReportController extends Controller
             |--------------------------------------------------------------------------
             */
 
-            $totalIncome = Income::query()
-                ->where('church_id', $church->id)
+            $periodIncomeQuery = (clone $incomeQuery)
                 ->whereBetween('income_date', [
                     $startDate->toDateString(),
                     $endDate->toDateString(),
-                ])
-                ->sum('amount');
+                ]);
+
+            $totalIncome = (float) $periodIncomeQuery->sum('amount');
 
             /*
             |--------------------------------------------------------------------------
@@ -93,13 +148,13 @@ class ReportController extends Controller
             |--------------------------------------------------------------------------
             */
 
-            $totalExpenses = Expense::query()
-                ->where('church_id', $church->id)
+            $periodExpenseQuery = (clone $expenseQuery)
                 ->whereBetween('expense_date', [
                     $startDate->toDateString(),
                     $endDate->toDateString(),
-                ])
-                ->sum('amount');
+                ]);
+
+            $totalExpenses = (float) $periodExpenseQuery->sum('amount');
 
             /*
             |--------------------------------------------------------------------------
@@ -111,46 +166,137 @@ class ReportController extends Controller
 
             /*
             |--------------------------------------------------------------------------
-            | Period Opening Balance
+            | Opening Financial Position
             |--------------------------------------------------------------------------
-            |
-            | The report opening balance is the financial position immediately
-            | before the selected reporting period begins.
-            |
-            | If the selected period starts before or on the church's original
-            | opening balance date, use the original opening balance.
-            |
-            | Otherwise:
-            |
-            | Original Opening Balance
-            | + Income before report period
-            | - Expenses before report period
-            | = Period Opening Balance
-            |
             */
 
-            $periodOpeningBalance = $openingBalance;
+            if ($selectedAccount) {
 
-            if (
-                $openingBalanceDate &&
-                $startDate->toDateString() > $openingBalanceDate->toDateString()
-            ) {
-                $incomeBeforePeriod = Income::query()
-                    ->where('church_id', $church->id)
-                    ->whereDate('income_date', '>=', $openingBalanceDate)
-                    ->whereDate('income_date', '<', $startDate)
-                    ->sum('amount');
+                $openingBalance = (float) $selectedAccount->opening_balance;
 
-                $expensesBeforePeriod = Expense::query()
-                    ->where('church_id', $church->id)
-                    ->whereDate('expense_date', '>=', $openingBalanceDate)
-                    ->whereDate('expense_date', '<', $startDate)
-                    ->sum('amount');
+                $openingBalanceDate =
+                    $selectedAccount->opening_balance_date;
 
-                $periodOpeningBalance =
-                    $openingBalance
-                    + $incomeBeforePeriod
-                    - $expensesBeforePeriod;
+                $periodOpeningBalance = $openingBalance;
+
+                /*
+                |--------------------------------------------------------------------------
+                | Transactions Before Report Period
+                |--------------------------------------------------------------------------
+                */
+
+                if (
+                    $openingBalanceDate &&
+                    $startDate->toDateString() >
+                    $openingBalanceDate->toDateString()
+                ) {
+
+                    $incomeBeforePeriod = (clone $incomeQuery)
+                        ->whereDate(
+                            'income_date',
+                            '>=',
+                            $openingBalanceDate
+                        )
+                        ->whereDate(
+                            'income_date',
+                            '<',
+                            $startDate
+                        )
+                        ->sum('amount');
+
+                    $expensesBeforePeriod = (clone $expenseQuery)
+                        ->whereDate(
+                            'expense_date',
+                            '>=',
+                            $openingBalanceDate
+                        )
+                        ->whereDate(
+                            'expense_date',
+                            '<',
+                            $startDate
+                        )
+                        ->sum('amount');
+
+                    $periodOpeningBalance =
+                        $openingBalance
+                        + (float) $incomeBeforePeriod
+                        - (float) $expensesBeforePeriod;
+                }
+
+            } else {
+
+                /*
+                |--------------------------------------------------------------------------
+                | All Accounts Opening Position
+                |--------------------------------------------------------------------------
+                |
+                | Sum all financial account opening balances.
+                |
+                */
+
+                $openingBalance = (float) $accounts->sum(
+                    fn (FinancialAccount $account) =>
+                        (float) $account->opening_balance
+                );
+
+                $openingBalanceDate = $accounts
+                    ->filter(
+                        fn (FinancialAccount $account) =>
+                            $account->opening_balance_date !== null
+                    )
+                    ->min('opening_balance_date');
+
+                $periodOpeningBalance = $openingBalance;
+
+                /*
+                |--------------------------------------------------------------------------
+                | All Transactions Before Report Period
+                |--------------------------------------------------------------------------
+                |
+                | All Accounts mode also includes legacy transactions that
+                | may not yet have a financial_account_id.
+                |
+                */
+
+                if (
+                    $openingBalanceDate &&
+                    $startDate->toDateString() >
+                    $openingBalanceDate->toDateString()
+                ) {
+
+                    $incomeBeforePeriod = Income::query()
+                        ->where('church_id', $church->id)
+                        ->whereDate(
+                            'income_date',
+                            '>=',
+                            $openingBalanceDate
+                        )
+                        ->whereDate(
+                            'income_date',
+                            '<',
+                            $startDate
+                        )
+                        ->sum('amount');
+
+                    $expensesBeforePeriod = Expense::query()
+                        ->where('church_id', $church->id)
+                        ->whereDate(
+                            'expense_date',
+                            '>=',
+                            $openingBalanceDate
+                        )
+                        ->whereDate(
+                            'expense_date',
+                            '<',
+                            $startDate
+                        )
+                        ->sum('amount');
+
+                    $periodOpeningBalance =
+                        $openingBalance
+                        + (float) $incomeBeforePeriod
+                        - (float) $expensesBeforePeriod;
+                }
             }
 
             /*
@@ -170,12 +316,7 @@ class ReportController extends Controller
             |--------------------------------------------------------------------------
             */
 
-            $incomeByCategory = Income::query()
-                ->where('church_id', $church->id)
-                ->whereBetween('income_date', [
-                    $startDate->toDateString(),
-                    $endDate->toDateString(),
-                ])
+            $incomeByCategory = (clone $periodIncomeQuery)
                 ->selectRaw('category, SUM(amount) as total')
                 ->groupBy('category')
                 ->orderByDesc('total')
@@ -187,12 +328,7 @@ class ReportController extends Controller
             |--------------------------------------------------------------------------
             */
 
-            $expensesByCategory = Expense::query()
-                ->where('church_id', $church->id)
-                ->whereBetween('expense_date', [
-                    $startDate->toDateString(),
-                    $endDate->toDateString(),
-                ])
+            $expensesByCategory = (clone $periodExpenseQuery)
                 ->selectRaw('category, SUM(amount) as total')
                 ->groupBy('category')
                 ->orderByDesc('total')
@@ -204,12 +340,7 @@ class ReportController extends Controller
             |--------------------------------------------------------------------------
             */
 
-            $incomeTransactions = Income::query()
-                ->where('church_id', $church->id)
-                ->whereBetween('income_date', [
-                    $startDate->toDateString(),
-                    $endDate->toDateString(),
-                ])
+            $incomeTransactions = (clone $periodIncomeQuery)
                 ->orderByDesc('income_date')
                 ->orderByDesc('id')
                 ->get();
@@ -220,12 +351,7 @@ class ReportController extends Controller
             |--------------------------------------------------------------------------
             */
 
-            $expenseTransactions = Expense::query()
-                ->where('church_id', $church->id)
-                ->whereBetween('expense_date', [
-                    $startDate->toDateString(),
-                    $endDate->toDateString(),
-                ])
+            $expenseTransactions = (clone $periodExpenseQuery)
                 ->orderByDesc('expense_date')
                 ->orderByDesc('id')
                 ->get();
@@ -271,6 +397,11 @@ class ReportController extends Controller
             'user' => $user,
             'church' => $church,
 
+            // Financial accounts
+            'accounts' => $accounts,
+            'selectedAccount' => $selectedAccount,
+            'selectedAccountId' => $selectedAccountId,
+
             // Period activity
             'totalIncome' => $totalIncome,
             'totalExpenses' => $totalExpenses,
@@ -312,7 +443,14 @@ class ReportController extends Controller
         $user = Auth::user();
         $church = $user?->church;
 
-        [$period, $startDate, $endDate] = $this->resolveReportPeriod($request);
+        [$period, $startDate, $endDate] =
+            $this->resolveReportPeriod($request);
+
+        $selectedAccountId = $request->filled('financial_account_id')
+            ? (int) $request->financial_account_id
+            : null;
+
+        $selectedAccount = null;
 
         $incomeTransactions = collect();
         $expenseTransactions = collect();
@@ -323,6 +461,8 @@ class ReportController extends Controller
         $periodOpeningBalance = 0;
         $closingBalance = 0;
 
+        $accounts = collect();
+
         /*
         |--------------------------------------------------------------------------
         | Financial Data
@@ -331,38 +471,70 @@ class ReportController extends Controller
 
         if ($church) {
 
-            $financialService = app(ChurchFinancialService::class);
+            $accounts = FinancialAccount::query()
+                ->where('church_id', $church->id)
+                ->orderByDesc('is_default')
+                ->orderBy('name')
+                ->get();
 
-            $originalOpeningBalance =
-                $financialService->openingBalance($church);
+            if ($selectedAccountId) {
 
-            $openingBalanceDate =
-                $financialService->openingBalanceDate($church);
+                $selectedAccount = $accounts
+                    ->firstWhere('id', $selectedAccountId);
 
-            $periodOpeningBalance = $originalOpeningBalance;
+                abort_unless(
+                    $selectedAccount,
+                    404,
+                    'The selected financial account was not found.'
+                );
+            }
 
             /*
             |--------------------------------------------------------------------------
-            | Period Income
+            | Income Query
             |--------------------------------------------------------------------------
             */
 
-            $totalIncome = Income::query()
-                ->where('church_id', $church->id)
+            $incomeQuery = Income::query()
+                ->where('church_id', $church->id);
+
+            if ($selectedAccount) {
+                $incomeQuery->where(
+                    'financial_account_id',
+                    $selectedAccount->id
+                );
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | Expense Query
+            |--------------------------------------------------------------------------
+            */
+
+            $expenseQuery = Expense::query()
+                ->where('church_id', $church->id);
+
+            if ($selectedAccount) {
+                $expenseQuery->where(
+                    'financial_account_id',
+                    $selectedAccount->id
+                );
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | Period Totals
+            |--------------------------------------------------------------------------
+            */
+
+            $totalIncome = (float) (clone $incomeQuery)
                 ->whereBetween('income_date', [
                     $startDate->toDateString(),
                     $endDate->toDateString(),
                 ])
                 ->sum('amount');
 
-            /*
-            |--------------------------------------------------------------------------
-            | Period Expenses
-            |--------------------------------------------------------------------------
-            */
-
-            $totalExpenses = Expense::query()
-                ->where('church_id', $church->id)
+            $totalExpenses = (float) (clone $expenseQuery)
                 ->whereBetween('expense_date', [
                     $startDate->toDateString(),
                     $endDate->toDateString(),
@@ -371,30 +543,107 @@ class ReportController extends Controller
 
             /*
             |--------------------------------------------------------------------------
-            | Period Opening Balance
+            | Opening Balance
             |--------------------------------------------------------------------------
             */
 
-            if (
-                $openingBalanceDate &&
-                $startDate->toDateString() > $openingBalanceDate->toDateString()
-            ) {
-                $incomeBeforePeriod = Income::query()
-                    ->where('church_id', $church->id)
-                    ->whereDate('income_date', '>=', $openingBalanceDate)
-                    ->whereDate('income_date', '<', $startDate)
-                    ->sum('amount');
-
-                $expensesBeforePeriod = Expense::query()
-                    ->where('church_id', $church->id)
-                    ->whereDate('expense_date', '>=', $openingBalanceDate)
-                    ->whereDate('expense_date', '<', $startDate)
-                    ->sum('amount');
+            if ($selectedAccount) {
 
                 $periodOpeningBalance =
-                    $originalOpeningBalance
-                    + $incomeBeforePeriod
-                    - $expensesBeforePeriod;
+                    (float) $selectedAccount->opening_balance;
+
+                $openingBalanceDate =
+                    $selectedAccount->opening_balance_date;
+
+                if (
+                    $openingBalanceDate &&
+                    $startDate->toDateString() >
+                    $openingBalanceDate->toDateString()
+                ) {
+
+                    $incomeBeforePeriod = (clone $incomeQuery)
+                        ->whereDate(
+                            'income_date',
+                            '>=',
+                            $openingBalanceDate
+                        )
+                        ->whereDate(
+                            'income_date',
+                            '<',
+                            $startDate
+                        )
+                        ->sum('amount');
+
+                    $expensesBeforePeriod = (clone $expenseQuery)
+                        ->whereDate(
+                            'expense_date',
+                            '>=',
+                            $openingBalanceDate
+                        )
+                        ->whereDate(
+                            'expense_date',
+                            '<',
+                            $startDate
+                        )
+                        ->sum('amount');
+
+                    $periodOpeningBalance +=
+                        (float) $incomeBeforePeriod
+                        - (float) $expensesBeforePeriod;
+                }
+
+            } else {
+
+                $periodOpeningBalance = (float) $accounts->sum(
+                    fn (FinancialAccount $account) =>
+                        (float) $account->opening_balance
+                );
+
+                $openingBalanceDate = $accounts
+                    ->filter(
+                        fn (FinancialAccount $account) =>
+                            $account->opening_balance_date !== null
+                    )
+                    ->min('opening_balance_date');
+
+                if (
+                    $openingBalanceDate &&
+                    $startDate->toDateString() >
+                    $openingBalanceDate->toDateString()
+                ) {
+
+                    $incomeBeforePeriod = Income::query()
+                        ->where('church_id', $church->id)
+                        ->whereDate(
+                            'income_date',
+                            '>=',
+                            $openingBalanceDate
+                        )
+                        ->whereDate(
+                            'income_date',
+                            '<',
+                            $startDate
+                        )
+                        ->sum('amount');
+
+                    $expensesBeforePeriod = Expense::query()
+                        ->where('church_id', $church->id)
+                        ->whereDate(
+                            'expense_date',
+                            '>=',
+                            $openingBalanceDate
+                        )
+                        ->whereDate(
+                            'expense_date',
+                            '<',
+                            $startDate
+                        )
+                        ->sum('amount');
+
+                    $periodOpeningBalance +=
+                        (float) $incomeBeforePeriod
+                        - (float) $expensesBeforePeriod;
+                }
             }
 
             $closingBalance =
@@ -408,8 +657,8 @@ class ReportController extends Controller
             |--------------------------------------------------------------------------
             */
 
-            $incomeTransactions = Income::query()
-                ->where('church_id', $church->id)
+            $incomeTransactions = (clone $incomeQuery)
+                ->with('financialAccount')
                 ->whereBetween('income_date', [
                     $startDate->toDateString(),
                     $endDate->toDateString(),
@@ -418,8 +667,8 @@ class ReportController extends Controller
                 ->orderBy('id')
                 ->get();
 
-            $expenseTransactions = Expense::query()
-                ->where('church_id', $church->id)
+            $expenseTransactions = (clone $expenseQuery)
+                ->with('financialAccount')
                 ->whereBetween('expense_date', [
                     $startDate->toDateString(),
                     $endDate->toDateString(),
@@ -443,6 +692,7 @@ class ReportController extends Controller
                 $totalExpenses,
                 $netBalance,
                 $closingBalance,
+                $selectedAccount,
                 $incomeTransactions,
                 $expenseTransactions
             ) {
@@ -466,6 +716,11 @@ class ReportController extends Controller
                         $startDate,
                         $endDate
                     ),
+                ]);
+
+                fputcsv($handle, [
+                    'Financial Account',
+                    $selectedAccount?->name ?? 'All Accounts',
                 ]);
 
                 fputcsv($handle, []);
@@ -513,6 +768,7 @@ class ReportController extends Controller
 
                 fputcsv($handle, [
                     'Date',
+                    'Financial Account',
                     'Category',
                     'Source',
                     'Payment Method',
@@ -521,14 +777,17 @@ class ReportController extends Controller
                 ]);
 
                 foreach ($incomeTransactions as $income) {
+
                     fputcsv($handle, [
                         $income->income_date?->format('Y-m-d'),
+                        $income->financialAccount?->name ?? 'Unassigned',
                         $income->category,
                         $income->source,
                         $income->payment_method,
                         $income->reference,
                         $income->amount,
                     ]);
+
                 }
 
                 fputcsv($handle, []);
@@ -545,6 +804,7 @@ class ReportController extends Controller
 
                 fputcsv($handle, [
                     'Date',
+                    'Financial Account',
                     'Category',
                     'Vendor',
                     'Payment Method',
@@ -553,17 +813,21 @@ class ReportController extends Controller
                 ]);
 
                 foreach ($expenseTransactions as $expense) {
+
                     fputcsv($handle, [
                         $expense->expense_date?->format('Y-m-d'),
+                        $expense->financialAccount?->name ?? 'Unassigned',
                         $expense->category,
                         $expense->vendor,
                         $expense->payment_method,
                         $expense->reference,
                         $expense->amount,
                     ]);
+
                 }
 
                 fclose($handle);
+
             },
             $filename,
             [
@@ -576,14 +840,19 @@ class ReportController extends Controller
     /**
      * Export church financial report as PDF.
      */
-    public function exportPdf(
-        Request $request,
-        ChurchFinancialService $financialService
-    ) {
+    public function exportPdf(Request $request)
+    {
         $user = Auth::user();
         $church = $user?->church;
 
-        [$period, $startDate, $endDate] = $this->resolveReportPeriod($request);
+        [$period, $startDate, $endDate] =
+            $this->resolveReportPeriod($request);
+
+        $selectedAccountId = $request->filled('financial_account_id')
+            ? (int) $request->financial_account_id
+            : null;
+
+        $selectedAccount = null;
 
         $totalIncome = 0;
         $totalExpenses = 0;
@@ -597,6 +866,8 @@ class ReportController extends Controller
         $incomeTransactions = collect();
         $expenseTransactions = collect();
 
+        $accounts = collect();
+
         /*
         |--------------------------------------------------------------------------
         | Financial Data
@@ -605,68 +876,176 @@ class ReportController extends Controller
 
         if ($church) {
 
-            $originalOpeningBalance =
-                $financialService->openingBalance($church);
+            $accounts = FinancialAccount::query()
+                ->where('church_id', $church->id)
+                ->orderByDesc('is_default')
+                ->orderBy('name')
+                ->get();
 
-            $openingBalanceDate =
-                $financialService->openingBalanceDate($church);
+            if ($selectedAccountId) {
 
-            $periodOpeningBalance = $originalOpeningBalance;
+                $selectedAccount = $accounts
+                    ->firstWhere('id', $selectedAccountId);
+
+                abort_unless(
+                    $selectedAccount,
+                    404,
+                    'The selected financial account was not found.'
+                );
+            }
 
             /*
             |--------------------------------------------------------------------------
-            | Period Income
+            | Queries
             |--------------------------------------------------------------------------
             */
 
-            $totalIncome = Income::query()
-                ->where('church_id', $church->id)
+            $incomeQuery = Income::query()
+                ->where('church_id', $church->id);
+
+            $expenseQuery = Expense::query()
+                ->where('church_id', $church->id);
+
+            if ($selectedAccount) {
+
+                $incomeQuery->where(
+                    'financial_account_id',
+                    $selectedAccount->id
+                );
+
+                $expenseQuery->where(
+                    'financial_account_id',
+                    $selectedAccount->id
+                );
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | Period Totals
+            |--------------------------------------------------------------------------
+            */
+
+            $periodIncomeQuery = (clone $incomeQuery)
                 ->whereBetween('income_date', [
                     $startDate->toDateString(),
                     $endDate->toDateString(),
-                ])
-                ->sum('amount');
+                ]);
 
-            /*
-            |--------------------------------------------------------------------------
-            | Period Expenses
-            |--------------------------------------------------------------------------
-            */
-
-            $totalExpenses = Expense::query()
-                ->where('church_id', $church->id)
+            $periodExpenseQuery = (clone $expenseQuery)
                 ->whereBetween('expense_date', [
                     $startDate->toDateString(),
                     $endDate->toDateString(),
-                ])
-                ->sum('amount');
+                ]);
+
+            $totalIncome =
+                (float) $periodIncomeQuery->sum('amount');
+
+            $totalExpenses =
+                (float) $periodExpenseQuery->sum('amount');
 
             /*
             |--------------------------------------------------------------------------
-            | Period Opening Balance
+            | Opening Balance
             |--------------------------------------------------------------------------
             */
 
-            if (
-                $openingBalanceDate &&
-                $startDate->toDateString() > $openingBalanceDate->toDateString()
-            ) {
-                $incomeBeforePeriod = Income::query()
-                    ->where('church_id', $church->id)
-                    ->whereDate('income_date', '>=', $openingBalanceDate)
-                    ->whereDate('income_date', '<', $startDate)
-                    ->sum('amount');
-
-                $expensesBeforePeriod = Expense::query()
-                    ->where('church_id', $church->id)
-                    ->whereDate('expense_date', '>=', $openingBalanceDate)
-                    ->whereDate('expense_date', '<', $startDate)
-                    ->sum('amount');
+            if ($selectedAccount) {
 
                 $periodOpeningBalance =
-                    $originalOpeningBalance
-                    + $incomeBeforePeriod
-                    - $expensesBeforePeriod;
+                    (float) $selectedAccount->opening_balance;
+
+                $openingBalanceDate =
+                    $selectedAccount->opening_balance_date;
+
+                if (
+                    $openingBalanceDate &&
+                    $startDate->toDateString() >
+                    $openingBalanceDate->toDateString()
+                ) {
+
+                    $incomeBeforePeriod = (clone $incomeQuery)
+                        ->whereDate(
+                            'income_date',
+                            '>=',
+                            $openingBalanceDate
+                        )
+                        ->whereDate(
+                            'income_date',
+                            '<',
+                            $startDate
+                        )
+                        ->sum('amount');
+
+                    $expensesBeforePeriod = (clone $expenseQuery)
+                        ->whereDate(
+                            'expense_date',
+                            '>=',
+                            $openingBalanceDate
+                        )
+                        ->whereDate(
+                            'expense_date',
+                            '<',
+                            $startDate
+                        )
+                        ->sum('amount');
+
+                    $periodOpeningBalance +=
+                        (float) $incomeBeforePeriod
+                        - (float) $expensesBeforePeriod;
+                }
+
+            } else {
+
+                $periodOpeningBalance = (float) $accounts->sum(
+                    fn (FinancialAccount $account) =>
+                        (float) $account->opening_balance
+                );
+
+                $openingBalanceDate = $accounts
+                    ->filter(
+                        fn (FinancialAccount $account) =>
+                            $account->opening_balance_date !== null
+                    )
+                    ->min('opening_balance_date');
+
+                if (
+                    $openingBalanceDate &&
+                    $startDate->toDateString() >
+                    $openingBalanceDate->toDateString()
+                ) {
+
+                    $incomeBeforePeriod = Income::query()
+                        ->where('church_id', $church->id)
+                        ->whereDate(
+                            'income_date',
+                            '>=',
+                            $openingBalanceDate
+                        )
+                        ->whereDate(
+                            'income_date',
+                            '<',
+                            $startDate
+                        )
+                        ->sum('amount');
+
+                    $expensesBeforePeriod = Expense::query()
+                        ->where('church_id', $church->id)
+                        ->whereDate(
+                            'expense_date',
+                            '>=',
+                            $openingBalanceDate
+                        )
+                        ->whereDate(
+                            'expense_date',
+                            '<',
+                            $startDate
+                        )
+                        ->sum('amount');
+
+                    $periodOpeningBalance +=
+                        (float) $incomeBeforePeriod
+                        - (float) $expensesBeforePeriod;
+                }
             }
 
             /*
@@ -682,16 +1061,17 @@ class ReportController extends Controller
 
             /*
             |--------------------------------------------------------------------------
-            | Income By Category
+            | Categories
             |--------------------------------------------------------------------------
             */
 
-            $incomeByCategory = Income::query()
-                ->where('church_id', $church->id)
-                ->whereBetween('income_date', [
-                    $startDate->toDateString(),
-                    $endDate->toDateString(),
-                ])
+            $incomeByCategory = (clone $periodIncomeQuery)
+                ->selectRaw('category, SUM(amount) as total')
+                ->groupBy('category')
+                ->orderByDesc('total')
+                ->get();
+
+            $expensesByCategory = (clone $periodExpenseQuery)
                 ->selectRaw('category, SUM(amount) as total')
                 ->groupBy('category')
                 ->orderByDesc('total')
@@ -699,55 +1079,25 @@ class ReportController extends Controller
 
             /*
             |--------------------------------------------------------------------------
-            | Expenses By Category
+            | Transactions
             |--------------------------------------------------------------------------
             */
 
-            $expensesByCategory = Expense::query()
-                ->where('church_id', $church->id)
-                ->whereBetween('expense_date', [
-                    $startDate->toDateString(),
-                    $endDate->toDateString(),
-                ])
-                ->selectRaw('category, SUM(amount) as total')
-                ->groupBy('category')
-                ->orderByDesc('total')
-                ->get();
-
-            /*
-            |--------------------------------------------------------------------------
-            | Income Transactions
-            |--------------------------------------------------------------------------
-            */
-
-            $incomeTransactions = Income::query()
-                ->where('church_id', $church->id)
-                ->whereBetween('income_date', [
-                    $startDate->toDateString(),
-                    $endDate->toDateString(),
-                ])
+            $incomeTransactions = (clone $periodIncomeQuery)
+                ->with('financialAccount')
                 ->orderBy('income_date')
                 ->orderBy('id')
                 ->get();
 
-            /*
-            |--------------------------------------------------------------------------
-            | Expense Transactions
-            |--------------------------------------------------------------------------
-            */
-
-            $expenseTransactions = Expense::query()
-                ->where('church_id', $church->id)
-                ->whereBetween('expense_date', [
-                    $startDate->toDateString(),
-                    $endDate->toDateString(),
-                ])
+            $expenseTransactions = (clone $periodExpenseQuery)
+                ->with('financialAccount')
                 ->orderBy('expense_date')
                 ->orderBy('id')
                 ->get();
         }
 
-        $netBalance = $totalIncome - $totalExpenses;
+        $netBalance =
+            $totalIncome - $totalExpenses;
 
         $reportLabel = $this->getReportLabel(
             $period,
@@ -764,6 +1114,11 @@ class ReportController extends Controller
         $pdf = Pdf::loadView('church.reports.pdf', [
             'church' => $church,
 
+            // Financial accounts
+            'accounts' => $accounts,
+            'selectedAccount' => $selectedAccount,
+
+            // Financial summary
             'totalIncome' => $totalIncome,
             'totalExpenses' => $totalExpenses,
             'netBalance' => $netBalance,
@@ -771,12 +1126,15 @@ class ReportController extends Controller
             'periodOpeningBalance' => $periodOpeningBalance,
             'closingBalance' => $closingBalance,
 
+            // Categories
             'incomeByCategory' => $incomeByCategory,
             'expensesByCategory' => $expensesByCategory,
 
+            // Transactions
             'incomeTransactions' => $incomeTransactions,
             'expenseTransactions' => $expenseTransactions,
 
+            // Period
             'period' => $period,
             'startDate' => $startDate,
             'endDate' => $endDate,

@@ -16,19 +16,37 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'reference',
     'description',
     'member_id',
+    'financial_account_id',
 ])]
 class Income extends Model
 {
+    /**
+     * The church that owns this income record.
+     */
     public function church(): BelongsTo
     {
         return $this->belongsTo(Church::class);
     }
 
+    /**
+     * The member associated with this income.
+     */
     public function member(): BelongsTo
     {
         return $this->belongsTo(Member::class);
     }
 
+    /**
+     * The financial account that received this income.
+     */
+    public function financialAccount(): BelongsTo
+    {
+        return $this->belongsTo(FinancialAccount::class);
+    }
+
+    /**
+     * Attribute casting.
+     */
     protected function casts(): array
     {
         return [

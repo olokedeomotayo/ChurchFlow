@@ -153,19 +153,16 @@ class MemberController extends Controller
             )
         );
 
-        /*
-        |--------------------------------------------------------------------------
-        | Redirect
-        |--------------------------------------------------------------------------
-        */
-
         return redirect()
             ->route('church.members.index')
             ->with('success', 'Member added successfully.');
     }
 
     /**
-     * Display a single member with attendance history.
+     * Display a single member.
+     *
+     * Individual member attendance history is intentionally not loaded.
+     * Attendance is now recorded at service level using numerical counts.
      */
     public function show(
         Request $request,
@@ -173,17 +170,8 @@ class MemberController extends Controller
     ): View {
         $this->ensureBelongsToChurch($request, $member);
 
-        $member->load([
-            'attendances' => function ($query) {
-                $query
-                    ->with('service')
-                    ->orderByDesc('checked_in_at');
-            },
-        ]);
-
         return view('church.members.show', [
             'member' => $member,
-            'attendanceHistory' => $member->attendances,
         ]);
     }
 
@@ -315,12 +303,6 @@ class MemberController extends Controller
                 $memberId
             )
         );
-
-        /*
-        |--------------------------------------------------------------------------
-        | Delete Member
-        |--------------------------------------------------------------------------
-        */
 
         $member->delete();
 
@@ -652,7 +634,6 @@ class MemberController extends Controller
         ];
 
         $callback = function () use ($members) {
-
             $file = fopen('php://output', 'w');
 
             fputcsv($file, [

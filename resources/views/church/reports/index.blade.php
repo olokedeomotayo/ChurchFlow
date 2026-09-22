@@ -26,28 +26,64 @@
 
 
         {{-- ============================================================= --}}
-        {{-- REPORT PERIOD --}}
+        {{-- REPORT FILTERS --}}
         {{-- ============================================================= --}}
 
         <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
 
-            <div class="mb-4">
+            <div class="mb-5">
                 <h2 class="text-sm font-semibold text-slate-900">
-                    Report Period
+                    Report Filters
                 </h2>
 
                 <p class="mt-1 text-xs text-slate-500">
-                    Select the period you want to analyse.
+                    Select the financial account and period you want to analyse.
                 </p>
             </div>
 
             <form
                 method="GET"
                 action="{{ route('church.reports.index') }}"
-                class="space-y-4"
+                class="space-y-5"
             >
 
-                <div class="grid grid-cols-1 gap-4 md:grid-cols-3 lg:grid-cols-4">
+                <div class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-5">
+
+                    {{-- Financial Account --}}
+                    <div>
+                        <label
+                            for="financial_account_id"
+                            class="mb-1.5 block text-xs font-semibold text-slate-700"
+                        >
+                            Financial Account
+                        </label>
+
+                        <select
+                            id="financial_account_id"
+                            name="financial_account_id"
+                            class="h-11 w-full cursor-pointer rounded-lg border border-slate-300 bg-white px-3 text-sm text-slate-700 shadow-sm outline-none transition focus:border-purple-500 focus:ring-2 focus:ring-purple-100"
+                        >
+                            <option value="">
+                                All Accounts
+                            </option>
+
+                            @foreach ($accounts as $account)
+
+                                <option
+                                    value="{{ $account->id }}"
+                                    @selected((string) $selectedAccountId === (string) $account->id)
+                                >
+                                    {{ $account->name }}
+                                    @if ($account->is_default)
+                                        — Default
+                                    @endif
+                                </option>
+
+                            @endforeach
+
+                        </select>
+                    </div>
+
 
                     {{-- Period --}}
                     <div>
@@ -62,7 +98,7 @@
                             id="period"
                             name="period"
                             onchange="toggleCustomDateFields()"
-                            class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-700 outline-none transition focus:border-purple-500 focus:ring-2 focus:ring-purple-100"
+                            class="h-11 w-full cursor-pointer rounded-lg border border-slate-300 bg-white px-3 text-sm text-slate-700 shadow-sm outline-none transition focus:border-purple-500 focus:ring-2 focus:ring-purple-100"
                         >
                             <option value="monthly" @selected($period === 'monthly')>
                                 Monthly
@@ -100,7 +136,7 @@
                             id="start_date"
                             name="start_date"
                             value="{{ request('start_date') }}"
-                            class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-700 outline-none transition focus:border-purple-500 focus:ring-2 focus:ring-purple-100"
+                            class="h-11 w-full cursor-pointer rounded-lg border border-slate-300 bg-white px-3 text-sm text-slate-700 shadow-sm outline-none transition focus:border-purple-500 focus:ring-2 focus:ring-purple-100"
                         >
                     </div>
 
@@ -122,63 +158,145 @@
                             id="end_date"
                             name="end_date"
                             value="{{ request('end_date') }}"
-                            class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-700 outline-none transition focus:border-purple-500 focus:ring-2 focus:ring-purple-100"
+                            class="h-11 w-full cursor-pointer rounded-lg border border-slate-300 bg-white px-3 text-sm text-slate-700 shadow-sm outline-none transition focus:border-purple-500 focus:ring-2 focus:ring-purple-100"
                         >
                     </div>
 
 
-                    {{-- Actions --}}
-                    <div class="flex items-end gap-2">
+                    {{-- Apply Filter --}}
+                    <div class="flex items-end">
 
                         <button
                             type="submit"
-                            class="inline-flex flex-1 cursor-pointer items-center justify-center rounded-lg bg-purple-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-purple-700"
+                            class="inline-flex h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-lg bg-purple-600 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-200"
                         >
-                            Generate Report
+                            <svg
+                                class="h-4 w-4"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    d="M3 4h18M6 9h12M10 14h4M11 19h2"
+                                />
+                            </svg>
+
+                            Apply Filters
                         </button>
-
-                        <a
-                            href="{{ route('church.reports.export', request()->query()) }}"
-                            class="inline-flex cursor-pointer items-center justify-center rounded-lg border border-green-300 bg-green-50 px-4 py-2.5 text-sm font-semibold text-green-700 transition hover:border-green-400 hover:bg-green-100"
-                        >
-                            Export CSV
-                        </a>
-
-                        <a
-                            href="{{ route('church.reports.export.pdf', request()->query()) }}"
-                            class="inline-flex cursor-pointer items-center gap-2 rounded-lg bg-red-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-red-700"
-                        >
-                            PDF
-                        </a>
-
-                        <a
-                            href="{{ route('church.reports.index') }}"
-                            class="inline-flex cursor-pointer items-center justify-center rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:border-red-300 hover:bg-red-50 hover:text-red-600"
-                        >
-                            Clear
-                        </a>
 
                     </div>
 
                 </div>
 
 
-                {{-- Selected Period --}}
-                <div class="flex flex-col gap-2 border-t border-slate-100 pt-4 sm:flex-row sm:items-center sm:justify-between">
+                {{-- Selected Context --}}
+                <div class="border-t border-slate-100 pt-4">
 
-                    <p class="text-xs text-slate-500">
-                        Showing financial figures for:
-                    </p>
+                    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
 
-                    <span class="w-fit rounded-full bg-purple-50 px-3 py-1 text-xs font-semibold text-purple-700">
-                        {{ $reportLabel }}
-                    </span>
+                        <div>
+                            <p class="text-xs font-semibold text-slate-700">
+                                Report Context
+                            </p>
+
+                            <p class="mt-1 text-xs text-slate-500">
+                                Financial figures for the selected period and account.
+                            </p>
+                        </div>
+
+                        <div class="flex flex-wrap items-center gap-2">
+
+                            <span class="rounded-full bg-purple-50 px-3 py-1 text-xs font-semibold text-purple-700">
+                                {{ $reportLabel }}
+                            </span>
+
+                            <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
+                                {{ $selectedAccount?->name ?? 'All Accounts' }}
+                            </span>
+
+                        </div>
+
+                    </div>
 
                 </div>
 
             </form>
 
         </div>
+
+
+        {{-- ============================================================= --}}
+        {{-- SELECTED ACCOUNT INFORMATION --}}
+        {{-- ============================================================= --}}
+
+        @if ($selectedAccount)
+
+            <div class="rounded-xl border border-purple-200 bg-purple-50 shadow-sm">
+
+                <div class="flex flex-col gap-4 px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
+
+                    <div>
+
+                        <div class="flex flex-wrap items-center gap-2">
+
+                            <h2 class="font-semibold text-purple-900">
+                                {{ $selectedAccount->name }}
+                            </h2>
+
+                            @if ($selectedAccount->is_default)
+
+                                <span class="rounded-full bg-purple-100 px-2.5 py-1 text-[11px] font-semibold text-purple-700">
+                                    Default
+                                </span>
+
+                            @endif
+
+                            @if ($selectedAccount->is_active)
+
+                                <span class="rounded-full bg-green-100 px-2.5 py-1 text-[11px] font-semibold text-green-700">
+                                    Active
+                                </span>
+
+                            @else
+
+                                <span class="rounded-full bg-slate-200 px-2.5 py-1 text-[11px] font-semibold text-slate-600">
+                                    Inactive
+                                </span>
+
+                            @endif
+
+                        </div>
+
+                        <p class="mt-1 text-xs text-purple-700">
+                            {{ ucfirst(str_replace('_', ' ', $selectedAccount->type)) }}
+
+                            @if ($selectedAccount->provider_name)
+                                · {{ $selectedAccount->provider_name }}
+                            @endif
+                        </p>
+
+                    </div>
+
+                    <div class="text-left sm:text-right">
+
+                        <p class="text-xs font-semibold uppercase tracking-wide text-purple-600">
+                            Current Balance
+                        </p>
+
+                        <p class="mt-1 text-xl font-bold text-purple-900">
+                            ₦{{ number_format((float) $selectedAccount->current_balance, 2) }}
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        @endif
 
 
         {{-- ============================================================= --}}
@@ -201,7 +319,7 @@
 
             <div class="grid grid-cols-1 gap-4 p-6 sm:grid-cols-2 xl:grid-cols-4">
 
-                {{-- Period Opening Balance --}}
+                {{-- Opening Balance --}}
                 <div class="rounded-lg border border-purple-100 bg-white p-4">
 
                     <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">
@@ -213,20 +331,24 @@
                     </p>
 
                     @if ($openingBalanceDate)
+
                         <p class="mt-1 text-[11px] text-slate-400">
-                            Original opening date:
+                            Opening date:
                             {{ $openingBalanceDate->format('d M Y') }}
                         </p>
+
                     @else
+
                         <p class="mt-1 text-[11px] text-slate-400">
                             No opening balance date configured.
                         </p>
+
                     @endif
 
                 </div>
 
 
-                {{-- Total Income --}}
+                {{-- Income --}}
                 <div class="rounded-lg border border-green-100 bg-green-50 p-4">
 
                     <p class="text-xs font-semibold uppercase tracking-wide text-green-600">
@@ -244,7 +366,7 @@
                 </div>
 
 
-                {{-- Total Expenses --}}
+                {{-- Expenses --}}
                 <div class="rounded-lg border border-red-100 bg-red-50 p-4">
 
                     <p class="text-xs font-semibold uppercase tracking-wide text-red-600">
@@ -288,21 +410,25 @@
             </div>
 
 
-            {{-- Calculation --}}
+            {{-- Balance Calculation --}}
             <div class="border-t border-purple-200 px-6 py-4">
 
                 <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
 
                     <div>
+
                         <p class="text-xs font-semibold text-purple-900">
                             Balance Calculation
                         </p>
 
                         <p class="mt-1 text-xs text-purple-700">
                             ₦{{ number_format((float) $periodOpeningBalance, 2) }}
-                            + ₦{{ number_format((float) $totalIncome, 2) }}
-                            − ₦{{ number_format((float) $totalExpenses, 2) }}
+                            +
+                            ₦{{ number_format((float) $totalIncome, 2) }}
+                            −
+                            ₦{{ number_format((float) $totalExpenses, 2) }}
                         </p>
+
                     </div>
 
                     <span class="text-sm font-bold text-purple-900">
@@ -558,13 +684,29 @@
 
             <div class="border-b border-slate-200 px-6 py-5">
 
-                <h2 class="font-semibold text-slate-900">
-                    Income Transactions
-                </h2>
+                <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
 
-                <p class="mt-1 text-xs text-slate-500">
-                    Detailed income transactions for {{ $reportLabel }}
-                </p>
+                    <div>
+
+                        <h2 class="font-semibold text-slate-900">
+                            Income Transactions
+                        </h2>
+
+                        <p class="mt-1 text-xs text-slate-500">
+                            Detailed income transactions for {{ $reportLabel }}
+                        </p>
+
+                    </div>
+
+                    @if ($selectedAccount)
+
+                        <span class="w-fit rounded-full bg-purple-50 px-3 py-1 text-xs font-semibold text-purple-700">
+                            {{ $selectedAccount->name }}
+                        </span>
+
+                    @endif
+
+                </div>
 
             </div>
 
@@ -581,6 +723,14 @@
                                 <th class="px-6 py-3 font-semibold text-slate-600">
                                     Date
                                 </th>
+
+                                @if (! $selectedAccount)
+
+                                    <th class="px-6 py-3 font-semibold text-slate-600">
+                                        Financial Account
+                                    </th>
+
+                                @endif
 
                                 <th class="px-6 py-3 font-semibold text-slate-600">
                                     Category
@@ -616,6 +766,14 @@
                                         {{ $income->income_date?->format('d M Y') }}
                                     </td>
 
+                                    @if (! $selectedAccount)
+
+                                        <td class="px-6 py-4 text-slate-600">
+                                            {{ $income->financialAccount?->name ?? 'Unassigned' }}
+                                        </td>
+
+                                    @endif
+
                                     <td class="px-6 py-4 font-medium text-slate-900">
                                         {{ $income->category }}
                                     </td>
@@ -647,7 +805,7 @@
                             <tr>
 
                                 <td
-                                    colspan="5"
+                                    colspan="{{ $selectedAccount ? 5 : 6 }}"
                                     class="px-6 py-4 text-right font-semibold text-slate-700"
                                 >
                                     Total Income
@@ -692,13 +850,29 @@
 
             <div class="border-b border-slate-200 px-6 py-5">
 
-                <h2 class="font-semibold text-slate-900">
-                    Expense Transactions
-                </h2>
+                <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
 
-                <p class="mt-1 text-xs text-slate-500">
-                    Detailed expense transactions for {{ $reportLabel }}
-                </p>
+                    <div>
+
+                        <h2 class="font-semibold text-slate-900">
+                            Expense Transactions
+                        </h2>
+
+                        <p class="mt-1 text-xs text-slate-500">
+                            Detailed expense transactions for {{ $reportLabel }}
+                        </p>
+
+                    </div>
+
+                    @if ($selectedAccount)
+
+                        <span class="w-fit rounded-full bg-purple-50 px-3 py-1 text-xs font-semibold text-purple-700">
+                            {{ $selectedAccount->name }}
+                        </span>
+
+                    @endif
+
+                </div>
 
             </div>
 
@@ -715,6 +889,14 @@
                                 <th class="px-6 py-3 font-semibold text-slate-600">
                                     Date
                                 </th>
+
+                                @if (! $selectedAccount)
+
+                                    <th class="px-6 py-3 font-semibold text-slate-600">
+                                        Financial Account
+                                    </th>
+
+                                @endif
 
                                 <th class="px-6 py-3 font-semibold text-slate-600">
                                     Category
@@ -750,6 +932,14 @@
                                         {{ $expense->expense_date?->format('d M Y') }}
                                     </td>
 
+                                    @if (! $selectedAccount)
+
+                                        <td class="px-6 py-4 text-slate-600">
+                                            {{ $expense->financialAccount?->name ?? 'Unassigned' }}
+                                        </td>
+
+                                    @endif
+
                                     <td class="px-6 py-4 font-medium text-slate-900">
                                         {{ $expense->category }}
                                     </td>
@@ -781,7 +971,7 @@
                             <tr>
 
                                 <td
-                                    colspan="5"
+                                    colspan="{{ $selectedAccount ? 5 : 6 }}"
                                     class="px-6 py-4 text-right font-semibold text-slate-700"
                                 >
                                     Total Expenses
@@ -929,14 +1119,13 @@
                 </h2>
 
                 <p class="mt-1 text-xs text-slate-500">
-                    Detailed reports will be available here.
+                    Detailed report categories available in ChurchFlow.
                 </p>
 
             </div>
 
             <div class="grid grid-cols-1 gap-4 p-6 sm:grid-cols-2 lg:grid-cols-3">
 
-                {{-- Financial Reports --}}
                 <div
                     class="cursor-pointer rounded-lg border border-slate-200 p-5 transition hover:border-purple-300 hover:bg-purple-50"
                 >
@@ -945,12 +1134,11 @@
                     </h3>
 
                     <p class="mt-1 text-xs leading-5 text-slate-500">
-                        Analyse income, expenses and financial balance.
+                        Analyse income, expenses, account balances and financial movement.
                     </p>
                 </div>
 
 
-                {{-- Attendance Reports --}}
                 <div
                     class="cursor-pointer rounded-lg border border-slate-200 p-5 transition hover:border-purple-300 hover:bg-purple-50"
                 >
@@ -964,7 +1152,6 @@
                 </div>
 
 
-                {{-- Membership Reports --}}
                 <div
                     class="cursor-pointer rounded-lg border border-slate-200 p-5 transition hover:border-purple-300 hover:bg-purple-50"
                 >

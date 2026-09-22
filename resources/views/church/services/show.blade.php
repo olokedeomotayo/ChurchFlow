@@ -18,6 +18,7 @@
 
             <div>
                 <div class="flex flex-wrap items-center gap-3">
+
                     <h1 class="text-2xl font-bold tracking-tight text-slate-900">
                         {{ $service->name }}
                     </h1>
@@ -35,6 +36,7 @@
                             Cancelled
                         </span>
                     @endif
+
                 </div>
 
                 <p class="mt-1 text-sm text-slate-500">
@@ -44,25 +46,22 @@
 
             <div class="flex flex-wrap items-center gap-3">
 
-                @if($service->status !== 'cancelled')
-                    <a href="{{ route('church.checkin.index', ['service_id' => $service->id]) }}"
-                       class="inline-flex cursor-pointer items-center justify-center gap-2 rounded-lg bg-purple-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-purple-700">
-                        Check In Members
+                @can('services.update')
+                    <a href="{{ route('church.services.edit', $service) }}"
+                       class="inline-flex cursor-pointer items-center justify-center rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50">
+                        Edit
                     </a>
-                @endif
-
-                <a href="{{ route('church.services.edit', $service) }}"
-                   class="inline-flex cursor-pointer items-center justify-center rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50">
-                    Edit
-                </a>
+                @endcan
 
             </div>
         </div>
     </div>
 
-    {{-- OVERVIEW --}}
-    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
 
+    {{-- OVERVIEW --}}
+    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+
+        {{-- SERVICE DATE --}}
         <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
             <p class="text-sm font-medium text-slate-500">
                 Service Date
@@ -73,6 +72,7 @@
             </p>
         </div>
 
+        {{-- START TIME --}}
         <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
             <p class="text-sm font-medium text-slate-500">
                 Start Time
@@ -83,6 +83,7 @@
             </p>
         </div>
 
+        {{-- END TIME --}}
         <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
             <p class="text-sm font-medium text-slate-500">
                 End Time
@@ -93,22 +94,14 @@
             </p>
         </div>
 
-        <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-            <p class="text-sm font-medium text-slate-500">
-                Attendance
-            </p>
-
-            <p class="mt-2 text-lg font-bold text-purple-600">
-                {{ $service->attendances_count }}
-            </p>
-        </div>
-
     </div>
+
 
     {{-- SERVICE DETAILS --}}
     <div class="grid gap-6 lg:grid-cols-3">
 
-        <div class="lg:col-span-2 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+        {{-- SERVICE INFORMATION --}}
+        <div class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm lg:col-span-2">
 
             <div class="border-b border-slate-200 px-6 py-5">
                 <h2 class="text-base font-semibold text-slate-900">
@@ -142,6 +135,7 @@
 
         </div>
 
+
         {{-- QUICK ACTIONS --}}
         <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
 
@@ -151,19 +145,21 @@
 
             <div class="mt-5 space-y-3">
 
-                @if($service->status !== 'cancelled')
-                    <a href="{{ route('church.checkin.index', ['service_id' => $service->id]) }}"
-                       class="flex cursor-pointer items-center justify-between rounded-lg border border-purple-200 bg-purple-50 px-4 py-3 text-sm font-medium text-purple-700 transition hover:bg-purple-100">
-                        <span>Check In Members</span>
+                @can('services.update')
+                    <a href="{{ route('church.services.edit', $service) }}"
+                       class="flex cursor-pointer items-center justify-between rounded-lg border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50">
+                        <span>Edit Service</span>
                         <span>→</span>
                     </a>
-                @endif
+                @endcan
 
-                <a href="{{ route('church.services.edit', $service) }}"
-                   class="flex cursor-pointer items-center justify-between rounded-lg border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50">
-                    <span>Edit Service</span>
-                    <span>→</span>
-                </a>
+                @can('attendance.view')
+                    <a href="{{ route('church.attendance.index', ['service_id' => $service->id]) }}"
+                       class="flex cursor-pointer items-center justify-between rounded-lg border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50">
+                        <span>View Attendance</span>
+                        <span>→</span>
+                    </a>
+                @endcan
 
                 <a href="{{ route('church.services.index') }}"
                    class="flex cursor-pointer items-center justify-between rounded-lg border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50">
@@ -177,6 +173,7 @@
 
     </div>
 
+
     {{-- ATTENDANCE --}}
     <div class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
 
@@ -188,22 +185,23 @@
                 </h2>
 
                 <p class="mt-1 text-sm text-slate-500">
-                    Members checked in for this service.
+                    Numerical attendance records for this service.
                 </p>
             </div>
 
-            @if($service->status !== 'cancelled')
-                <a href="{{ route('church.checkin.index', ['service_id' => $service->id]) }}"
+            @can('attendance.create')
+                <a href="{{ route('church.attendance.create', ['service_id' => $service->id]) }}"
                    class="inline-flex cursor-pointer items-center justify-center rounded-lg bg-purple-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-purple-700">
-                    Add Check-In
+                    Record Attendance
                 </a>
-            @endif
+            @endcan
 
         </div>
 
         <div class="px-6 py-10 text-center">
 
-            <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-slate-500">
+            <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-purple-50 text-purple-600">
+
                 <svg class="h-6 w-6"
                      fill="none"
                      stroke="currentColor"
@@ -215,56 +213,56 @@
                              M9 20H4v-2a4 4 0 014-4h1
                              M12 12a4 4 0 100-8 4 4 0 000 8z"/>
                 </svg>
+
             </div>
 
-            @if($service->attendances_count > 0)
+            <p class="mt-4 text-sm font-semibold text-slate-900">
+                Attendance is recorded by category
+            </p>
 
-                <p class="mt-4 text-sm font-semibold text-slate-900">
-                    {{ $service->attendances_count }}
-                    {{ $service->attendances_count === 1 ? 'member' : 'members' }}
-                    checked in
-                </p>
+            <p class="mx-auto mt-1 max-w-xl text-sm leading-6 text-slate-500">
+                Record the number of men, women, teenagers, children,
+                and guests or first timers who attended this service.
+            </p>
 
-                <p class="mt-1 text-sm text-slate-500">
-                    Attendance records are available for this service.
-                </p>
-
-            @else
-
-                <p class="mt-4 text-sm font-semibold text-slate-900">
-                    No attendance recorded yet
-                </p>
-
-                <p class="mt-1 text-sm text-slate-500">
-                    Start checking members in to record attendance for this service.
-                </p>
-
-            @endif
+            @can('attendance.view')
+                <div class="mt-5">
+                    <a href="{{ route('church.attendance.index', ['service_id' => $service->id]) }}"
+                       class="inline-flex cursor-pointer items-center justify-center rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50">
+                        View Attendance Records
+                    </a>
+                </div>
+            @endcan
 
         </div>
 
     </div>
 
+
     {{-- DELETE --}}
-    <div class="flex justify-end">
+    @can('services.delete')
+        <div class="flex justify-end">
 
-        <button
-            type="button"
-            onclick="if (confirm('Are you sure you want to delete this service? This will also delete its attendance records.')) { document.getElementById('delete-service-form').submit(); }"
-            class="cursor-pointer text-sm font-medium text-red-600 transition hover:text-red-700"
-        >
-            Delete Service
-        </button>
+            <button
+                type="button"
+                onclick="if (confirm('Are you sure you want to delete this service? This may also remove its associated attendance records.')) { document.getElementById('delete-service-form').submit(); }"
+                class="cursor-pointer text-sm font-medium text-red-600 transition hover:text-red-700"
+            >
+                Delete Service
+            </button>
 
-    </div>
+        </div>
 
-    <form id="delete-service-form"
-          method="POST"
-          action="{{ route('church.services.destroy', $service) }}"
-          class="hidden">
-        @csrf
-        @method('DELETE')
-    </form>
+        <form id="delete-service-form"
+              method="POST"
+              action="{{ route('church.services.destroy', $service) }}"
+              class="hidden">
+
+            @csrf
+            @method('DELETE')
+
+        </form>
+    @endcan
 
 </div>
 

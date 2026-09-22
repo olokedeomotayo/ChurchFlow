@@ -73,27 +73,35 @@
                         class="w-full cursor-pointer rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500"
                     >
                         <option value="">Select Category</option>
+
                         <option value="Tithe" @selected(old('category') === 'Tithe')>
                             Tithe
                         </option>
+
                         <option value="Offering" @selected(old('category') === 'Offering')>
                             Offering
                         </option>
+
                         <option value="Donation" @selected(old('category') === 'Donation')>
                             Donation
                         </option>
+
                         <option value="Thanksgiving" @selected(old('category') === 'Thanksgiving')>
                             Thanksgiving
                         </option>
+
                         <option value="Special Offering" @selected(old('category') === 'Special Offering')>
                             Special Offering
                         </option>
+
                         <option value="Pledge" @selected(old('category') === 'Pledge')>
                             Pledge
                         </option>
+
                         <option value="Fundraising" @selected(old('category') === 'Fundraising')>
                             Fundraising
                         </option>
+
                         <option value="Other" @selected(old('category') === 'Other')>
                             Other
                         </option>
@@ -197,6 +205,75 @@
 
             </div>
 
+            {{-- Financial Account --}}
+            <div>
+                <label
+                    for="financial_account_id"
+                    class="mb-1.5 block text-sm font-medium text-slate-700"
+                >
+                    Financial Account <span class="text-red-500">*</span>
+                </label>
+
+                @if($accounts->isNotEmpty())
+
+                    <select
+                        id="financial_account_id"
+                        name="financial_account_id"
+                        required
+                        class="w-full cursor-pointer rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    >
+                        <option value="">Select Financial Account</option>
+
+                        @foreach($accounts as $account)
+                            <option
+                                value="{{ $account->id }}"
+                                @selected(
+                                    (string) old(
+                                        'financial_account_id',
+                                        $defaultAccount?->id
+                                    ) === (string) $account->id
+                                )
+                            >
+                                {{ $account->name }}
+                                @if($account->is_default)
+                                    — Default
+                                @endif
+                            </option>
+                        @endforeach
+                    </select>
+
+                    <p class="mt-1.5 text-xs text-slate-500">
+                        Select the account where this income was received.
+                    </p>
+
+                @else
+
+                    <div class="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3">
+                        <p class="text-sm font-medium text-amber-800">
+                            No active financial account is available.
+                        </p>
+
+                        <p class="mt-1 text-sm text-amber-700">
+                            Please create or activate a financial account before recording income.
+                        </p>
+
+                        <a
+                            href="{{ route('church.settings.financial-accounts.create') }}"
+                            class="mt-3 inline-flex cursor-pointer items-center rounded-lg bg-amber-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-amber-700"
+                        >
+                            Create Financial Account
+                        </a>
+                    </div>
+
+                @endif
+
+                @error('financial_account_id')
+                    <p class="mt-1.5 text-sm text-red-600">
+                        {{ $message }}
+                    </p>
+                @enderror
+            </div>
+
             {{-- Payment Method / Reference --}}
             <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
 
@@ -295,6 +372,7 @@
                             {{ $member->first_name }}
                             {{ $member->middle_name ? $member->middle_name . ' ' : '' }}
                             {{ $member->last_name }}
+
                             @if($member->member_id)
                                 — {{ $member->member_id }}
                             @endif
@@ -349,7 +427,8 @@
 
                 <button
                     type="submit"
-                    class="inline-flex cursor-pointer items-center justify-center rounded-lg bg-purple-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
+                    @disabled($accounts->isEmpty())
+                    class="inline-flex cursor-pointer items-center justify-center rounded-lg bg-purple-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                     <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path

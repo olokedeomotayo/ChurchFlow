@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Church;
 
 use App\Http\Controllers\Controller;
 use App\Models\ChurchFinancialSetting;
+use App\Models\FinancialAccount;
 use App\Services\ActivityLogService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -30,15 +31,30 @@ class FinancialSettingController extends Controller
             ]
         );
 
+        $accounts = FinancialAccount::query()
+            ->where('church_id', $church->id)
+            ->orderByDesc('is_default')
+            ->orderBy('name')
+            ->get();
+
+        $totalBalance = $accounts->sum(
+            fn (FinancialAccount $account) => $account->current_balance
+        );
+
         return view('church.settings.financial', [
             'user' => $user,
             'church' => $church,
             'financialSetting' => $financialSetting,
+            'accounts' => $accounts,
+            'totalBalance' => $totalBalance,
         ]);
     }
 
     /**
      * Update church financial settings.
+     *
+     * The legacy ChurchFinancialSetting is retained for compatibility,
+     * while new account-based balances are managed through FinancialAccount.
      */
     public function update(
         Request $request,
@@ -70,11 +86,17 @@ class FinancialSettingController extends Controller
             ]
         );
 
+        /*
+         * If the church already has a Financial Account, the account-based
+         * structure is now the source of truth for current balances.
+         *
+         * We retain the legacy setting here for backwards compatibility.
+         */
         $activityLog->record(
             action: 'updated',
             subject: $financialSetting,
             description: sprintf(
-                'Financial settings updated. Opening balance: ₦%s, opening balance date: %s.',
+                'Legacy financial settings updated. Opening balance: ₦%s, opening balance date: %s.',
                 number_format(
                     (float) $financialSetting->opening_balance,
                     2
@@ -87,7 +109,7 @@ class FinancialSettingController extends Controller
             ->route('church.settings.financial.edit')
             ->with(
                 'success',
-                'Opening balance updated successfully.'
+                'Financial settings updated successfully.'
             );
     }
 }

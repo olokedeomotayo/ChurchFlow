@@ -15,7 +15,6 @@ use App\Http\Controllers\Church\ChurchDashboardController;
 use App\Http\Controllers\Church\PaymentController;
 use App\Http\Controllers\Church\MemberController;
 use App\Http\Controllers\Church\GroupController;
-use App\Http\Controllers\Church\CheckInController;
 use App\Http\Controllers\Church\ServiceController;
 use App\Http\Controllers\Church\AttendanceController;
 use App\Http\Controllers\Church\IncomeController;
@@ -23,6 +22,9 @@ use App\Http\Controllers\Church\ExpenseController;
 use App\Http\Controllers\Church\ReportController;
 use App\Http\Controllers\Church\FinancialSettingController;
 use App\Http\Controllers\Church\AuditLogController;
+use App\Http\Controllers\Church\RoleController;
+use App\Http\Controllers\Church\UserController;
+use App\Http\Controllers\Church\FinancialAccountController;
 
 
 /*
@@ -471,22 +473,6 @@ Route::middleware('auth')->group(function () {
             )->name('groups.destroy');
 
 
-            /*
-            |--------------------------------------------------------------------------
-            | Check-In
-            |--------------------------------------------------------------------------
-            */
-
-            Route::get(
-                '/check-in',
-                [CheckInController::class, 'index']
-            )->name('checkin.index');
-
-            Route::post(
-                '/check-in',
-                [CheckInController::class, 'store']
-            )->name('checkin.store');
-
 
             /*
             |--------------------------------------------------------------------------
@@ -511,6 +497,50 @@ Route::middleware('auth')->group(function () {
                 [AttendanceController::class, 'index']
             )->name('attendance.index');
 
+            Route::get(
+                '/attendance/create',
+                [AttendanceController::class, 'create']
+            )->name('attendance.create');
+
+            Route::post(
+                '/attendance',
+                [AttendanceController::class, 'store']
+            )->name('attendance.store');
+
+            Route::get(
+                '/attendance/{attendance}/edit',
+                [AttendanceController::class, 'edit']
+            )->name('attendance.edit');
+
+            Route::put(
+                '/attendance/{attendance}',
+                [AttendanceController::class, 'update']
+            )->name('attendance.update');
+
+            Route::delete(
+                '/attendance/{attendance}',
+                [AttendanceController::class, 'destroy']
+            )->name('attendance.destroy');
+
+            Route::get(
+            '/attendance/template',
+            [AttendanceController::class, 'downloadTemplate']
+        )->name('attendance.template');
+
+        Route::get(
+            '/attendance/import',
+            [AttendanceController::class, 'import']
+        )->name('attendance.import');
+
+        Route::post(
+            '/attendance/import',
+            [AttendanceController::class, 'importStore']
+        )->name('attendance.import.store');
+
+        Route::get(
+            '/attendance/export',
+            [AttendanceController::class, 'export']
+        )->name('attendance.export');
 
             /*
             |--------------------------------------------------------------------------
@@ -586,8 +616,72 @@ Route::middleware('auth')->group(function () {
             Route::put('/settings/financial', [FinancialSettingController::class, 'update'])
                 ->name('settings.financial.update');
 
+            Route::get('/settings/financial/accounts', [FinancialAccountController::class, 'index'])
+                ->name('settings.financial-accounts.index');
+
+            Route::get('/settings/financial/accounts/create', [FinancialAccountController::class, 'create'])
+                ->name('settings.financial-accounts.create');
+
+            Route::post('/settings/financial/accounts', [FinancialAccountController::class, 'store'])
+                ->name('settings.financial-accounts.store');
+
+            Route::get('/settings/financial/accounts/{financialAccount}/edit', [FinancialAccountController::class, 'edit'])
+                ->name('settings.financial-accounts.edit');
+
+            Route::put('/settings/financial/accounts/{financialAccount}', [FinancialAccountController::class, 'update'])
+                ->name('settings.financial-accounts.update');
+
+            Route::delete('/settings/financial/accounts/{financialAccount}', [FinancialAccountController::class, 'destroy'])
+                ->name('settings.financial-accounts.destroy');
+
+            Route::patch('/settings/financial/accounts/{financialAccount}/default', [FinancialAccountController::class, 'setDefault'])
+                ->name('settings.financial-accounts.default');
+
+            Route::patch('/settings/financial/accounts/{financialAccount}/activate', [FinancialAccountController::class, 'activate'])
+                ->name('settings.financial-accounts.activate');
+
+            Route::patch('/settings/financial/accounts/{financialAccount}/deactivate', [FinancialAccountController::class, 'deactivate'])
+                ->name('settings.financial-accounts.deactivate');
+
             Route::get('/audit-logs', [AuditLogController::class, 'index'])
                 ->name('audit-logs.index');
+
+
+        Route::get('/roles', [RoleController::class, 'index'])
+            ->name('roles.index');
+
+        Route::get('/roles/create', [RoleController::class, 'create'])
+            ->name('roles.create');
+
+        Route::post('/roles', [RoleController::class, 'store'])
+            ->name('roles.store');
+
+        Route::get('/roles/{role}/edit', [RoleController::class, 'edit'])
+            ->name('roles.edit');
+
+        Route::put('/roles/{role}', [RoleController::class, 'update'])
+            ->name('roles.update');
+
+        Route::delete('/roles/{role}', [RoleController::class, 'destroy'])
+            ->name('roles.destroy');
+
+        Route::get('/users', [UserController::class, 'index'])
+            ->name('users.index');
+
+        Route::get('/users/create', [UserController::class, 'create'])
+            ->name('users.create');
+
+        Route::post('/users', [UserController::class, 'store'])
+            ->name('users.store');
+
+        Route::get('/users/{churchUser}/edit', [UserController::class, 'edit'])
+            ->name('users.edit');
+
+        Route::put('/users/{churchUser}', [UserController::class, 'update'])
+            ->name('users.update');
+
+        Route::delete('/users/{churchUser}', [UserController::class, 'destroy'])
+            ->name('users.destroy');
 
         });
 

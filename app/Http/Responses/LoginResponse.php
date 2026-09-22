@@ -15,22 +15,26 @@ class LoginResponse implements LoginResponseContract
 
         /*
         |--------------------------------------------------------------------------
-        | Church Users
-        |--------------------------------------------------------------------------
-        */
-
-        if ($user->hasRole('church_owner')) {
-            return redirect()->route('church.dashboard');
-        }
-
-        /*
-        |--------------------------------------------------------------------------
         | Platform Administrators
         |--------------------------------------------------------------------------
         */
 
         if ($user->hasRole('platform_admin')) {
             return redirect()->route('dashboard');
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Church Users
+        |--------------------------------------------------------------------------
+        |
+        | Any authenticated user belonging to a church is a church user.
+        | Their specific role controls what they are allowed to access.
+        |
+        */
+
+        if ($user->church_id !== null) {
+            return redirect()->route('church.dashboard');
         }
 
         /*

@@ -34,16 +34,6 @@ class Church extends Model
         return $this->hasMany(Subscription::class);
     }
 
-    protected function casts(): array
-    {
-        return [
-            'trial_started_at' => 'datetime',
-            'trial_ends_at' => 'datetime',
-            'created_at' => 'datetime',
-            'updated_at' => 'datetime',
-        ];
-    }
-
     /**
      * Payments made by this church.
      */
@@ -60,33 +50,69 @@ class Church extends Model
         return $this->hasMany(Member::class);
     }
 
+    /**
+     * Groups belonging to this church.
+     */
     public function groups(): HasMany
     {
         return $this->hasMany(Group::class);
     }
 
+    /**
+     * Services belonging to this church.
+     */
     public function services(): HasMany
     {
         return $this->hasMany(Service::class);
     }
 
+    /**
+     * Attendance records belonging to this church.
+     */
     public function attendance(): HasMany
     {
         return $this->hasMany(Attendance::class);
     }
 
+    /**
+     * Income records belonging to this church.
+     */
     public function incomes(): HasMany
     {
         return $this->hasMany(Income::class);
     }
 
-    public function expenses()
+    /**
+     * Expense records belonging to this church.
+     */
+    public function expenses(): HasMany
     {
         return $this->hasMany(Expense::class);
     }
 
+    /**
+     * Financial accounts belonging to this church.
+     */
+    public function financialAccounts(): HasMany
+    {
+        return $this->hasMany(FinancialAccount::class);
+    }
+
+    /**
+     * Legacy church-wide financial setting.
+     */
     public function financialSetting(): HasOne
     {
         return $this->hasOne(ChurchFinancialSetting::class);
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'trial_started_at' => 'datetime',
+            'trial_ends_at' => 'datetime',
+            'created_at' => 'datetime',
+            'updated_at' => 'datetime',
+        ];
     }
 }

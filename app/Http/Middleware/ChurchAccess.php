@@ -25,11 +25,8 @@ class ChurchAccess
             abort(403, 'You do not belong to a church.');
         }
 
-        // User must have a church-level role.
-        if (!$user->hasRole('church_owner')) {
-            abort(403, 'You do not have permission to access the church area.');
-        }
-
+        // Any authenticated church user may access the church area.
+        // Specific permissions are enforced by individual modules.
         return $next($request);
     }
 }

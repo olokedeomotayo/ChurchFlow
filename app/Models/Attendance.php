@@ -9,10 +9,13 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 #[Fillable([
     'church_id',
     'service_id',
-    'member_id',
-    'checked_in_at',
-    'checked_out_at',
-    'status',
+    'attendance_date',
+    'men',
+    'women',
+    'teenagers',
+    'children',
+    'guests',
+    'notes',
 ])]
 class Attendance extends Model
 {
@@ -28,16 +31,27 @@ class Attendance extends Model
         return $this->belongsTo(Service::class);
     }
 
-    public function member(): BelongsTo
+    /**
+     * Get the total attendance.
+     */
+    public function getTotalAttribute(): int
     {
-        return $this->belongsTo(Member::class);
+        return (int) $this->men
+            + (int) $this->women
+            + (int) $this->teenagers
+            + (int) $this->children
+            + (int) $this->guests;
     }
 
     protected function casts(): array
     {
         return [
-            'checked_in_at' => 'datetime',
-            'checked_out_at' => 'datetime',
+            'attendance_date' => 'date',
+            'men' => 'integer',
+            'women' => 'integer',
+            'teenagers' => 'integer',
+            'children' => 'integer',
+            'guests' => 'integer',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];

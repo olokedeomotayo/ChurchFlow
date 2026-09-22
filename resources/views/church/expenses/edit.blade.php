@@ -26,7 +26,6 @@
     {{-- Validation Errors --}}
     @if($errors->any())
         <div class="rounded-xl border border-red-200 bg-red-50 p-4">
-
             <p class="mb-2 text-sm font-semibold text-red-800">
                 Please correct the following errors:
             </p>
@@ -36,7 +35,6 @@
                     <li>{{ $error }}</li>
                 @endforeach
             </ul>
-
         </div>
     @endif
 
@@ -56,7 +54,6 @@
 
             {{-- Expense Information --}}
             <div>
-
                 <h2 class="text-base font-semibold text-slate-900">
                     Expense Information
                 </h2>
@@ -64,20 +61,77 @@
                 <p class="mt-1 text-sm text-slate-500">
                     Update the information below.
                 </p>
-
             </div>
 
 
             <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
 
+                {{-- Financial Account --}}
+                <div class="md:col-span-2">
+
+                    <label
+                        for="financial_account_id"
+                        class="mb-1.5 block text-sm font-semibold text-slate-700"
+                    >
+                        Financial Account
+                        <span class="text-red-500">*</span>
+                    </label>
+
+                    <select
+                        id="financial_account_id"
+                        name="financial_account_id"
+                        required
+                        class="w-full rounded-lg border-slate-300 text-sm shadow-sm focus:border-purple-500 focus:ring-purple-500"
+                    >
+                        <option value="">
+                            Select financial account
+                        </option>
+
+                        @foreach($accounts as $account)
+                            <option
+                                value="{{ $account->id }}"
+                                @selected(
+                                    (string) old(
+                                        'financial_account_id',
+                                        $expense->financial_account_id
+                                    ) === (string) $account->id
+                                )
+                            >
+                                {{ $account->name }}
+
+                                @if($account->is_default)
+                                    — Default
+                                @endif
+
+                                @if(!$account->is_active)
+                                    — Inactive
+                                @endif
+                            </option>
+                        @endforeach
+                    </select>
+
+                    <p class="mt-1.5 text-xs text-slate-500">
+                        Select the financial account from which this expense
+                        was paid.
+                    </p>
+
+                    @error('financial_account_id')
+                        <p class="mt-1 text-xs text-red-600">
+                            {{ $message }}
+                        </p>
+                    @enderror
+
+                </div>
+
+
                 {{-- Category --}}
                 <div>
-
                     <label
                         for="category"
                         class="mb-1.5 block text-sm font-semibold text-slate-700"
                     >
-                        Category <span class="text-red-500">*</span>
+                        Category
+                        <span class="text-red-500">*</span>
                     </label>
 
                     <input
@@ -95,22 +149,20 @@
                             {{ $message }}
                         </p>
                     @enderror
-
                 </div>
 
 
                 {{-- Amount --}}
                 <div>
-
                     <label
                         for="amount"
                         class="mb-1.5 block text-sm font-semibold text-slate-700"
                     >
-                        Amount <span class="text-red-500">*</span>
+                        Amount
+                        <span class="text-red-500">*</span>
                     </label>
 
                     <div class="relative">
-
                         <span class="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-medium text-slate-500">
                             ₦
                         </span>
@@ -125,7 +177,6 @@
                             step="0.01"
                             class="w-full rounded-lg border-slate-300 pl-8 text-sm shadow-sm focus:border-purple-500 focus:ring-purple-500"
                         >
-
                     </div>
 
                     @error('amount')
@@ -133,18 +184,17 @@
                             {{ $message }}
                         </p>
                     @enderror
-
                 </div>
 
 
                 {{-- Expense Date --}}
                 <div>
-
                     <label
                         for="expense_date"
                         class="mb-1.5 block text-sm font-semibold text-slate-700"
                     >
-                        Expense Date <span class="text-red-500">*</span>
+                        Expense Date
+                        <span class="text-red-500">*</span>
                     </label>
 
                     <input
@@ -161,13 +211,11 @@
                             {{ $message }}
                         </p>
                     @enderror
-
                 </div>
 
 
                 {{-- Payment Method --}}
                 <div>
-
                     <label
                         for="payment_method"
                         class="mb-1.5 block text-sm font-semibold text-slate-700"
@@ -180,46 +228,69 @@
                         name="payment_method"
                         class="w-full rounded-lg border-slate-300 text-sm shadow-sm focus:border-purple-500 focus:ring-purple-500"
                     >
-
                         <option value="">
                             Select payment method
                         </option>
 
                         <option
                             value="cash"
-                            @selected(old('payment_method', $expense->payment_method) === 'cash')
+                            @selected(
+                                old(
+                                    'payment_method',
+                                    $expense->payment_method
+                                ) === 'cash'
+                            )
                         >
                             Cash
                         </option>
 
                         <option
                             value="bank transfer"
-                            @selected(old('payment_method', $expense->payment_method) === 'bank transfer')
+                            @selected(
+                                old(
+                                    'payment_method',
+                                    $expense->payment_method
+                                ) === 'bank transfer'
+                            )
                         >
                             Bank Transfer
                         </option>
 
                         <option
                             value="card"
-                            @selected(old('payment_method', $expense->payment_method) === 'card')
+                            @selected(
+                                old(
+                                    'payment_method',
+                                    $expense->payment_method
+                                ) === 'card'
+                            )
                         >
                             Card
                         </option>
 
                         <option
                             value="cheque"
-                            @selected(old('payment_method', $expense->payment_method) === 'cheque')
+                            @selected(
+                                old(
+                                    'payment_method',
+                                    $expense->payment_method
+                                ) === 'cheque'
+                            )
                         >
                             Cheque
                         </option>
 
                         <option
                             value="other"
-                            @selected(old('payment_method', $expense->payment_method) === 'other')
+                            @selected(
+                                old(
+                                    'payment_method',
+                                    $expense->payment_method
+                                ) === 'other'
+                            )
                         >
                             Other
                         </option>
-
                     </select>
 
                     @error('payment_method')
@@ -227,13 +298,11 @@
                             {{ $message }}
                         </p>
                     @enderror
-
                 </div>
 
 
                 {{-- Vendor --}}
                 <div>
-
                     <label
                         for="vendor"
                         class="mb-1.5 block text-sm font-semibold text-slate-700"
@@ -255,13 +324,11 @@
                             {{ $message }}
                         </p>
                     @enderror
-
                 </div>
 
 
                 {{-- Reference --}}
                 <div>
-
                     <label
                         for="reference"
                         class="mb-1.5 block text-sm font-semibold text-slate-700"
@@ -283,7 +350,6 @@
                             {{ $message }}
                         </p>
                     @enderror
-
                 </div>
 
 
@@ -302,13 +368,11 @@
                         name="member_id"
                         class="w-full rounded-lg border-slate-300 text-sm shadow-sm focus:border-purple-500 focus:ring-purple-500"
                     >
-
                         <option value="">
                             None / Not associated with a member
                         </option>
 
                         @foreach($members as $member)
-
                             <option
                                 value="{{ $member->id }}"
                                 @selected(
@@ -324,11 +388,8 @@
                                 @if($member->member_id)
                                     — {{ $member->member_id }}
                                 @endif
-
                             </option>
-
                         @endforeach
-
                     </select>
 
                     @error('member_id')
@@ -424,7 +485,6 @@
         <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 
             <div>
-
                 <h2 class="text-sm font-semibold text-red-800">
                     Delete Expense
                 </h2>
@@ -432,7 +492,6 @@
                 <p class="mt-1 text-sm text-red-600">
                     This action cannot be undone.
                 </p>
-
             </div>
 
             <form
@@ -440,7 +499,6 @@
                 action="{{ route('church.expenses.destroy', $expense) }}"
                 onsubmit="return confirm('Are you sure you want to permanently delete this expense?');"
             >
-
                 @csrf
                 @method('DELETE')
 
@@ -450,7 +508,6 @@
                 >
                     Delete Expense
                 </button>
-
             </form>
 
         </div>

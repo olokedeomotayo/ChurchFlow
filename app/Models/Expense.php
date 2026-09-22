@@ -17,6 +17,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'vendor',
     'notes',
     'member_id',
+    'financial_account_id',
 ])]
 class Expense extends Model
 {
@@ -34,6 +35,14 @@ class Expense extends Model
     public function member(): BelongsTo
     {
         return $this->belongsTo(Member::class);
+    }
+
+    /**
+     * The financial account this expense was paid from.
+     */
+    public function financialAccount(): BelongsTo
+    {
+        return $this->belongsTo(FinancialAccount::class);
     }
 
     /**

@@ -39,6 +39,48 @@
     @endif
 
 
+    {{-- No Financial Account Warning --}}
+    @if($accounts->isEmpty())
+        <div class="rounded-xl border border-amber-200 bg-amber-50 p-5">
+            <div class="flex gap-3">
+                <div class="mt-0.5 text-amber-600">
+                    <svg
+                        class="h-5 w-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M12 9v2m0 4h.01M10.29 3.86l-7.82 13a2 2 0 001.71 3h15.64a2 2 0 001.71-3l-7.82-13a2 2 0 00-3.42 0z"
+                        />
+                    </svg>
+                </div>
+
+                <div>
+                    <h3 class="text-sm font-semibold text-amber-800">
+                        No active financial account
+                    </h3>
+
+                    <p class="mt-1 text-sm text-amber-700">
+                        You need at least one active financial account before
+                        recording an expense.
+                    </p>
+
+                    <a
+                        href="{{ route('church.settings.financial-accounts.create') }}"
+                        class="mt-3 inline-flex cursor-pointer items-center gap-2 rounded-lg bg-amber-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-amber-700"
+                    >
+                        Create Financial Account
+                    </a>
+                </div>
+            </div>
+        </div>
+    @endif
+
+
     {{-- Form --}}
     <div class="rounded-xl border border-slate-200 bg-white shadow-sm">
 
@@ -50,7 +92,8 @@
 
             @csrf
 
-            {{-- Basic Information --}}
+
+            {{-- Expense Information --}}
             <div>
                 <h2 class="text-base font-semibold text-slate-900">
                     Expense Information
@@ -64,13 +107,68 @@
 
             <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
 
+                {{-- Financial Account --}}
+                <div class="md:col-span-2">
+
+                    <label
+                        for="financial_account_id"
+                        class="mb-1.5 block text-sm font-semibold text-slate-700"
+                    >
+                        Financial Account
+                        <span class="text-red-500">*</span>
+                    </label>
+
+                    <select
+                        id="financial_account_id"
+                        name="financial_account_id"
+                        required
+                        @disabled($accounts->isEmpty())
+                        class="w-full rounded-lg border-slate-300 text-sm shadow-sm focus:border-purple-500 focus:ring-purple-500 disabled:cursor-not-allowed disabled:bg-slate-100"
+                    >
+                        <option value="">
+                            Select financial account
+                        </option>
+
+                        @foreach($accounts as $account)
+                            <option
+                                value="{{ $account->id }}"
+                                @selected(
+                                    (string) old(
+                                        'financial_account_id',
+                                        $defaultAccount?->id
+                                    ) === (string) $account->id
+                                )
+                            >
+                                {{ $account->name }}
+
+                                @if($account->is_default)
+                                    — Default
+                                @endif
+                            </option>
+                        @endforeach
+                    </select>
+
+                    <p class="mt-1.5 text-xs text-slate-500">
+                        Select the account from which this expense was paid.
+                    </p>
+
+                    @error('financial_account_id')
+                        <p class="mt-1 text-xs text-red-600">
+                            {{ $message }}
+                        </p>
+                    @enderror
+
+                </div>
+
+
                 {{-- Category --}}
                 <div>
                     <label
                         for="category"
                         class="mb-1.5 block text-sm font-semibold text-slate-700"
                     >
-                        Category <span class="text-red-500">*</span>
+                        Category
+                        <span class="text-red-500">*</span>
                     </label>
 
                     <input
@@ -98,7 +196,8 @@
                         for="amount"
                         class="mb-1.5 block text-sm font-semibold text-slate-700"
                     >
-                        Amount <span class="text-red-500">*</span>
+                        Amount
+                        <span class="text-red-500">*</span>
                     </label>
 
                     <div class="relative">
@@ -133,7 +232,8 @@
                         for="expense_date"
                         class="mb-1.5 block text-sm font-semibold text-slate-700"
                     >
-                        Expense Date <span class="text-red-500">*</span>
+                        Expense Date
+                        <span class="text-red-500">*</span>
                     </label>
 
                     <input
@@ -167,7 +267,9 @@
                         name="payment_method"
                         class="w-full rounded-lg border-slate-300 text-sm shadow-sm focus:border-purple-500 focus:ring-purple-500"
                     >
-                        <option value="">Select payment method</option>
+                        <option value="">
+                            Select payment method
+                        </option>
 
                         <option
                             value="cash"
@@ -289,10 +391,14 @@
                         @foreach($members as $member)
                             <option
                                 value="{{ $member->id }}"
-                                @selected((string) old('member_id') === (string) $member->id)
+                                @selected(
+                                    (string) old('member_id') ===
+                                    (string) $member->id
+                                )
                             >
                                 {{ $member->first_name }}
                                 {{ $member->last_name }}
+
                                 @if($member->member_id)
                                     — {{ $member->member_id }}
                                 @endif
@@ -377,7 +483,8 @@
 
                 <button
                     type="submit"
-                    class="inline-flex cursor-pointer items-center justify-center rounded-lg bg-purple-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-purple-700"
+                    @disabled($accounts->isEmpty())
+                    class="inline-flex cursor-pointer items-center justify-center rounded-lg bg-purple-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-purple-700 disabled:cursor-not-allowed disabled:bg-slate-300"
                 >
                     Record Expense
                 </button>

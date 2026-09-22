@@ -169,23 +169,7 @@
             </div>
 
 
-            {{-- Today's Check-In --}}
-            <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-
-                <p class="text-xs font-medium uppercase tracking-wide text-slate-400">
-                    Today's Check-In
-                </p>
-
-                <p class="mt-2 text-2xl font-bold text-slate-900">
-                    {{ number_format($todayCheckIns) }}
-                </p>
-
-                <p class="mt-1 text-xs text-slate-500">
-                    People checked in today
-                </p>
-
-            </div>
-
+           
 
             {{-- Income This Month --}}
             <div class="rounded-xl border border-green-200 bg-green-50 p-5 shadow-sm">
@@ -633,18 +617,6 @@
                     </a>
 
 
-                    <a
-                        href="{{ route('church.checkin.index') }}"
-                        class="cursor-pointer rounded-lg border border-slate-200 p-4 transition hover:border-purple-300 hover:bg-purple-50"
-                    >
-                        <p class="text-sm font-semibold text-slate-900">
-                            Check-In
-                        </p>
-
-                        <p class="mt-1 text-xs text-slate-500">
-                            Record attendance
-                        </p>
-                    </a>
 
 
                     <a

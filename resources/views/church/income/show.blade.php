@@ -98,6 +98,45 @@
                     </p>
                 </div>
 
+                {{-- Financial Account --}}
+                <div>
+                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                        Financial Account
+                    </p>
+
+                    @if($income->financialAccount)
+                        <div class="mt-1 flex flex-wrap items-center gap-2">
+                            <p class="text-sm font-medium text-slate-900">
+                                {{ $income->financialAccount->name }}
+                            </p>
+
+                            @if($income->financialAccount->is_default)
+                                <span class="inline-flex rounded-full bg-purple-100 px-2 py-0.5 text-xs font-semibold text-purple-700">
+                                    Default
+                                </span>
+                            @endif
+
+                            @if(!$income->financialAccount->is_active)
+                                <span class="inline-flex rounded-full bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-600">
+                                    Inactive
+                                </span>
+                            @endif
+                        </div>
+
+                        <p class="mt-0.5 text-xs text-slate-500">
+                            {{ ucwords(str_replace('_', ' ', $income->financialAccount->type)) }}
+
+                            @if($income->financialAccount->provider_name)
+                                · {{ $income->financialAccount->provider_name }}
+                            @endif
+                        </p>
+                    @else
+                        <p class="mt-1 text-sm text-amber-600">
+                            No financial account assigned
+                        </p>
+                    @endif
+                </div>
+
                 {{-- Payment Method --}}
                 <div>
                     <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">
@@ -222,7 +261,7 @@
                             stroke-linecap="round"
                             stroke-linejoin="round"
                             stroke-width="2"
-                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3m-4 0h14"
+                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 01-1-1h-4a1 1 0 01-1 1v3m-4 0h14"
                         />
                     </svg>
 

@@ -24,7 +24,7 @@
             </p>
         </div>
 
-        <div class="flex gap-2">
+        <div class="flex flex-wrap gap-2">
 
             <a
                 href="{{ route('church.expenses.edit', $expense) }}"
@@ -79,11 +79,25 @@
                 {{ $expense->category }}
             </span>
 
-            <span class="text-purple-300">•</span>
+            <span class="text-purple-300">
+                •
+            </span>
 
             <span>
                 {{ $expense->expense_date?->format('d M Y') }}
             </span>
+
+            @if($expense->financialAccount)
+
+                <span class="text-purple-300">
+                    •
+                </span>
+
+                <span>
+                    {{ $expense->financialAccount->name }}
+                </span>
+
+            @endif
 
         </div>
 
@@ -100,6 +114,78 @@
         </div>
 
         <div class="grid grid-cols-1 gap-x-8 gap-y-6 p-6 md:grid-cols-2">
+
+            {{-- Financial Account --}}
+            <div class="md:col-span-2">
+
+                <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                    Financial Account
+                </p>
+
+                @if($expense->financialAccount)
+
+                    <div class="mt-2 flex flex-wrap items-center gap-2">
+
+                        <p class="text-sm font-semibold text-slate-900">
+                            {{ $expense->financialAccount->name }}
+                        </p>
+
+                        @if($expense->financialAccount->is_default)
+                            <span class="inline-flex rounded-full bg-blue-100 px-2.5 py-1 text-xs font-semibold text-blue-700">
+                                Default
+                            </span>
+                        @endif
+
+                        @if($expense->financialAccount->is_active)
+                            <span class="inline-flex rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-semibold text-emerald-700">
+                                Active
+                            </span>
+                        @else
+                            <span class="inline-flex rounded-full bg-slate-200 px-2.5 py-1 text-xs font-semibold text-slate-600">
+                                Inactive
+                            </span>
+                        @endif
+
+                    </div>
+
+                    <div class="mt-2 flex flex-wrap gap-x-6 gap-y-1 text-xs text-slate-500">
+
+                        <span class="capitalize">
+                            Type:
+                            {{ str_replace('_', ' ', $expense->financialAccount->type) }}
+                        </span>
+
+                        @if($expense->financialAccount->provider_name)
+                            <span>
+                                Provider:
+                                {{ $expense->financialAccount->provider_name }}
+                            </span>
+                        @endif
+
+                        @if($expense->financialAccount->account_number)
+                            <span>
+                                Account:
+                                {{ $expense->financialAccount->account_number }}
+                            </span>
+                        @endif
+
+                    </div>
+
+                @else
+
+                    <p class="mt-1 text-sm font-medium text-amber-600">
+                        Unassigned
+                    </p>
+
+                    <p class="mt-1 text-xs text-slate-500">
+                        This expense was created before financial account
+                        tracking was introduced.
+                    </p>
+
+                @endif
+
+            </div>
+
 
             {{-- Category --}}
             <div>
@@ -187,6 +273,7 @@
                     </p>
 
                 @endif
+
             </div>
 
 

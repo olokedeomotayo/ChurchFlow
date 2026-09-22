@@ -74,7 +74,7 @@ class ChurchDashboardController extends Controller
         */
 
         $totalMembers = 0;
-        $todayCheckIns = 0;
+   
 
         /*
         |--------------------------------------------------------------------------
@@ -126,10 +126,7 @@ class ChurchDashboardController extends Controller
             |--------------------------------------------------------------------------
             */
 
-            $todayCheckIns = Attendance::query()
-                ->where('church_id', $church->id)
-                ->whereDate('checked_in_at', today())
-                ->count();
+           
 
             /*
             |--------------------------------------------------------------------------
@@ -248,7 +245,7 @@ class ChurchDashboardController extends Controller
             'trialSubscription' => $trialSubscription,
 
             'totalMembers' => $totalMembers,
-            'todayCheckIns' => $todayCheckIns,
+            
 
             /*
             | Financial Position

@@ -78,7 +78,7 @@
                             stroke-linecap="round"
                             stroke-linejoin="round"
                             stroke-width="2"
-                            d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                            d="M7 16a4 4 0 01-.88-7.903A5 5 0 0115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
                         />
                     </svg>
 
@@ -149,13 +149,118 @@
 
                         <p class="mt-3 text-sm text-blue-800">
                             Optional columns include:
-                            Member ID, Source, Payment Method, Reference and Description.
                         </p>
+
+                        <ul class="mt-2 list-disc space-y-1 pl-5 text-sm text-blue-800">
+                            <li><strong>Financial Account</strong></li>
+                            <li><strong>Member ID</strong></li>
+                            <li><strong>Source</strong></li>
+                            <li><strong>Payment Method</strong></li>
+                            <li><strong>Reference</strong></li>
+                            <li><strong>Description</strong></li>
+                        </ul>
+
+                        <div class="mt-4 rounded-lg border border-blue-200 bg-white/60 p-3">
+                            <p class="text-xs leading-5 text-blue-800">
+                                <strong>Financial Account:</strong>
+                                Enter the exact name of the financial account
+                                where the income was received.
+                            </p>
+
+                            <p class="mt-2 text-xs leading-5 text-blue-800">
+                                If the Financial Account column is left blank,
+                                the income will be assigned to the church's
+                                default active financial account.
+                            </p>
+                        </div>
                     </div>
 
                 </div>
 
             </div>
+
+            {{-- Active Account Information --}}
+            @if(isset($accounts))
+
+                @if($accounts->isNotEmpty())
+
+                    <div class="rounded-lg border border-slate-200 bg-slate-50 p-5">
+
+                        <h3 class="text-sm font-semibold text-slate-900">
+                            Available Financial Accounts
+                        </h3>
+
+                        <p class="mt-1 text-sm text-slate-500">
+                            Use these exact account names in your CSV file.
+                        </p>
+
+                        <div class="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2">
+
+                            @foreach($accounts as $account)
+                                <div class="flex items-center justify-between rounded-lg border border-slate-200 bg-white px-3 py-2.5">
+
+                                    <span class="text-sm font-medium text-slate-700">
+                                        {{ $account->name }}
+                                    </span>
+
+                                    @if($account->is_default)
+                                        <span class="ml-2 inline-flex shrink-0 rounded-full bg-purple-100 px-2 py-0.5 text-xs font-semibold text-purple-700">
+                                            Default
+                                        </span>
+                                    @endif
+
+                                </div>
+                            @endforeach
+
+                        </div>
+
+                    </div>
+
+                @else
+
+                    <div class="rounded-lg border border-amber-200 bg-amber-50 p-5">
+
+                        <div class="flex items-start gap-3">
+
+                            <svg
+                                class="mt-0.5 h-5 w-5 shrink-0 text-amber-600"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M12 9v2m0 4h.01M12 20a8 8 0 100-16 8 8 0 000 16z"
+                                />
+                            </svg>
+
+                            <div>
+                                <h3 class="text-sm font-semibold text-amber-900">
+                                    No Active Financial Account
+                                </h3>
+
+                                <p class="mt-1 text-sm leading-6 text-amber-800">
+                                    You need at least one active financial account
+                                    before importing income records.
+                                </p>
+
+                                <a
+                                    href="{{ route('church.settings.financial-accounts.create') }}"
+                                    class="mt-3 inline-flex cursor-pointer items-center rounded-lg bg-amber-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-amber-700"
+                                >
+                                    Create Financial Account
+                                </a>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                @endif
+
+            @endif
 
             {{-- Template --}}
             <div class="rounded-lg border border-purple-200 bg-purple-50 p-5">
@@ -209,7 +314,8 @@
 
                 <button
                     type="submit"
-                    class="inline-flex cursor-pointer items-center justify-center rounded-lg bg-purple-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
+                    @disabled(isset($accounts) && $accounts->isEmpty())
+                    class="inline-flex cursor-pointer items-center justify-center rounded-lg bg-purple-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                     <svg
                         class="mr-2 h-5 w-5"

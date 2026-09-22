@@ -42,6 +42,13 @@
             font-size: 10px;
         }
 
+        .account {
+            margin-top: 5px;
+            color: #7e22ce;
+            font-size: 10px;
+            font-weight: bold;
+        }
+
         .section-title {
             font-size: 13px;
             font-weight: bold;
@@ -179,6 +186,38 @@
 
         /*
         |--------------------------------------------------------------------------
+        | Account Information
+        |--------------------------------------------------------------------------
+        */
+
+        .account-box {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        .account-box td {
+            padding: 8px 10px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .account-label {
+            width: 25%;
+            background: #f8fafc;
+            color: #64748b;
+            font-size: 8px;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+
+        .account-value {
+            color: #334155;
+            font-size: 9px;
+            font-weight: bold;
+        }
+
+        /*
+        |--------------------------------------------------------------------------
         | Footer
         |--------------------------------------------------------------------------
         */
@@ -218,7 +257,89 @@
             Reporting Period: {{ $reportLabel }}
         </div>
 
+        <div class="account">
+            Financial Account:
+            {{ $selectedAccount?->name ?? 'All Accounts' }}
+        </div>
+
     </div>
+
+
+    {{-- ============================================================= --}}
+    {{-- SELECTED ACCOUNT --}}
+    {{-- ============================================================= --}}
+
+    @if ($selectedAccount)
+
+        <div class="section-title">
+            Financial Account
+        </div>
+
+        <table class="account-box">
+
+            <tr>
+
+                <td class="account-label">
+                    Account Name
+                </td>
+
+                <td class="account-value">
+                    {{ $selectedAccount->name }}
+                </td>
+
+                <td class="account-label">
+                    Account Type
+                </td>
+
+                <td class="account-value">
+                    {{ ucfirst(str_replace('_', ' ', $selectedAccount->type)) }}
+                </td>
+
+            </tr>
+
+            <tr>
+
+                <td class="account-label">
+                    Provider
+                </td>
+
+                <td class="account-value">
+                    {{ $selectedAccount->provider_name ?: '-' }}
+                </td>
+
+                <td class="account-label">
+                    Account Number
+                </td>
+
+                <td class="account-value">
+                    {{ $selectedAccount->account_number ?: '-' }}
+                </td>
+
+            </tr>
+
+            <tr>
+
+                <td class="account-label">
+                    Opening Balance
+                </td>
+
+                <td class="account-value">
+                    ₦{{ number_format((float) $selectedAccount->opening_balance, 2) }}
+                </td>
+
+                <td class="account-label">
+                    Opening Date
+                </td>
+
+                <td class="account-value">
+                    {{ $selectedAccount->opening_balance_date?->format('d M Y') ?? '-' }}
+                </td>
+
+            </tr>
+
+        </table>
+
+    @endif
 
 
     {{-- ============================================================= --}}
@@ -324,6 +445,7 @@
         <tr>
 
             <td>
+
                 <div class="net-label">
                     Balance Calculation
                 </div>
@@ -331,6 +453,7 @@
                 <div style="margin-top: 4px; font-size: 9px; color: #64748b;">
                     Opening Balance + Income During Period − Expenses During Period
                 </div>
+
             </td>
 
             <td class="net-value {{ $closingBalance >= 0 ? 'positive' : 'negative' }}">
@@ -364,6 +487,7 @@
         <tr>
 
             <td>
+
                 <div class="net-label">
                     Net Movement
                 </div>
@@ -371,6 +495,7 @@
                 <div style="margin-top: 4px; font-size: 9px; color: #64748b;">
                     Total income less total expenses for the selected period
                 </div>
+
             </td>
 
             <td
@@ -563,6 +688,14 @@
                     Date
                 </th>
 
+                @if (! $selectedAccount)
+
+                    <th>
+                        Financial Account
+                    </th>
+
+                @endif
+
                 <th>
                     Category
                 </th>
@@ -597,6 +730,14 @@
                         {{ $income->income_date?->format('d M Y') }}
                     </td>
 
+                    @if (! $selectedAccount)
+
+                        <td>
+                            {{ $income->financialAccount?->name ?? 'Unassigned' }}
+                        </td>
+
+                    @endif
+
                     <td>
                         {{ $income->category }}
                     </td>
@@ -623,7 +764,7 @@
 
                 <tr>
 
-                    <td colspan="6">
+                    <td colspan="{{ $selectedAccount ? 6 : 7 }}">
                         No income transactions found.
                     </td>
 
@@ -637,7 +778,10 @@
 
             <tr class="total-row">
 
-                <td colspan="5" style="text-align: right;">
+                <td
+                    colspan="{{ $selectedAccount ? 5 : 6 }}"
+                    style="text-align: right;"
+                >
                     Total Income
                 </td>
 
@@ -669,6 +813,14 @@
                 <th>
                     Date
                 </th>
+
+                @if (! $selectedAccount)
+
+                    <th>
+                        Financial Account
+                    </th>
+
+                @endif
 
                 <th>
                     Category
@@ -704,6 +856,14 @@
                         {{ $expense->expense_date?->format('d M Y') }}
                     </td>
 
+                    @if (! $selectedAccount)
+
+                        <td>
+                            {{ $expense->financialAccount?->name ?? 'Unassigned' }}
+                        </td>
+
+                    @endif
+
                     <td>
                         {{ $expense->category }}
                     </td>
@@ -730,7 +890,7 @@
 
                 <tr>
 
-                    <td colspan="6">
+                    <td colspan="{{ $selectedAccount ? 6 : 7 }}">
                         No expense transactions found.
                     </td>
 
@@ -744,7 +904,10 @@
 
             <tr class="total-row">
 
-                <td colspan="5" style="text-align: right;">
+                <td
+                    colspan="{{ $selectedAccount ? 5 : 6 }}"
+                    style="text-align: right;"
+                >
                     Total Expenses
                 </td>
 

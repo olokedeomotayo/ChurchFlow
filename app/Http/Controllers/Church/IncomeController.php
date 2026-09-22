@@ -3,13 +3,16 @@
 namespace App\Http\Controllers\Church;
 
 use App\Http\Controllers\Controller;
+use App\Models\FinancialAccount;
 use App\Models\Income;
 use App\Services\ActivityLogService;
+use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Response as ResponseFacade;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class IncomeController extends Controller
 {
@@ -20,12 +23,54 @@ class IncomeController extends Controller
     {
         $church = $request->user()->church;
 
-        if (! $church) {
-            abort(403, 'Your account is not associated with a church.');
+        abort_unless(
+            $church,
+            403,
+            'Your account is not associated with a church.'
+        );
+
+        /*
+         * Financial Account Selection
+         *
+         * null = All Accounts
+         * value = selected financial account
+         */
+        $selectedAccountId = $request->filled('financial_account_id')
+            ? (int) $request->financial_account_id
+            : null;
+
+        $selectedAccount = null;
+
+        if ($selectedAccountId) {
+            $selectedAccount = $church->financialAccounts()
+                ->whereKey($selectedAccountId)
+                ->first();
+
+            abort_unless(
+                $selectedAccount,
+                404,
+                'The selected financial account was not found.'
+            );
         }
 
-        $incomes = $church->incomes()
-            ->with('member')
+        /*
+         * Base income query.
+         *
+         * All filters, including the selected financial account,
+         * are applied to this query.
+         */
+        $incomeQuery = $church->incomes()
+            ->with([
+                'member',
+                'financialAccount',
+            ])
+            ->when(
+                $selectedAccountId,
+                fn ($query) => $query->where(
+                    'financial_account_id',
+                    $selectedAccountId
+                )
+            )
             ->when(
                 $request->filled('category'),
                 fn ($query) => $query->where(
@@ -55,24 +100,50 @@ class IncomeController extends Controller
                     '<=',
                     $request->date_to
                 )
-            )
+            );
+
+        /*
+         * Paginated income records.
+         */
+        $incomes = (clone $incomeQuery)
             ->orderByDesc('income_date')
             ->orderByDesc('id')
             ->paginate(20)
             ->withQueryString();
 
-        $totalIncome = $church->incomes()->sum('amount');
-
-        $currentMonthIncome = $church->incomes()
-            ->whereMonth('income_date', now()->month)
-            ->whereYear('income_date', now()->year)
+        /*
+         * Summary totals follow the selected financial account.
+         */
+        $totalIncome = (clone $incomeQuery)
             ->sum('amount');
 
-        $categories = $church->incomes()
+        $currentMonthIncome = (clone $incomeQuery)
+            ->whereMonth(
+                'income_date',
+                now()->month
+            )
+            ->whereYear(
+                'income_date',
+                now()->year
+            )
+            ->sum('amount');
+
+        /*
+         * Categories available within the selected account.
+         */
+        $categories = (clone $incomeQuery)
             ->select('category')
             ->distinct()
             ->orderBy('category')
             ->pluck('category');
+
+        /*
+         * All church financial accounts for the account selector.
+         */
+        $accounts = $church->financialAccounts()
+            ->orderByDesc('is_default')
+            ->orderBy('name')
+            ->get();
 
         return view('church.income.index', [
             'church' => $church,
@@ -80,6 +151,9 @@ class IncomeController extends Controller
             'totalIncome' => $totalIncome,
             'currentMonthIncome' => $currentMonthIncome,
             'categories' => $categories,
+            'accounts' => $accounts,
+            'selectedAccount' => $selectedAccount,
+            'selectedAccountId' => $selectedAccountId,
         ]);
     }
 
@@ -90,18 +164,33 @@ class IncomeController extends Controller
     {
         $church = $request->user()->church;
 
-        if (! $church) {
-            abort(403, 'Your account is not associated with a church.');
-        }
+        abort_unless(
+            $church,
+            403,
+            'Your account is not associated with a church.'
+        );
 
         $members = $church->members()
             ->orderBy('first_name')
             ->orderBy('last_name')
             ->get();
 
+        $accounts = $church->financialAccounts()
+            ->where('is_active', true)
+            ->orderByDesc('is_default')
+            ->orderBy('name')
+            ->get();
+
+        $defaultAccount = $accounts->firstWhere(
+            'is_default',
+            true
+        ) ?? $accounts->first();
+
         return view('church.income.create', [
             'church' => $church,
             'members' => $members,
+            'accounts' => $accounts,
+            'defaultAccount' => $defaultAccount,
         ]);
     }
 
@@ -114,9 +203,11 @@ class IncomeController extends Controller
     ): RedirectResponse {
         $church = $request->user()->church;
 
-        if (! $church) {
-            abort(403, 'Your account is not associated with a church.');
-        }
+        abort_unless(
+            $church,
+            403,
+            'Your account is not associated with a church.'
+        );
 
         $validated = $request->validate([
             'category' => [
@@ -157,11 +248,21 @@ class IncomeController extends Controller
                 'integer',
                 'exists:members,id',
             ],
+            'financial_account_id' => [
+                'required',
+                'integer',
+                'exists:financial_accounts,id',
+            ],
         ]);
 
         $this->validateMemberBelongsToChurch(
             $church,
             $validated['member_id'] ?? null
+        );
+
+        $financialAccount = $this->getActiveFinancialAccount(
+            $church->id,
+            (int) $validated['financial_account_id']
         );
 
         $income = $church->incomes()->create($validated);
@@ -170,15 +271,22 @@ class IncomeController extends Controller
             action: 'created',
             subject: $income,
             description: sprintf(
-                'Income record created: ₦%s under %s.',
-                number_format((float) $income->amount, 2),
-                $income->category
+                'Income record created: ₦%s under %s, assigned to %s.',
+                number_format(
+                    (float) $income->amount,
+                    2
+                ),
+                $income->category,
+                $financialAccount->name
             )
         );
 
         return redirect()
             ->route('church.income.index')
-            ->with('success', 'Income recorded successfully.');
+            ->with(
+                'success',
+                'Income recorded successfully.'
+            );
     }
 
     /**
@@ -188,9 +296,15 @@ class IncomeController extends Controller
         Request $request,
         Income $income
     ): View {
-        $this->ensureBelongsToChurch($request, $income);
+        $this->ensureBelongsToChurch(
+            $request,
+            $income
+        );
 
-        $income->load('member');
+        $income->load([
+            'member',
+            'financialAccount',
+        ]);
 
         return view('church.income.show', [
             'income' => $income,
@@ -204,7 +318,10 @@ class IncomeController extends Controller
         Request $request,
         Income $income
     ): View {
-        $this->ensureBelongsToChurch($request, $income);
+        $this->ensureBelongsToChurch(
+            $request,
+            $income
+        );
 
         $church = $request->user()->church;
 
@@ -213,9 +330,26 @@ class IncomeController extends Controller
             ->orderBy('last_name')
             ->get();
 
+        /*
+         * Include all active accounts plus the income's current account.
+         */
+        $accounts = $church->financialAccounts()
+            ->where(function ($query) use ($income) {
+                $query
+                    ->where('is_active', true)
+                    ->orWhere(
+                        'id',
+                        $income->financial_account_id
+                    );
+            })
+            ->orderByDesc('is_default')
+            ->orderBy('name')
+            ->get();
+
         return view('church.income.edit', [
             'income' => $income,
             'members' => $members,
+            'accounts' => $accounts,
         ]);
     }
 
@@ -227,7 +361,10 @@ class IncomeController extends Controller
         Income $income,
         ActivityLogService $activityLog
     ): RedirectResponse {
-        $this->ensureBelongsToChurch($request, $income);
+        $this->ensureBelongsToChurch(
+            $request,
+            $income
+        );
 
         $church = $request->user()->church;
 
@@ -270,11 +407,21 @@ class IncomeController extends Controller
                 'integer',
                 'exists:members,id',
             ],
+            'financial_account_id' => [
+                'required',
+                'integer',
+                'exists:financial_accounts,id',
+            ],
         ]);
 
         $this->validateMemberBelongsToChurch(
             $church,
             $validated['member_id'] ?? null
+        );
+
+        $financialAccount = $this->getFinancialAccount(
+            $church->id,
+            (int) $validated['financial_account_id']
         );
 
         $income->update($validated);
@@ -283,15 +430,25 @@ class IncomeController extends Controller
             action: 'updated',
             subject: $income,
             description: sprintf(
-                'Income record updated: ₦%s under %s.',
-                number_format((float) $income->amount, 2),
-                $income->category
+                'Income record updated: ₦%s under %s, assigned to %s.',
+                number_format(
+                    (float) $income->amount,
+                    2
+                ),
+                $income->category,
+                $financialAccount->name
             )
         );
 
         return redirect()
-            ->route('church.income.show', $income)
-            ->with('success', 'Income updated successfully.');
+            ->route(
+                'church.income.show',
+                $income
+            )
+            ->with(
+                'success',
+                'Income updated successfully.'
+            );
     }
 
     /**
@@ -302,18 +459,28 @@ class IncomeController extends Controller
         Income $income,
         ActivityLogService $activityLog
     ): RedirectResponse {
-        $this->ensureBelongsToChurch($request, $income);
+        $this->ensureBelongsToChurch(
+            $request,
+            $income
+        );
 
         $amount = (float) $income->amount;
         $category = $income->category;
+        $accountName = $income->financialAccount?->name;
 
         $activityLog->record(
             action: 'deleted',
             subject: $income,
             description: sprintf(
-                'Income record deleted: ₦%s under %s.',
-                number_format($amount, 2),
-                $category
+                'Income record deleted: ₦%s under %s%s.',
+                number_format(
+                    $amount,
+                    2
+                ),
+                $category,
+                $accountName
+                    ? " from {$accountName}"
+                    : ''
             )
         );
 
@@ -321,7 +488,10 @@ class IncomeController extends Controller
 
         return redirect()
             ->route('church.income.index')
-            ->with('success', 'Income deleted successfully.');
+            ->with(
+                'success',
+                'Income deleted successfully.'
+            );
     }
 
     /**
@@ -331,17 +501,24 @@ class IncomeController extends Controller
     {
         $church = $request->user()->church;
 
-        if (! $church) {
-            abort(403, 'Your account is not associated with a church.');
-        }
+        abort_unless(
+            $church,
+            403,
+            'Your account is not associated with a church.'
+        );
 
         $incomes = $church->incomes()
-            ->with('member')
+            ->with([
+                'member',
+                'financialAccount',
+            ])
             ->orderByDesc('income_date')
             ->orderByDesc('id')
             ->get();
 
-        $filename = 'church-income-' . now()->format('Y-m-d-H-i-s') . '.csv';
+        $filename = 'church-income-' . now()->format(
+            'Y-m-d-H-i-s'
+        ) . '.csv';
 
         $headers = [
             'Content-Type' => 'text/csv',
@@ -350,6 +527,7 @@ class IncomeController extends Controller
 
         $columns = [
             'Member ID',
+            'Financial Account',
             'Category',
             'Source',
             'Amount',
@@ -359,14 +537,24 @@ class IncomeController extends Controller
             'Description',
         ];
 
-        $callback = function () use ($incomes, $columns) {
-            $file = fopen('php://output', 'w');
+        $callback = function () use (
+            $incomes,
+            $columns
+        ) {
+            $file = fopen(
+                'php://output',
+                'w'
+            );
 
-            fputcsv($file, $columns);
+            fputcsv(
+                $file,
+                $columns
+            );
 
             foreach ($incomes as $income) {
                 fputcsv($file, [
                     $income->member?->member_id,
+                    $income->financialAccount?->name,
                     $income->category,
                     $income->source,
                     $income->amount,
@@ -394,12 +582,27 @@ class IncomeController extends Controller
     {
         $church = $request->user()->church;
 
-        if (! $church) {
-            abort(403, 'Your account is not associated with a church.');
-        }
+        abort_unless(
+            $church,
+            403,
+            'Your account is not associated with a church.'
+        );
+
+        $accounts = $church->financialAccounts()
+            ->where('is_active', true)
+            ->orderByDesc('is_default')
+            ->orderBy('name')
+            ->get();
+
+        $defaultAccount = $accounts->firstWhere(
+            'is_default',
+            true
+        ) ?? $accounts->first();
 
         return view('church.income.import', [
             'church' => $church,
+            'accounts' => $accounts,
+            'defaultAccount' => $defaultAccount,
         ]);
     }
 
@@ -412,9 +615,11 @@ class IncomeController extends Controller
     ): RedirectResponse {
         $church = $request->user()->church;
 
-        if (! $church) {
-            abort(403, 'Your account is not associated with a church.');
-        }
+        abort_unless(
+            $church,
+            403,
+            'Your account is not associated with a church.'
+        );
 
         $request->validate([
             'file' => [
@@ -425,9 +630,31 @@ class IncomeController extends Controller
             ],
         ]);
 
+        $defaultAccount = $church->financialAccounts()
+            ->where('is_active', true)
+            ->where('is_default', true)
+            ->first();
+
+        if (! $defaultAccount) {
+            $defaultAccount = $church->financialAccounts()
+                ->where('is_active', true)
+                ->orderBy('name')
+                ->first();
+        }
+
+        if (! $defaultAccount) {
+            return back()->with(
+                'error',
+                'Please create at least one active financial account before importing income.'
+            );
+        }
+
         $file = $request->file('file');
 
-        $handle = fopen($file->getRealPath(), 'r');
+        $handle = fopen(
+            $file->getRealPath(),
+            'r'
+        );
 
         if (! $handle) {
             return back()->with(
@@ -448,7 +675,15 @@ class IncomeController extends Controller
         }
 
         $header = array_map(
-            fn ($value) => strtolower(trim($value)),
+            fn ($value) => strtolower(
+                trim(
+                    preg_replace(
+                        '/^\xEF\xBB\xBF/',
+                        '',
+                        (string) $value
+                    )
+                )
+            ),
             $header
         );
 
@@ -459,7 +694,11 @@ class IncomeController extends Controller
         ];
 
         foreach ($requiredColumns as $requiredColumn) {
-            if (! in_array($requiredColumn, $header, true)) {
+            if (! in_array(
+                $requiredColumn,
+                $header,
+                true
+            )) {
                 fclose($handle);
 
                 return back()->with(
@@ -527,7 +766,7 @@ class IncomeController extends Controller
             }
 
             try {
-                $parsedDate = \Carbon\Carbon::parse(
+                $parsedDate = Carbon::parse(
                     $incomeDate
                 )->format('Y-m-d');
             } catch (\Throwable) {
@@ -535,14 +774,45 @@ class IncomeController extends Controller
                 continue;
             }
 
+            /*
+             * Financial Account
+             *
+             * If a Financial Account is supplied in the CSV,
+             * it must match an active account belonging to the church.
+             *
+             * If the column is blank, the default active account
+             * is used.
+             */
+            $financialAccount = $defaultAccount;
+
+            if (
+                ! empty($data['financial account'])
+            ) {
+                $accountName = trim(
+                    (string) $data['financial account']
+                );
+
+                $financialAccount = $church
+                    ->financialAccounts()
+                    ->where('is_active', true)
+                    ->where('name', $accountName)
+                    ->first();
+
+                if (! $financialAccount) {
+                    $skipped++;
+                    continue;
+                }
+            }
+
             $memberId = null;
 
             if (! empty($data['member id'])) {
-
                 $member = $church->members()
                     ->where(
                         'member_id',
-                        trim($data['member id'])
+                        trim(
+                            (string) $data['member id']
+                        )
                     )
                     ->first();
 
@@ -552,26 +822,42 @@ class IncomeController extends Controller
             }
 
             $church->incomes()->create([
+                'financial_account_id' => $financialAccount->id,
+
                 'category' => $category,
 
                 'source' => ! empty($data['source'])
-                    ? trim($data['source'])
+                    ? trim(
+                        (string) $data['source']
+                    )
                     : null,
 
                 'amount' => (float) $amount,
 
                 'income_date' => $parsedDate,
 
-                'payment_method' => ! empty($data['payment method'])
-                    ? trim($data['payment method'])
+                'payment_method' => ! empty(
+                    $data['payment method']
+                )
+                    ? trim(
+                        (string) $data['payment method']
+                    )
                     : null,
 
-                'reference' => ! empty($data['reference'])
-                    ? trim($data['reference'])
+                'reference' => ! empty(
+                    $data['reference']
+                )
+                    ? trim(
+                        (string) $data['reference']
+                    )
                     : null,
 
-                'description' => ! empty($data['description'])
-                    ? trim($data['description'])
+                'description' => ! empty(
+                    $data['description']
+                )
+                    ? trim(
+                        (string) $data['description']
+                    )
                     : null,
 
                 'member_id' => $memberId,
@@ -595,15 +881,24 @@ class IncomeController extends Controller
             );
         }
 
-        $message = "{$imported} income record(s) imported successfully.";
+        $message = sprintf(
+            '%d income record(s) imported successfully.',
+            $imported
+        );
 
         if ($skipped > 0) {
-            $message .= " {$skipped} row(s) were skipped.";
+            $message .= sprintf(
+                ' %d row(s) were skipped.',
+                $skipped
+            );
         }
 
         return redirect()
             ->route('church.income.index')
-            ->with('success', $message);
+            ->with(
+                'success',
+                $message
+            );
     }
 
     /**
@@ -611,12 +906,14 @@ class IncomeController extends Controller
      */
     public function downloadTemplate(
         Request $request
-    ): \Symfony\Component\HttpFoundation\StreamedResponse {
+    ): StreamedResponse {
         $church = $request->user()->church;
 
-        if (! $church) {
-            abort(403, 'Your account is not associated with a church.');
-        }
+        abort_unless(
+            $church,
+            403,
+            'Your account is not associated with a church.'
+        );
 
         $filename = 'church-income-template.csv';
 
@@ -625,11 +922,29 @@ class IncomeController extends Controller
             'Content-Disposition' => 'attachment; filename="' . $filename . '"',
         ];
 
-        $callback = function () {
-            $file = fopen('php://output', 'w');
+        $defaultAccount = $church->financialAccounts()
+            ->where('is_active', true)
+            ->where('is_default', true)
+            ->first();
+
+        if (! $defaultAccount) {
+            $defaultAccount = $church->financialAccounts()
+                ->where('is_active', true)
+                ->orderBy('name')
+                ->first();
+        }
+
+        $callback = function () use (
+            $defaultAccount
+        ) {
+            $file = fopen(
+                'php://output',
+                'w'
+            );
 
             fputcsv($file, [
                 'Member ID',
+                'Financial Account',
                 'Category',
                 'Source',
                 'Amount',
@@ -641,6 +956,7 @@ class IncomeController extends Controller
 
             fputcsv($file, [
                 'MEM-0001',
+                $defaultAccount?->name ?? 'Main Account',
                 'Tithe',
                 'Sunday Service',
                 '50000.00',
@@ -661,6 +977,49 @@ class IncomeController extends Controller
     }
 
     /**
+     * Get an active financial account belonging to the church.
+     */
+    private function getActiveFinancialAccount(
+        int $churchId,
+        int $accountId
+    ): FinancialAccount {
+        $account = FinancialAccount::query()
+            ->where('church_id', $churchId)
+            ->whereKey($accountId)
+            ->where('is_active', true)
+            ->first();
+
+        abort_unless(
+            $account,
+            422,
+            'The selected financial account is invalid or inactive.'
+        );
+
+        return $account;
+    }
+
+    /**
+     * Get a financial account belonging to the church.
+     */
+    private function getFinancialAccount(
+        int $churchId,
+        int $accountId
+    ): FinancialAccount {
+        $account = FinancialAccount::query()
+            ->where('church_id', $churchId)
+            ->whereKey($accountId)
+            ->first();
+
+        abort_unless(
+            $account,
+            422,
+            'The selected financial account does not belong to your church.'
+        );
+
+        return $account;
+    }
+
+    /**
      * Validate that a member belongs to the church.
      */
     private function validateMemberBelongsToChurch(
@@ -676,12 +1035,11 @@ class IncomeController extends Controller
             ->whereKey($memberId)
             ->exists();
 
-        if (! $belongsToChurch) {
-            abort(
-                403,
-                'The selected member does not belong to your church.'
-            );
-        }
+        abort_unless(
+            $belongsToChurch,
+            403,
+            'The selected member does not belong to your church.'
+        );
     }
 
     /**
