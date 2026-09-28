@@ -1,0 +1,6 @@
+---
+deployment:
+  tasks:
+    - export DEPLOYPATH=/home2/techcro1/public_html/churchflow.techcrossbreed.com.ng
+    - /bin/rm -rf $DEPLOYPATH
+    - /bin/ln -s /home2/techcro1/repositories/ChurchFlow/public $DEPLOYPATH
