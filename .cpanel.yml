@@ -1,6 +1,9 @@
 ---
 deployment:
   tasks:
-    - export DEPLOYPATH=/home2/techcro1/public_html/churchflow.techcrossbreed.com.ng
+    - export DEPLOYPATH=/home2/techcro1/public_html/churchflow.techcrossbreed.com.ng/
     - /bin/rm -rf $DEPLOYPATH
-    - /bin/ln -s /home2/techcro1/repositories/ChurchFlow/public $DEPLOYPATH
+    - /bin/mkdir -p $DEPLOYPATH
+    - /bin/cp -R public/. $DEPLOYPATH
+    - /bin/sed -i "s#require __DIR__.'/../vendor/autoload.php'#require '/home2/techcro1/repositories/ChurchFlow/vendor/autoload.php'#" $DEPLOYPATH/index.php
+    - /bin/sed -i "s#require_once __DIR__.'/../bootstrap/app.php'#require_once '/home2/techcro1/repositories/ChurchFlow/bootstrap/app.php'#" $DEPLOYPATH/index.php
