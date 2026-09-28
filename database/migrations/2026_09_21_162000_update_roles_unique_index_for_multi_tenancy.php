@@ -9,7 +9,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('roles', function (Blueprint $table) {
-            $table->dropUnique('roles_name_guard_name_unique');
+            $table->dropIndex('roles_church_id_name_index');
 
             $table->unique(
                 ['church_id', 'name', 'guard_name'],
@@ -21,13 +21,11 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('roles', function (Blueprint $table) {
-            $table->dropUnique(
-                'roles_church_id_name_guard_name_unique'
-            );
+            $table->dropUnique('roles_church_id_name_guard_name_unique');
 
-            $table->unique(
-                ['name', 'guard_name'],
-                'roles_name_guard_name_unique'
+            $table->index(
+                ['church_id', 'name'],
+                'roles_church_id_name_index'
             );
         });
     }
