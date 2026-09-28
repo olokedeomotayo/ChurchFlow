@@ -9,12 +9,12 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('roles', function (Blueprint $table) {
-            $table->dropIndex('roles_church_id_name_index');
-
             $table->unique(
                 ['church_id', 'name', 'guard_name'],
                 'roles_church_id_name_guard_name_unique'
             );
+
+            $table->dropIndex('roles_church_id_name_index');
         });
     }
 
