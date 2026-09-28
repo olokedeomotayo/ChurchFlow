@@ -190,51 +190,182 @@
             </div>
 
             @can('attendance.create')
-                <a href="{{ route('church.attendance.create', ['service_id' => $service->id]) }}"
-                   class="inline-flex cursor-pointer items-center justify-center rounded-lg bg-purple-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-purple-700">
-                    Record Attendance
-                </a>
+                @if($service->attendances->isEmpty())
+                    <a href="{{ route('church.attendance.create', ['service_id' => $service->id]) }}"
+                       class="inline-flex cursor-pointer items-center justify-center rounded-lg bg-purple-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-purple-700">
+                        Record Attendance
+                    </a>
+                @endif
             @endcan
 
         </div>
 
-        <div class="px-6 py-10 text-center">
 
-            <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-purple-50 text-purple-600">
+        @if($service->attendances->isNotEmpty())
 
-                <svg class="h-6 w-6"
-                     fill="none"
-                     stroke="currentColor"
-                     viewBox="0 0 24 24">
-                    <path stroke-linecap="round"
-                          stroke-linejoin="round"
-                          stroke-width="2"
-                          d="M17 20h5v-2a4 4 0 00-4-4h-1
-                             M9 20H4v-2a4 4 0 014-4h1
-                             M12 12a4 4 0 100-8 4 4 0 000 8z"/>
-                </svg>
+            @php
+                $attendance = $service->attendances->sortByDesc('attendance_date')->first();
+            @endphp
+
+            {{-- ATTENDANCE TOTAL --}}
+            <div class="border-b border-slate-200 bg-slate-50 px-6 py-6">
+
+                <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+
+                    <div>
+                        <p class="text-sm font-medium text-slate-500">
+                            Total Attendance
+                        </p>
+
+                        <p class="mt-1 text-3xl font-bold text-slate-900">
+                            {{ number_format($attendance->total) }}
+                        </p>
+
+                        <p class="mt-1 text-xs text-slate-500">
+                            Attendance recorded for
+                            {{ $attendance->attendance_date?->format('d M Y') }}
+                        </p>
+                    </div>
+
+                    @can('attendance.view')
+                        <a href="{{ route('church.attendance.index', ['service_id' => $service->id]) }}"
+                           class="inline-flex cursor-pointer items-center justify-center rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50">
+                            View Attendance Records
+                        </a>
+                    @endcan
+
+                </div>
 
             </div>
 
-            <p class="mt-4 text-sm font-semibold text-slate-900">
-                Attendance is recorded by category
-            </p>
 
-            <p class="mx-auto mt-1 max-w-xl text-sm leading-6 text-slate-500">
-                Record the number of men, women, teenagers, children,
-                and guests or first timers who attended this service.
-            </p>
+            {{-- ATTENDANCE BREAKDOWN --}}
+            <div class="grid gap-4 p-6 sm:grid-cols-2 lg:grid-cols-5">
 
-            @can('attendance.view')
-                <div class="mt-5">
-                    <a href="{{ route('church.attendance.index', ['service_id' => $service->id]) }}"
-                       class="inline-flex cursor-pointer items-center justify-center rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50">
-                        View Attendance Records
-                    </a>
+                {{-- MEN --}}
+                <div class="rounded-xl border border-slate-200 bg-white p-5">
+                    <p class="text-sm font-medium text-slate-500">
+                        Men
+                    </p>
+
+                    <p class="mt-2 text-2xl font-bold text-slate-900">
+                        {{ number_format($attendance->men) }}
+                    </p>
                 </div>
-            @endcan
 
-        </div>
+
+                {{-- WOMEN --}}
+                <div class="rounded-xl border border-slate-200 bg-white p-5">
+                    <p class="text-sm font-medium text-slate-500">
+                        Women
+                    </p>
+
+                    <p class="mt-2 text-2xl font-bold text-slate-900">
+                        {{ number_format($attendance->women) }}
+                    </p>
+                </div>
+
+
+                {{-- TEENAGERS --}}
+                <div class="rounded-xl border border-slate-200 bg-white p-5">
+                    <p class="text-sm font-medium text-slate-500">
+                        Teenagers
+                    </p>
+
+                    <p class="mt-2 text-2xl font-bold text-slate-900">
+                        {{ number_format($attendance->teenagers) }}
+                    </p>
+                </div>
+
+
+                {{-- CHILDREN --}}
+                <div class="rounded-xl border border-slate-200 bg-white p-5">
+                    <p class="text-sm font-medium text-slate-500">
+                        Children
+                    </p>
+
+                    <p class="mt-2 text-2xl font-bold text-slate-900">
+                        {{ number_format($attendance->children) }}
+                    </p>
+                </div>
+
+
+                {{-- GUESTS --}}
+                <div class="rounded-xl border border-slate-200 bg-white p-5">
+                    <p class="text-sm font-medium text-slate-500">
+                        Guests
+                    </p>
+
+                    <p class="mt-2 text-2xl font-bold text-slate-900">
+                        {{ number_format($attendance->guests) }}
+                    </p>
+                </div>
+
+            </div>
+
+
+            {{-- NOTES --}}
+            @if($attendance->notes)
+
+                <div class="border-t border-slate-200 px-6 py-5">
+
+                    <h3 class="text-sm font-semibold text-slate-700">
+                        Attendance Notes
+                    </h3>
+
+                    <p class="mt-2 whitespace-pre-line text-sm leading-6 text-slate-600">
+                        {{ $attendance->notes }}
+                    </p>
+
+                </div>
+
+            @endif
+
+
+        @else
+
+            {{-- NO ATTENDANCE --}}
+            <div class="px-6 py-10 text-center">
+
+                <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-purple-50 text-purple-600">
+
+                    <svg class="h-6 w-6"
+                         fill="none"
+                         stroke="currentColor"
+                         viewBox="0 0 24 24">
+                        <path stroke-linecap="round"
+                              stroke-linejoin="round"
+                              stroke-width="2"
+                              d="M17 20h5v-2a4 4 0 00-4-4h-1
+                                 M9 20H4v-2a4 4 0 014-4h1
+                                 M12 12a4 4 0 100-8 4 4 0 000 8z"/>
+                    </svg>
+
+                </div>
+
+                <p class="mt-4 text-sm font-semibold text-slate-900">
+                    No attendance recorded yet
+                </p>
+
+                <p class="mx-auto mt-1 max-w-xl text-sm leading-6 text-slate-500">
+                    Record the number of men, women, teenagers, children,
+                    and guests who attended this service.
+                </p>
+
+                @can('attendance.create')
+                    <div class="mt-5">
+
+                        <a href="{{ route('church.attendance.create', ['service_id' => $service->id]) }}"
+                           class="inline-flex cursor-pointer items-center justify-center rounded-lg bg-purple-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-purple-700">
+                            Record Attendance
+                        </a>
+
+                    </div>
+                @endcan
+
+            </div>
+
+        @endif
 
     </div>
 

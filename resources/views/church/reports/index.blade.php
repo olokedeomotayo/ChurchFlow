@@ -10,20 +10,71 @@
 
     <div class="w-full space-y-6">
 
-        {{-- ============================================================= --}}
-        {{-- HEADER --}}
-        {{-- ============================================================= --}}
+{{-- ============================================================= --}}
+{{-- HEADER --}}
+{{-- ============================================================= --}}
 
-        <div>
-            <h1 class="text-2xl font-bold text-slate-900">
-                Church Reports
-            </h1>
+<div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
 
-            <p class="mt-1 text-sm text-slate-500">
-                Overview of your church's financial, membership and attendance data.
-            </p>
-        </div>
+    <div>
+        <h1 class="text-2xl font-bold text-slate-900">
+            Church Reports
+        </h1>
 
+        <p class="mt-1 text-sm text-slate-500">
+            Overview of your church's financial, membership and attendance data.
+        </p>
+    </div>
+
+    <div class="flex flex-wrap items-center gap-2">
+
+        {{-- Download CSV --}}
+        <a
+            href="{{ route('church.reports.export', request()->query()) }}"
+            class="inline-flex cursor-pointer items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50"
+        >
+            <svg
+                class="h-4 w-4"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+            >
+                <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M12 3v12m0 0 4-4m-4 4-4-4M5 21h14"
+                />
+            </svg>
+
+            Download CSV
+        </a>
+
+        {{-- Download Financial Report --}}
+        <a
+            href="{{ route('church.reports.export.pdf', request()->query()) }}"
+            class="inline-flex cursor-pointer items-center justify-center gap-2 rounded-lg bg-purple-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-purple-700"
+        >
+            <svg
+                class="h-4 w-4"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+            >
+                <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M12 3v12m0 0 4-4m-4 4-4-4M5 21h14"
+                />
+            </svg>
+
+            Download Financial Report
+        </a>
+
+    </div>
+
+</div>
 
         {{-- ============================================================= --}}
         {{-- REPORT FILTERS --}}

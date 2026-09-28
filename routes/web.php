@@ -474,18 +474,28 @@ Route::middleware('auth')->group(function () {
 
 
 
-            /*
-            |--------------------------------------------------------------------------
-            | Services
-            |--------------------------------------------------------------------------
-            */
+         /*
+        |--------------------------------------------------------------------------
+        | Services
+        |--------------------------------------------------------------------------
+        */
 
-            Route::resource(
-                '/services',
-                ServiceController::class
-            )->names('services');
+        Route::get('/services/export', [ServiceController::class, 'export'])
+            ->name('services.export');
 
+        Route::get('/services/import', [ServiceController::class, 'import'])
+            ->name('services.import');
 
+        Route::post('/services/import', [ServiceController::class, 'importStore'])
+            ->name('services.import.store');
+
+        Route::get('/services/import/template', [ServiceController::class, 'downloadTemplate'])
+            ->name('services.import.template');
+
+        Route::resource(
+            '/services',
+            ServiceController::class
+        )->names('services');
             /*
             |--------------------------------------------------------------------------
             | Attendance

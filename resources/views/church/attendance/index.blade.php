@@ -58,7 +58,7 @@
     {{-- SUMMARY CARDS --}}
     <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
 
-        {{-- Total Attendance --}}
+        {{-- TOTAL ATTENDANCE --}}
         <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
 
             <p class="text-sm font-medium text-slate-500">
@@ -70,13 +70,13 @@
             </p>
 
             <p class="mt-1 text-xs text-slate-500">
-                All recorded attendance
+                For selected period
             </p>
 
         </div>
 
 
-        {{-- Total Records --}}
+        {{-- ATTENDANCE RECORDS --}}
         <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
 
             <p class="text-sm font-medium text-slate-500">
@@ -88,13 +88,13 @@
             </p>
 
             <p class="mt-1 text-xs text-slate-500">
-                Service attendance records
+                Attendance records
             </p>
 
         </div>
 
 
-        {{-- Average --}}
+        {{-- AVERAGE --}}
         <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
 
             <p class="text-sm font-medium text-slate-500">
@@ -112,7 +112,7 @@
         </div>
 
 
-        {{-- Highest --}}
+        {{-- HIGHEST --}}
         <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
 
             <p class="text-sm font-medium text-slate-500">
@@ -156,7 +156,7 @@
             </h2>
 
             <p class="mt-1 text-sm text-slate-500">
-                Filter attendance records by service or date.
+                Filter attendance records by period or service.
             </p>
 
         </div>
@@ -167,21 +167,78 @@
             action="{{ route('church.attendance.index') }}"
         >
 
-            <div class="grid gap-4 p-6 md:grid-cols-3 md:items-end">
+            <div class="grid gap-4 p-6 lg:grid-cols-4 lg:items-end">
 
-                {{-- Service --}}
+                {{-- PERIOD --}}
                 <div>
 
                     <label
-                        for="service_id"
+                        for="filter"
+                        class="block text-sm font-medium text-slate-700"
+                    >
+                        Period
+                    </label>
+
+                    <select
+                        id="filter"
+                        name="filter"
+                        onchange="toggleCustomDates()"
+                        class="mt-2 block w-full cursor-pointer rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 shadow-sm outline-none transition focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20"
+                    >
+
+                        <option
+                            value="this_month"
+                            @selected(($filter ?? 'this_month') === 'this_month')
+                        >
+                            This Month
+                        </option>
+
+                        <option
+                            value="last_month"
+                            @selected(($filter ?? '') === 'last_month')
+                        >
+                            Last Month
+                        </option>
+
+                        <option
+                            value="this_year"
+                            @selected(($filter ?? '') === 'this_year')
+                        >
+                            This Year
+                        </option>
+
+                        <option
+                            value="custom"
+                            @selected(($filter ?? '') === 'custom')
+                        >
+                            Custom
+                        </option>
+
+                        <option
+                            value="all"
+                            @selected(($filter ?? '') === 'all')
+                        >
+                            All Time
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                {{-- SERVICE --}}
+                <div>
+
+                    <label
+                        for="service_name"
                         class="block text-sm font-medium text-slate-700"
                     >
                         Service
                     </label>
 
                     <select
-                        id="service_id"
-                        name="service_id"
+                        id="service_name"
+                        name="service_name"
                         class="mt-2 block w-full cursor-pointer rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 shadow-sm outline-none transition focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20"
                     >
 
@@ -192,17 +249,10 @@
                         @foreach($services as $service)
 
                             <option
-                                value="{{ $service->id }}"
-                                @selected(
-                                    (string) request('service_id')
-                                    ===
-                                    (string) $service->id
-                                )
+                                value="{{ $service->name }}"
+                                @selected(request('service_name') === $service->name)
                             >
                                 {{ $service->name }}
-                                @if($service->service_date)
-                                    — {{ $service->service_date->format('d M Y') }}
-                                @endif
                             </option>
 
                         @endforeach
@@ -212,29 +262,56 @@
                 </div>
 
 
-                {{-- Date --}}
-                <div>
+                {{-- FROM DATE --}}
+                <div
+                    id="custom-from-date"
+                    class="{{ ($filter ?? 'this_month') === 'custom' ? '' : 'hidden' }}"
+                >
 
                     <label
-                        for="attendance_date"
+                        for="from_date"
                         class="block text-sm font-medium text-slate-700"
                     >
-                        Attendance Date
+                        From Date
                     </label>
 
                     <input
                         type="date"
-                        id="attendance_date"
-                        name="attendance_date"
-                        value="{{ request('attendance_date') }}"
+                        id="from_date"
+                        name="from_date"
+                        value="{{ ($filter ?? '') === 'custom' ? request('from_date') : '' }}"
                         class="mt-2 block w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 shadow-sm outline-none transition focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20"
                     >
 
                 </div>
 
 
-                {{-- Actions --}}
-                <div class="flex items-center gap-3">
+                {{-- TO DATE --}}
+                <div
+                    id="custom-to-date"
+                    class="{{ ($filter ?? 'this_month') === 'custom' ? '' : 'hidden' }}"
+                >
+
+                    <label
+                        for="to_date"
+                        class="block text-sm font-medium text-slate-700"
+                    >
+                        To Date
+                    </label>
+
+                    <input
+                        type="date"
+                        id="to_date"
+                        name="to_date"
+                        value="{{ ($filter ?? '') === 'custom' ? request('to_date') : '' }}"
+                        class="mt-2 block w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 shadow-sm outline-none transition focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20"
+                    >
+
+                </div>
+
+
+                {{-- ACTIONS --}}
+                <div class="flex items-center gap-3 lg:col-span-4">
 
                     <button
                         type="submit"
@@ -244,16 +321,17 @@
                     </button>
 
                     @if(
-                        request()->filled('service_id')
-                        ||
-                        request()->filled('attendance_date')
+                        ($filter ?? 'this_month') !== 'this_month'
+                        || request()->filled('service_name')
+                        || request()->filled('from_date')
+                        || request()->filled('to_date')
                     )
 
                         <a
                             href="{{ route('church.attendance.index') }}"
                             class="inline-flex cursor-pointer items-center justify-center rounded-lg border border-slate-300 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
                         >
-                            Clear
+                            Reset
                         </a>
 
                     @endif
@@ -364,41 +442,31 @@
 
                                 {{-- MEN --}}
                                 <td class="whitespace-nowrap px-6 py-4 text-right text-sm text-slate-700">
-
                                     {{ number_format($record->men) }}
-
                                 </td>
 
 
                                 {{-- WOMEN --}}
                                 <td class="whitespace-nowrap px-6 py-4 text-right text-sm text-slate-700">
-
                                     {{ number_format($record->women) }}
-
                                 </td>
 
 
                                 {{-- TEENAGERS --}}
                                 <td class="whitespace-nowrap px-6 py-4 text-right text-sm text-slate-700">
-
                                     {{ number_format($record->teenagers) }}
-
                                 </td>
 
 
                                 {{-- CHILDREN --}}
                                 <td class="whitespace-nowrap px-6 py-4 text-right text-sm text-slate-700">
-
                                     {{ number_format($record->children) }}
-
                                 </td>
 
 
                                 {{-- GUESTS --}}
                                 <td class="whitespace-nowrap px-6 py-4 text-right text-sm text-slate-700">
-
                                     {{ number_format($record->guests) }}
-
                                 </td>
 
 
@@ -424,7 +492,6 @@
                                             Edit
                                         </a>
 
-
                                         <form
                                             method="POST"
                                             action="{{ route('church.attendance.destroy', $record) }}"
@@ -432,6 +499,7 @@
                                         >
 
                                             @csrf
+
                                             @method('DELETE')
 
                                             <button
@@ -462,9 +530,7 @@
             @if($attendance->hasPages())
 
                 <div class="border-t border-slate-200 px-6 py-4">
-
                     {{ $attendance->links() }}
-
                 </div>
 
             @endif
@@ -483,7 +549,6 @@
                         stroke="currentColor"
                         viewBox="0 0 24 24"
                     >
-
                         <path
                             stroke-linecap="round"
                             stroke-linejoin="round"
@@ -492,25 +557,21 @@
                                M9 17H5a2 2 0 01-2-2v-1a4 4 0 014-4h1
                                M12 11a4 4 0 100-8 4 4 0 000 8z"
                         />
-
                     </svg>
 
                 </div>
-
 
                 <h3 class="mt-4 text-sm font-semibold text-slate-900">
                     No attendance records
                 </h3>
 
-
                 <p class="mx-auto mt-1 max-w-md text-sm text-slate-500">
-                    Start recording service attendance to see your church attendance history here.
+                    No attendance records match the selected filters.
                 </p>
-
 
                 <a
                     href="{{ route('church.attendance.create') }}"
-                    class="mt-5 inline-flex cursor-pointer items-center gap-2 rounded-lg bg-purple-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-purple-700"
+                    class="mt-5 inline-flex cursor-pointer items-center gap-2 rounded-lg bg-purple-600 px-4 py-2.5 text-sm font-semibold text-white"
                 >
                     Record Attendance
                 </a>
@@ -522,5 +583,23 @@
     </div>
 
 </div>
+
+
+<script>
+    function toggleCustomDates() {
+        const filter = document.getElementById('filter').value;
+
+        const fromDate = document.getElementById('custom-from-date');
+        const toDate = document.getElementById('custom-to-date');
+
+        if (filter === 'custom') {
+            fromDate.classList.remove('hidden');
+            toDate.classList.remove('hidden');
+        } else {
+            fromDate.classList.add('hidden');
+            toDate.classList.add('hidden');
+        }
+    }
+</script>
 
 @endsection

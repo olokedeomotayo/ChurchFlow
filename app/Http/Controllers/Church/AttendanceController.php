@@ -27,34 +27,147 @@ class AttendanceController extends Controller
             403
         );
 
-        $attendance = Attendance::query()
+        /*
+        |--------------------------------------------------------------------------
+        | Attendance Period Filter
+        |--------------------------------------------------------------------------
+        */
+
+        $filter = $request->input('filter', 'this_month');
+
+        $fromDate = null;
+        $toDate = null;
+
+        switch ($filter) {
+            case 'this_month':
+                $fromDate = now()->startOfMonth()->toDateString();
+                $toDate = now()->endOfMonth()->toDateString();
+                break;
+
+            case 'last_month':
+                $fromDate = now()
+                    ->subMonth()
+                    ->startOfMonth()
+                    ->toDateString();
+
+                $toDate = now()
+                    ->subMonth()
+                    ->endOfMonth()
+                    ->toDateString();
+                break;
+
+            case 'this_year':
+                $fromDate = now()->startOfYear()->toDateString();
+                $toDate = now()->endOfYear()->toDateString();
+                break;
+
+            case 'custom':
+                $request->validate([
+                    'from_date' => [
+                        'required',
+                        'date',
+                    ],
+                    'to_date' => [
+                        'required',
+                        'date',
+                        'after_or_equal:from_date',
+                    ],
+                ]);
+
+                $fromDate = $request->input('from_date');
+                $toDate = $request->input('to_date');
+                break;
+
+            case 'all':
+                break;
+
+            default:
+                $filter = 'this_month';
+
+                $fromDate = now()
+                    ->startOfMonth()
+                    ->toDateString();
+
+                $toDate = now()
+                    ->endOfMonth()
+                    ->toDateString();
+                break;
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Attendance Records
+        |--------------------------------------------------------------------------
+        */
+
+        $attendanceQuery = Attendance::query()
             ->with('service')
             ->where('church_id', $church->id)
             ->when(
-                $request->filled('service_id'),
-                fn ($query) => $query->where(
-                    'service_id',
-                    $request->service_id
+                $request->filled('service_name'),
+                fn ($query) => $query->whereHas(
+                    'service',
+                    fn ($serviceQuery) => $serviceQuery->where(
+                        'name',
+                        $request->service_name
+                    )
                 )
             )
             ->when(
-                $request->filled('attendance_date'),
-                fn ($query) => $query->whereDate(
-                    'attendance_date',
-                    $request->attendance_date
-                )
-            )
+                $fromDate && $toDate,
+                fn ($query) => $query
+                    ->whereDate(
+                        'attendance_date',
+                        '>=',
+                        $fromDate
+                    )
+                    ->whereDate(
+                        'attendance_date',
+                        '<=',
+                        $toDate
+                    )
+            );
+
+        $attendance = $attendanceQuery
             ->orderByDesc('attendance_date')
             ->paginate(20)
             ->withQueryString();
 
-        $services = $church->services()
-            ->orderByDesc('service_date')
-            ->orderByDesc('start_time')
-            ->get();
+        /*
+        |--------------------------------------------------------------------------
+        | Filtered Summary
+        |--------------------------------------------------------------------------
+        */
 
-        $allAttendance = Attendance::query()
+        $summaryQuery = Attendance::query()
             ->where('church_id', $church->id)
+            ->when(
+                $request->filled('service_name'),
+                fn ($query) => $query->whereHas(
+                    'service',
+                    fn ($serviceQuery) => $serviceQuery->where(
+                        'name',
+                        $request->service_name
+                    )
+                )
+            )
+            ->when(
+                $fromDate && $toDate,
+                fn ($query) => $query
+                    ->whereDate(
+                        'attendance_date',
+                        '>=',
+                        $fromDate
+                    )
+                    ->whereDate(
+                        'attendance_date',
+                        '<=',
+                        $toDate
+                    )
+            );
+
+        $allAttendance = $summaryQuery
+            ->with('service')
             ->get();
 
         $totalAttendance = $allAttendance->sum(
@@ -64,25 +177,57 @@ class AttendanceController extends Controller
         $totalServices = $allAttendance->count();
 
         $averageAttendance = $totalServices > 0
-            ? round($totalAttendance / $totalServices, 1)
+            ? round(
+                $totalAttendance / $totalServices,
+                1
+            )
             : 0;
 
         $highestAttendance = $allAttendance
-            ->load('service')
             ->sortByDesc(
                 fn (Attendance $record) => $record->total
             )
             ->first();
+
+        /*
+        |--------------------------------------------------------------------------
+        | Unique Services
+        |--------------------------------------------------------------------------
+        |
+        | Only unique service names are displayed in the filter.
+        | Example:
+        | - Bible Study
+        | - Celebration Service
+        |
+        */
+
+        $services = $church->services()
+            ->select('id', 'name')
+            ->orderBy('name')
+            ->get()
+            ->unique('name')
+            ->values();
+
+        /*
+        |--------------------------------------------------------------------------
+        | View
+        |--------------------------------------------------------------------------
+        */
 
         return view('church.attendance.index', [
             'user' => $user,
             'church' => $church,
             'attendance' => $attendance,
             'services' => $services,
+
             'totalAttendance' => $totalAttendance,
             'totalServices' => $totalServices,
             'averageAttendance' => $averageAttendance,
             'highestAttendance' => $highestAttendance,
+
+            'filter' => $filter,
+            'fromDate' => $fromDate,
+            'toDate' => $toDate,
         ]);
     }
 
@@ -102,9 +247,11 @@ class AttendanceController extends Controller
         );
 
         $services = $church->services()
-            ->orderByDesc('service_date')
-            ->orderByDesc('start_time')
-            ->get();
+            ->select('id', 'name')
+            ->orderBy('name')
+            ->get()
+            ->unique('name')
+            ->values();
 
         return view('church.attendance.create', [
             'user' => $user,
@@ -136,35 +283,42 @@ class AttendanceController extends Controller
                 'integer',
                 'exists:services,id',
             ],
+
             'attendance_date' => [
                 'required',
                 'date',
             ],
+
             'men' => [
                 'required',
                 'integer',
                 'min:0',
             ],
+
             'women' => [
                 'required',
                 'integer',
                 'min:0',
             ],
+
             'teenagers' => [
                 'required',
                 'integer',
                 'min:0',
             ],
+
             'children' => [
                 'required',
                 'integer',
                 'min:0',
             ],
+
             'guests' => [
                 'required',
                 'integer',
                 'min:0',
             ],
+
             'notes' => [
                 'nullable',
                 'string',
@@ -175,7 +329,10 @@ class AttendanceController extends Controller
             ->whereKey($validated['service_id'])
             ->exists();
 
-        abort_unless($serviceBelongsToChurch, 404);
+        abort_unless(
+            $serviceBelongsToChurch,
+            404
+        );
 
         $attendanceExists = Attendance::query()
             ->where('church_id', $church->id)
@@ -284,35 +441,42 @@ class AttendanceController extends Controller
                 'integer',
                 'exists:services,id',
             ],
+
             'attendance_date' => [
                 'required',
                 'date',
             ],
+
             'men' => [
                 'required',
                 'integer',
                 'min:0',
             ],
+
             'women' => [
                 'required',
                 'integer',
                 'min:0',
             ],
+
             'teenagers' => [
                 'required',
                 'integer',
                 'min:0',
             ],
+
             'children' => [
                 'required',
                 'integer',
                 'min:0',
             ],
+
             'guests' => [
                 'required',
                 'integer',
                 'min:0',
             ],
+
             'notes' => [
                 'nullable',
                 'string',
@@ -323,7 +487,10 @@ class AttendanceController extends Controller
             ->whereKey($validated['service_id'])
             ->exists();
 
-        abort_unless($serviceBelongsToChurch, 404);
+        abort_unless(
+            $serviceBelongsToChurch,
+            404
+        );
 
         $duplicate = Attendance::query()
             ->where('church_id', $church->id)
@@ -515,7 +682,10 @@ class AttendanceController extends Controller
 
         $file = $request->file('file');
 
-        $handle = fopen($file->getRealPath(), 'r');
+        $handle = fopen(
+            $file->getRealPath(),
+            'r'
+        );
 
         if ($handle === false) {
             return back()->withErrors([
@@ -543,9 +713,12 @@ class AttendanceController extends Controller
             function ($header) {
                 $header = trim((string) $header);
 
-                // Remove UTF-8 BOM if present.
                 return strtolower(
-                    preg_replace('/^\xEF\xBB\xBF/', '', $header)
+                    preg_replace(
+                        '/^\xEF\xBB\xBF/',
+                        '',
+                        $header
+                    )
                 );
             },
             $headers
@@ -563,7 +736,11 @@ class AttendanceController extends Controller
         ];
 
         foreach ($requiredHeaders as $requiredHeader) {
-            if (! in_array($requiredHeader, $headers, true)) {
+            if (! in_array(
+                $requiredHeader,
+                $headers,
+                true
+            )) {
                 fclose($handle);
 
                 return back()->withErrors([
@@ -586,15 +763,13 @@ class AttendanceController extends Controller
         while (($row = fgetcsv($handle)) !== false) {
             $rowNumber++;
 
-            // Skip completely empty rows.
             if (
-                count($row) === 1 &&
-                trim((string) $row[0]) === ''
+                count($row) === 1
+                && trim((string) $row[0]) === ''
             ) {
                 continue;
             }
 
-            // Ensure the row has enough columns.
             $row = array_pad(
                 $row,
                 count($headers),
@@ -618,9 +793,9 @@ class AttendanceController extends Controller
             $serviceId = $data['service_id'];
 
             if (
-                $serviceId === '' ||
-                ! ctype_digit($serviceId) ||
-                (int) $serviceId <= 0
+                $serviceId === ''
+                || ! ctype_digit($serviceId)
+                || (int) $serviceId <= 0
             ) {
                 $skipped++;
 
@@ -685,8 +860,8 @@ class AttendanceController extends Controller
                 $value = $data[$field];
 
                 if (
-                    $value === '' ||
-                    ! ctype_digit($value)
+                    $value === ''
+                    || ! ctype_digit($value)
                 ) {
                     $invalidCount = true;
 
@@ -735,7 +910,7 @@ class AttendanceController extends Controller
             |--------------------------------------------------------------------------
             */
 
-            $attendance = Attendance::create([
+            Attendance::create([
                 'church_id' => $church->id,
                 'service_id' => $service->id,
                 'attendance_date' => $attendanceDate,
@@ -823,7 +998,10 @@ class AttendanceController extends Controller
 
         return response()->stream(
             function () use ($attendance) {
-                $file = fopen('php://output', 'w');
+                $file = fopen(
+                    'php://output',
+                    'w'
+                );
 
                 fputcsv($file, [
                     'service_id',
@@ -858,6 +1036,7 @@ class AttendanceController extends Controller
             200,
             [
                 'Content-Type' => 'text/csv',
+
                 'Content-Disposition' =>
                     'attachment; filename="' . $filename . '"',
             ]
@@ -885,8 +1064,8 @@ class AttendanceController extends Controller
             );
 
             if (
-                $date !== false &&
-                $date->format($format) === $value
+                $date !== false
+                && $date->format($format) === $value
             ) {
                 return $date->format('Y-m-d');
             }
