@@ -81,7 +81,7 @@
 
                         <div class="mt-7">
                             <span class="text-4xl font-bold text-[#211b30]">
-                                ₦20,000
+                                ₦10,000
                             </span>
 
                             <span class="text-sm text-[#8b8595]">
@@ -127,7 +127,7 @@
 
                             <div class="mt-7">
                                 <span class="text-4xl font-bold text-[#211b30]">
-                                    ₦50,000
+                                    ₦20,000
                                 </span>
 
                                 <span class="text-sm text-[#8b8595]">
@@ -165,7 +165,7 @@
 
                         <div class="mt-7">
                             <span class="text-4xl font-bold">
-                                ₦200,000
+                                ₦50,000
                             </span>
 
                             <span class="text-sm text-white/50">
