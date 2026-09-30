@@ -1,470 +1,293 @@
-<section
-    id="contact"
-    class="bg-[#f4f1f7] py-24"
->
-
+<!-- Contact Section -->
+<section id="contact" class="relative overflow-hidden bg-[#f4f1f7] py-24 sm:py-28">
     <div class="mx-auto max-w-7xl px-6 lg:px-8">
 
-        <div class="grid gap-12 lg:grid-cols-2 lg:gap-20">
+        <!-- Section Header -->
+        <div class="max-w-3xl">
+            <span class="inline-flex items-center rounded-full border border-[#ddd9e5] bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-[#7021a8]">
+                Talk to ChurchFlow
+            </span>
 
+            <h2 class="mt-6 text-4xl font-bold tracking-tight text-[#211b30] sm:text-5xl">
+                Have a question?
+                <span class="text-[#b22962]">Let's talk.</span>
+            </h2>
 
-            {{-- Contact Information --}}
+            <p class="mt-5 max-w-2xl text-lg leading-8 text-[#8b8595]">
+                Whether you want a product demo, need help choosing a plan,
+                or simply want to learn more about ChurchFlow, our team is ready
+                to help.
+            </p>
+        </div>
 
-            <div class="flex flex-col justify-center">
+        <div class="mt-14 grid gap-10 lg:grid-cols-5">
 
-                <p
-                    class="text-sm font-extrabold uppercase tracking-[0.18em] text-[#7021a8]"
-                >
-                    Contact Us
-                </p>
+            <!-- Contact Information -->
+            <div class="lg:col-span-2">
 
-                <h2
-                    class="mt-4 text-4xl font-extrabold leading-tight tracking-tight text-[#211b30] sm:text-5xl"
-                >
-                    Have questions?
-                    <span
-                        class="bg-gradient-to-r from-[#7021a8] to-[#b22962] bg-clip-text text-transparent"
-                    >
-                        Let's talk.
-                    </span>
-                </h2>
+                <div class="rounded-3xl bg-[#211b30] p-8 text-white sm:p-10">
+                    <p class="text-sm font-semibold uppercase tracking-[0.18em] text-white/60">
+                        Get in touch
+                    </p>
 
-                <p
-                    class="mt-6 max-w-xl text-lg leading-8 text-[#8b8595]"
-                >
-                    Want a demo, have questions about pricing or need help
-                    deciding which plan is right for your church?
-                    Send us a message and our team will get back to you.
-                </p>
+                    <h3 class="mt-4 text-2xl font-bold">
+                        Let's make church administration simpler.
+                    </h3>
 
+                    <p class="mt-4 text-sm leading-7 text-white/65">
+                        Tell us what you need and we'll help you understand how
+                        ChurchFlow can fit into your church's workflow.
+                    </p>
 
-                {{-- Contact Points --}}
+                    <div class="mt-8 space-y-5">
 
-                <div class="mt-10 space-y-5">
-
-
-                    {{-- Demo --}}
-
-                    <div class="flex items-start gap-4">
-
-                        <div
-                            class="flex h-11 w-11 shrink-0 items-center justify-center rounded-[9px] bg-white text-[#7021a8] shadow-sm"
+                        <!-- Phone -->
+                        <a
+                            href="tel:08120081213"
+                            class="group flex items-center gap-4"
                         >
+                            <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white/10 transition group-hover:bg-white/15">
+                                <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
+                                        d="M3 5a2 2 0 012-2h3.28a2 2 0 011.94 1.515l.7 2.8a2 2 0 01-.45 1.85L9.2 10.44a16.05 16.05 0 006.36 6.36l1.275-1.27a2 2 0 011.85-.45l2.8.7A2 2 0 0123 17.72V21a2 2 0 01-2 2C10.61 23 1 13.39 1 3a2 2 0 012-2z"/>
+                                </svg>
+                            </div>
 
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                class="h-5 w-5"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                                stroke-width="1.8"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    d="M15 10l4.55-2.28A1 1 0 0121 8.62v6.76a1 1 0 01-1.45.9L15 14"
-                                />
+                            <div>
+                                <p class="text-xs text-white/45">Phone</p>
+                                <p class="mt-1 text-sm font-medium">
+                                    08120081213
+                                </p>
+                            </div>
+                        </a>
 
-                                <rect
-                                    x="3"
-                                    y="6"
-                                    width="12"
-                                    height="12"
-                                    rx="2"
-                                />
+                        <!-- Email -->
+                        <a
+                            href="mailto:info@techcrossbreed.com.ng"
+                            class="group flex items-center gap-4"
+                        >
+                            <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white/10 transition group-hover:bg-white/15">
+                                <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
+                                        d="M3 8l9 6 9-6M5 5h14a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2z"/>
+                                </svg>
+                            </div>
 
-                            </svg>
-
-                        </div>
-
-                        <div>
-
-                            <p class="font-extrabold text-[#211b30]">
-                                Request a Demo
-                            </p>
-
-                            <p class="mt-1 text-sm leading-6 text-[#8b8595]">
-                                See how ChurchFlow can work for your church.
-                            </p>
-
-                        </div>
+                            <div>
+                                <p class="text-xs text-white/45">Email</p>
+                                <p class="mt-1 text-sm font-medium">
+                                    info@techcrossbreed.com.ng
+                                </p>
+                            </div>
+                        </a>
 
                     </div>
 
+                    <div class="mt-10 border-t border-white/10 pt-8">
+                        <p class="text-xs font-semibold uppercase tracking-[0.16em] text-white/45">
+                            Available for
+                        </p>
 
-                    {{-- Pricing --}}
+                        <div class="mt-4 flex flex-wrap gap-2">
+                            <span class="rounded-full bg-white/10 px-3 py-1.5 text-xs text-white/70">
+                                Product Demo
+                            </span>
 
-                    <div class="flex items-start gap-4">
+                            <span class="rounded-full bg-white/10 px-3 py-1.5 text-xs text-white/70">
+                                Pricing
+                            </span>
 
-                        <div
-                            class="flex h-11 w-11 shrink-0 items-center justify-center rounded-[9px] bg-white text-[#b22962] shadow-sm"
-                        >
-
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                class="h-5 w-5"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                                stroke-width="1.8"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    d="M12 2v20"
-                                />
-
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H7"
-                                />
-
-                            </svg>
-
+                            <span class="rounded-full bg-white/10 px-3 py-1.5 text-xs text-white/70">
+                                Support
+                            </span>
                         </div>
-
-                        <div>
-
-                            <p class="font-extrabold text-[#211b30]">
-                                Need Help Choosing a Plan?
-                            </p>
-
-                            <p class="mt-1 text-sm leading-6 text-[#8b8595]">
-                                We'll help you find the right option
-                                for your church.
-                            </p>
-
-                        </div>
-
                     </div>
-
-
-                    {{-- Trial --}}
-
-                    <div class="flex items-start gap-4">
-
-                        <div
-                            class="flex h-11 w-11 shrink-0 items-center justify-center rounded-[9px] bg-white text-[#7021a8] shadow-sm"
-                        >
-
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                class="h-5 w-5"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                                stroke-width="1.8"
-                            >
-                                <circle
-                                    cx="12"
-                                    cy="12"
-                                    r="9"
-                                />
-
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    d="M12 7v5l3 2"
-                                />
-
-                            </svg>
-
-                        </div>
-
-                        <div>
-
-                            <p class="font-extrabold text-[#211b30]">
-                                30-Day Free Trial
-                            </p>
-
-                            <p class="mt-1 text-sm leading-6 text-[#8b8595]">
-                                Start exploring ChurchFlow without
-                                a credit card.
-                            </p>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-                {{-- CTA --}}
-
-                <div class="mt-10">
-
-                    <a
-                        href="{{ route('register') }}"
-                        class="cf-gradient-button inline-flex items-center rounded-[9px] px-6 py-3.5 text-sm font-extrabold text-white"
-                    >
-                        Get Started →
-                    </a>
-
                 </div>
 
             </div>
 
+            <!-- Contact Form -->
+            <div class="lg:col-span-3">
 
-            {{-- Contact Form --}}
+                <div class="rounded-3xl border border-[#ddd9e5] bg-white p-8 shadow-sm sm:p-10">
 
-            <div
-                class="rounded-[20px] border border-[#ddd9e5] bg-white p-7 shadow-[0_20px_50px_rgba(45,20,70,.08)] sm:p-9"
-            >
+                    @if(session('contact_success'))
+                        <div class="mb-6 rounded-2xl border border-green-200 bg-green-50 px-5 py-4 text-sm text-green-700">
+                            {{ session('contact_success') }}
+                        </div>
+                    @endif
 
-                <div class="mb-7">
+                    @if($errors->any())
+                        <div class="mb-6 rounded-2xl border border-red-200 bg-red-50 px-5 py-4">
+                            <p class="text-sm font-semibold text-red-700">
+                                Please correct the following:
+                            </p>
 
-                    <h3
-                        class="text-2xl font-extrabold text-[#211b30]"
-                    >
-                        Send us a message
-                    </h3>
+                            <ul class="mt-2 list-disc space-y-1 pl-5 text-sm text-red-600">
+                                @foreach($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
 
-                    <p
-                        class="mt-2 text-sm leading-6 text-[#8b8595]"
-                    >
-                        Fill in the form below and we'll get back
-                        to you as soon as possible.
-                    </p>
-
-                </div>
-
-                @if (session('contact_success'))
-
-                    <div
-                        class="mb-6 rounded-[12px] border border-green-200 bg-green-50 px-4 py-3 text-sm font-semibold text-green-700"
-                    >
-                        {{ session('contact_success') }}
-                    </div>
-
-                @endif
-
-                @if ($errors->any())
-
-                    <div
-                        class="mb-6 rounded-[12px] border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
-                    >
-
-                        <p class="font-extrabold">
-                            Please check the following:
+                    <div class="mb-8">
+                        <p class="text-sm font-semibold uppercase tracking-[0.16em] text-[#7021a8]">
+                            Contact form
                         </p>
 
-                        <ul class="mt-2 list-disc space-y-1 pl-5">
-
-                            @foreach ($errors->all() as $error)
-
-                                <li>
-                                    {{ $error }}
-                                </li>
-
-                            @endforeach
-
-                        </ul>
-
+                        <h3 class="mt-3 text-2xl font-bold text-[#211b30]">
+                            Tell us how we can help.
+                        </h3>
                     </div>
 
-                @endif
+                    <form action="{{ route('contact.store') }}" method="POST" class="space-y-6">
+                        @csrf
 
-                <form
-                    action="{{ route('contact.store') }}"
-                    method="POST"
-                >
+                        <div class="grid gap-6 sm:grid-cols-2">
 
-                    @csrf
-
-
-                    <div class="grid gap-5">
-
-
-                        {{-- Name --}}
-
-                        <div>
-
-                            <label
-                                for="contact_name"
-                                class="text-sm font-extrabold text-[#332c40]"
-                            >
-                                Your Name
-                            </label>
-
-                            <input
-                                id="contact_name"
-                                type="text"
-                                name="name"
-                                value="{{ old('name') }}"
-                                placeholder="Enter your name"
-                                class="mt-2 h-12 w-full rounded-[9px] border border-[#ddd9e5] bg-white px-4 text-sm text-[#211d32] outline-none transition focus:border-[#7021a8] focus:ring-4 focus:ring-[#7021a8]/5"
-                                required
-                            >
-
-                        </div>
-
-
-                        {{-- Church Name --}}
-
-                        <div>
-
-                            <label
-                                for="church_name"
-                                class="text-sm font-extrabold text-[#332c40]"
-                            >
-                                Church Name
-                            </label>
-
-                            <input
-                                id="church_name"
-                                type="text"
-                                name="church_name"
-                                value="{{ old('church_name') }}"
-                                placeholder="Enter your church name"
-                                class="mt-2 h-12 w-full rounded-[9px] border border-[#ddd9e5] bg-white px-4 text-sm text-[#211d32] outline-none transition focus:border-[#7021a8] focus:ring-4 focus:ring-[#7021a8]/5"
-                                required
-                            >
-
-                        </div>
-
-
-                        {{-- Email + Phone --}}
-
-                        <div class="grid gap-5 sm:grid-cols-2">
-
-
+                            <!-- Name -->
                             <div>
+                                <label for="name" class="mb-2 block text-sm font-semibold text-[#211b30]">
+                                    Your Name
+                                </label>
 
-                                <label
-                                    for="contact_email"
-                                    class="text-sm font-extrabold text-[#332c40]"
+                                <input
+                                    type="text"
+                                    id="name"
+                                    name="name"
+                                    value="{{ old('name') }}"
+                                    required
+                                    placeholder="John Doe"
+                                    class="w-full rounded-xl border border-[#ddd9e5] bg-[#faf9fb] px-4 py-3.5 text-sm text-[#211b30] outline-none transition placeholder:text-[#aaa5b0] focus:border-[#7021a8] focus:ring-2 focus:ring-[#7021a8]/10"
                                 >
+                            </div>
+
+                            <!-- Church -->
+                            <div>
+                                <label for="church_name" class="mb-2 block text-sm font-semibold text-[#211b30]">
+                                    Church Name
+                                </label>
+
+                                <input
+                                    type="text"
+                                    id="church_name"
+                                    name="church_name"
+                                    value="{{ old('church_name') }}"
+                                    required
+                                    placeholder="Your Church Name"
+                                    class="w-full rounded-xl border border-[#ddd9e5] bg-[#faf9fb] px-4 py-3.5 text-sm text-[#211b30] outline-none transition placeholder:text-[#aaa5b0] focus:border-[#7021a8] focus:ring-2 focus:ring-[#7021a8]/10"
+                                >
+                            </div>
+
+                            <!-- Email -->
+                            <div>
+                                <label for="email" class="mb-2 block text-sm font-semibold text-[#211b30]">
                                     Email Address
                                 </label>
 
                                 <input
-                                    id="contact_email"
                                     type="email"
+                                    id="email"
                                     name="email"
                                     value="{{ old('email') }}"
-                                    placeholder="you@example.com"
-                                    class="mt-2 h-12 w-full rounded-[9px] border border-[#ddd9e5] bg-white px-4 text-sm text-[#211d32] outline-none transition focus:border-[#7021a8] focus:ring-4 focus:ring-[#7021a8]/5"
                                     required
+                                    placeholder="you@church.com"
+                                    class="w-full rounded-xl border border-[#ddd9e5] bg-[#faf9fb] px-4 py-3.5 text-sm text-[#211b30] outline-none transition placeholder:text-[#aaa5b0] focus:border-[#7021a8] focus:ring-2 focus:ring-[#7021a8]/10"
                                 >
-
                             </div>
 
-
+                            <!-- Phone -->
                             <div>
-
-                                <label
-                                    for="contact_phone"
-                                    class="text-sm font-extrabold text-[#332c40]"
-                                >
+                                <label for="phone" class="mb-2 block text-sm font-semibold text-[#211b30]">
                                     Phone Number
+                                    <span class="font-normal text-[#aaa5b0]">(Optional)</span>
                                 </label>
 
                                 <input
-                                    id="contact_phone"
-                                    type="tel"
+                                    type="text"
+                                    id="phone"
                                     name="phone"
                                     value="{{ old('phone') }}"
-                                    placeholder="+234..."
-                                    class="mt-2 h-12 w-full rounded-[9px] border border-[#ddd9e5] bg-white px-4 text-sm text-[#211d32] outline-none transition focus:border-[#7021a8] focus:ring-4 focus:ring-[#7021a8]/5"
+                                    placeholder="0812 008 1213"
+                                    class="w-full rounded-xl border border-[#ddd9e5] bg-[#faf9fb] px-4 py-3.5 text-sm text-[#211b30] outline-none transition placeholder:text-[#aaa5b0] focus:border-[#7021a8] focus:ring-2 focus:ring-[#7021a8]/10"
                                 >
-
                             </div>
 
                         </div>
 
-
-                        {{-- Subject --}}
-
+                        <!-- Subject -->
                         <div>
-
-                            <label
-                                for="contact_subject"
-                                class="text-sm font-extrabold text-[#332c40]"
-                            >
+                            <label for="subject" class="mb-2 block text-sm font-semibold text-[#211b30]">
                                 What can we help with?
                             </label>
 
                             <select
-                                id="contact_subject"
+                                id="subject"
                                 name="subject"
-                                class="mt-2 h-12 w-full rounded-[9px] border border-[#ddd9e5] bg-white px-4 text-sm text-[#211d32] outline-none transition focus:border-[#7021a8] focus:ring-4 focus:ring-[#7021a8]/5"
                                 required
+                                class="w-full rounded-xl border border-[#ddd9e5] bg-[#faf9fb] px-4 py-3.5 text-sm text-[#211b30] outline-none transition focus:border-[#7021a8] focus:ring-2 focus:ring-[#7021a8]/10"
                             >
-
-                                <option value="">
-                                    Select an option
+                                <option value="">Select an option</option>
+                                <option value="demo" {{ old('subject') === 'demo' ? 'selected' : '' }}>
+                                    I want a product demo
                                 </option>
-
-                                <option value="demo">
-                                    Request a Demo
+                                <option value="pricing" {{ old('subject') === 'pricing' ? 'selected' : '' }}>
+                                    I have a pricing question
                                 </option>
-
-                                <option value="pricing">
-                                    Pricing Question
+                                <option value="support" {{ old('subject') === 'support' ? 'selected' : '' }}>
+                                    I need support
                                 </option>
-
-                                <option value="support">
-                                    Product Question
+                                <option value="other" {{ old('subject') === 'other' ? 'selected' : '' }}>
+                                    Something else
                                 </option>
-
-                                <option value="other">
-                                    Something Else
-                                </option>
-
                             </select>
-
                         </div>
 
-
-                        {{-- Message --}}
-
+                        <!-- Message -->
                         <div>
-
-                            <label
-                                for="contact_message"
-                                class="text-sm font-extrabold text-[#332c40]"
-                            >
+                            <label for="message" class="mb-2 block text-sm font-semibold text-[#211b30]">
                                 Message
                             </label>
 
                             <textarea
-                                id="contact_message"
+                                id="message"
                                 name="message"
-                                rows="5"
-                                placeholder="Tell us how we can help..."
-                                class="mt-2 w-full rounded-[9px] border border-[#ddd9e5] bg-white px-4 py-3 text-sm leading-6 text-[#211d32] outline-none transition focus:border-[#7021a8] focus:ring-4 focus:ring-[#7021a8]/5"
+                                rows="6"
                                 required
+                                placeholder="Tell us a little about what you need..."
+                                class="w-full resize-none rounded-xl border border-[#ddd9e5] bg-[#faf9fb] px-4 py-3.5 text-sm text-[#211b30] outline-none transition placeholder:text-[#aaa5b0] focus:border-[#7021a8] focus:ring-2 focus:ring-[#7021a8]/10"
                             >{{ old('message') }}</textarea>
+                        </div>
+
+                        <!-- Submit -->
+                        <div class="flex flex-col gap-4 pt-2 sm:flex-row sm:items-center sm:justify-between">
+
+                            <p class="max-w-sm text-xs leading-5 text-[#8b8595]">
+                                By submitting this form, you agree to be contacted
+                                regarding your enquiry.
+                            </p>
+
+                            <button
+                                type="submit"
+                                class="cf-gradient-button inline-flex items-center justify-center gap-2 rounded-xl px-6 py-3.5 text-sm font-semibold text-white shadow-lg shadow-[#7021a8]/15 transition hover:-translate-y-0.5"
+                            >
+                                Send Message
+
+                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M5 12h14M13 6l6 6-6 6"/>
+                                </svg>
+                            </button>
 
                         </div>
 
+                    </form>
 
-                        {{-- Submit --}}
-
-                        <button
-                            type="submit"
-                            class="cf-gradient-button w-full rounded-[9px] px-6 py-3.5 text-sm font-extrabold text-white"
-                        >
-                            Send Message →
-                        </button>
-
-
-                        <p
-                            class="text-center text-[11px] leading-5 text-[#aaa4b2]"
-                        >
-                            We'll only use your information to respond
-                            to your enquiry.
-                        </p>
-
-                    </div>
-
-                </form>
+                </div>
 
             </div>
 
         </div>
-
     </div>
-
 </section>

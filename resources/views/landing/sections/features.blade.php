@@ -1,503 +1,842 @@
+{{-- =========================================================
+     FEATURES / PRODUCT SHOWCASE
+========================================================= --}}
 <section
     id="features"
-    class="bg-[#f4f1f7] py-24"
+    class="relative overflow-hidden bg-[#ddd5e6] py-24 lg:py-32"
 >
 
     <div class="mx-auto max-w-7xl px-6 lg:px-8">
 
+        {{-- =====================================================
+             SECTION INTRO
+        ====================================================== --}}
+        <div class="max-w-3xl">
 
-        {{-- Section Heading --}}
-
-        <div class="mx-auto max-w-3xl text-center">
-
-            <p
-                class="text-sm font-extrabold uppercase tracking-[0.18em] text-[#7021a8]"
-            >
-                Powerful Features
+            <p class="text-xs font-bold uppercase tracking-[0.2em] text-[#b22962]">
+                THE CHURCHFLOW PLATFORM
             </p>
 
             <h2
-                class="mt-4 text-4xl font-extrabold leading-tight tracking-tight text-[#211b30] sm:text-5xl"
+                class="mt-5 text-4xl font-black tracking-[-0.03em] text-[#181525] sm:text-5xl lg:text-6xl"
             >
-                Powerful tools for running your church.
+                Powerful tools.
+                <span
+                    class="bg-clip-text text-transparent"
+                    style="background-image: linear-gradient(90deg, #7021a8, #b22962);"
+                >
+                    One connected platform.
+                </span>
             </h2>
 
-            <p
-                class="mt-6 text-lg leading-8 text-[#8b8595]"
-            >
-                Everything is designed around making church administration
-                simpler, more organized and more transparent.
+            <p class="mt-6 max-w-2xl text-lg leading-8 text-[#625a6b]">
+                Everything your team needs to manage the day-to-day
+                operations of your church without jumping between
+                disconnected systems.
             </p>
 
         </div>
 
 
-        {{-- Features Grid --}}
+        {{-- =====================================================
+             FEATURE 01 — FINANCE
+        ====================================================== --}}
+        <div class="mt-16 grid items-center gap-12 lg:grid-cols-2 lg:gap-20">
 
-        <div
-            class="mt-16 grid gap-6 md:grid-cols-2 lg:grid-cols-3"
-        >
-
-
-            {{-- Financial Management --}}
-
-            <div
-                class="group rounded-[20px] border border-[#ddd9e5] bg-white p-7 shadow-[0_10px_30px_rgba(45,20,70,.04)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_20px_40px_rgba(45,20,70,.10)]"
-            >
+            {{-- Content --}}
+            <div>
 
                 <div
-                    class="flex h-12 w-12 items-center justify-center rounded-[9px] bg-[#f4f1f7] text-[#7021a8] transition group-hover:bg-[#7021a8] group-hover:text-white"
+                    class="flex h-12 w-12 items-center justify-center rounded-xl text-white shadow-lg shadow-purple-300/30"
+                    style="background: linear-gradient(135deg, #7021a8, #b22962);"
                 >
-
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        class="h-6 w-6"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        stroke-width="1.8"
-                    >
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            d="M12 2v20"
-                        />
-
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H7"
-                        />
-
-                    </svg>
-
+                    ₦
                 </div>
 
-                <h3 class="mt-6 text-xl font-extrabold text-[#211b30]">
-                    Financial Management
+                <p class="mt-7 text-xs font-bold uppercase tracking-[0.18em] text-[#756d80]">
+                    FINANCIAL MANAGEMENT
+                </p>
+
+                <h3 class="mt-3 text-3xl font-black tracking-tight text-[#181525] sm:text-4xl">
+                    Understand every naira.
                 </h3>
 
-                <p class="mt-3 leading-7 text-[#8b8595]">
-                    Record income, expenses, budgets and financial activities
-                    with greater accuracy and visibility.
+                <p class="mt-5 text-base leading-7 text-[#625a6b]">
+                    Keep your church's income, expenses, giving and
+                    financial records organized in one place.
+                    ChurchFlow gives your finance team a clearer view
+                    of where money comes from and where it goes.
                 </p>
+
+                <div class="mt-7 space-y-3">
+
+                    <div class="flex items-center gap-3 text-sm text-[#51495c]">
+                        <span class="flex h-6 w-6 items-center justify-center rounded-full bg-[#eee3f5] text-xs font-bold text-[#7021a8]">
+                            ✓
+                        </span>
+                        Record income and expenses
+                    </div>
+
+                    <div class="flex items-center gap-3 text-sm text-[#51495c]">
+                        <span class="flex h-6 w-6 items-center justify-center rounded-full bg-[#eee3f5] text-xs font-bold text-[#7021a8]">
+                            ✓
+                        </span>
+                        Track giving and donations
+                    </div>
+
+                    <div class="flex items-center gap-3 text-sm text-[#51495c]">
+                        <span class="flex h-6 w-6 items-center justify-center rounded-full bg-[#eee3f5] text-xs font-bold text-[#7021a8]">
+                            ✓
+                        </span>
+                        Generate financial reports
+                    </div>
+
+                </div>
 
             </div>
 
 
-            {{-- Giving --}}
+            {{-- Finance Preview --}}
+            <div class="relative">
 
-            <div
-                class="group rounded-[20px] border border-[#ddd9e5] bg-white p-7 shadow-[0_10px_30px_rgba(45,20,70,.04)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_20px_40px_rgba(45,20,70,.10)]"
-            >
+                <div class="absolute -inset-5 rounded-[2rem] bg-purple-300/20 blur-2xl"></div>
 
                 <div
-                    class="flex h-12 w-12 items-center justify-center rounded-[9px] bg-[#f4f1f7] text-[#b22962] transition group-hover:bg-[#b22962] group-hover:text-white"
+                    class="relative overflow-hidden rounded-2xl border border-[#d7d0dd] bg-white shadow-[0_25px_70px_rgba(33,27,48,0.15)]"
                 >
 
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        class="h-6 w-6"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        stroke-width="1.8"
-                    >
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 000-7.78z"
-                        />
+                    {{-- Header --}}
+                    <div class="flex items-center justify-between border-b border-[#eeeaf1] px-6 py-4">
 
-                    </svg>
+                        <div>
+                            <p class="text-[10px] font-semibold uppercase tracking-wider text-[#aaa3b0]">
+                                Finance
+                            </p>
+
+                            <p class="mt-1 text-sm font-bold text-[#211b30]">
+                                Financial Overview
+                            </p>
+                        </div>
+
+                        <div class="rounded-lg bg-[#f4edf7] px-3 py-1.5 text-[10px] font-semibold text-[#7021a8]">
+                            September 2026
+                        </div>
+
+                    </div>
+
+                    <div class="p-6">
+
+                        {{-- Metrics --}}
+                        <div class="grid grid-cols-2 gap-3">
+
+                            <div class="rounded-xl bg-[#f8f6fa] p-4">
+
+                                <p class="text-[10px] text-[#99929f]">
+                                    Total Income
+                                </p>
+
+                                <p class="mt-2 text-xl font-bold text-[#211b30]">
+                                    ₦4.8M
+                                </p>
+
+                                <p class="mt-1 text-[9px] font-semibold text-[#7021a8]">
+                                    This month
+                                </p>
+
+                            </div>
+
+                            <div class="rounded-xl bg-[#f8f6fa] p-4">
+
+                                <p class="text-[10px] text-[#99929f]">
+                                    Expenses
+                                </p>
+
+                                <p class="mt-2 text-xl font-bold text-[#211b30]">
+                                    ₦2.1M
+                                </p>
+
+                                <p class="mt-1 text-[9px] font-semibold text-[#b22962]">
+                                    This month
+                                </p>
+
+                            </div>
+
+                        </div>
+
+
+                        {{-- Chart --}}
+                        <div class="mt-5 rounded-xl border border-[#eeeaf1] p-5">
+
+                            <div class="flex justify-between">
+
+                                <p class="text-[10px] font-semibold text-[#211b30]">
+                                    Income & Expenses
+                                </p>
+
+                                <p class="text-[9px] text-[#aaa3b0]">
+                                    Monthly
+                                </p>
+
+                            </div>
+
+                            <div class="mt-6 flex h-36 items-end gap-2">
+
+                                <div class="flex-1 rounded-t bg-[#d8c4e4]" style="height: 42%"></div>
+                                <div class="flex-1 rounded-t bg-[#7021a8]" style="height: 65%"></div>
+
+                                <div class="flex-1 rounded-t bg-[#d8c4e4]" style="height: 50%"></div>
+                                <div class="flex-1 rounded-t bg-[#7021a8]" style="height: 72%"></div>
+
+                                <div class="flex-1 rounded-t bg-[#d8c4e4]" style="height: 47%"></div>
+                                <div class="flex-1 rounded-t bg-[#7021a8]" style="height: 60%"></div>
+
+                                <div class="flex-1 rounded-t bg-[#d8c4e4]" style="height: 60%"></div>
+                                <div class="flex-1 rounded-t bg-[#7021a8]" style="height: 82%"></div>
+
+                                <div class="flex-1 rounded-t bg-[#d8c4e4]" style="height: 55%"></div>
+                                <div class="flex-1 rounded-t bg-[#b22962]" style="height: 90%"></div>
+
+                            </div>
+
+                            <div class="mt-3 flex justify-between text-[8px] text-[#aaa3b0]">
+                                <span>May</span>
+                                <span>Jun</span>
+                                <span>Jul</span>
+                                <span>Aug</span>
+                                <span>Sep</span>
+                            </div>
+
+                        </div>
+
+                    </div>
 
                 </div>
 
-                <h3 class="mt-6 text-xl font-extrabold text-[#211b30]">
-                    Giving & Donations
-                </h3>
-
-                <p class="mt-3 leading-7 text-[#8b8595]">
-                    Keep organized records of offerings, donations and
-                    other forms of giving.
-                </p>
-
             </div>
-
-
-            {{-- Members --}}
-
-            <div
-                class="group rounded-[20px] border border-[#ddd9e5] bg-white p-7 shadow-[0_10px_30px_rgba(45,20,70,.04)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_20px_40px_rgba(45,20,70,.10)]"
-            >
-
-                <div
-                    class="flex h-12 w-12 items-center justify-center rounded-[9px] bg-[#f4f1f7] text-[#7021a8] transition group-hover:bg-[#7021a8] group-hover:text-white"
-                >
-
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        class="h-6 w-6"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        stroke-width="1.8"
-                    >
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"
-                        />
-
-                        <circle
-                            cx="9"
-                            cy="7"
-                            r="4"
-                        />
-
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            d="M22 21v-2a4 4 0 00-3-3.87"
-                        />
-
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            d="M16 3.13a4 4 0 010 7.75"
-                        />
-
-                    </svg>
-
-                </div>
-
-                <h3 class="mt-6 text-xl font-extrabold text-[#211b30]">
-                    Member Management
-                </h3>
-
-                <p class="mt-3 leading-7 text-[#8b8595]">
-                    Maintain complete member profiles and organize
-                    your church community.
-                </p>
-
-            </div>
-
-
-            {{-- Check-In --}}
-
-            <div
-                class="group rounded-[20px] border border-[#ddd9e5] bg-white p-7 shadow-[0_10px_30px_rgba(45,20,70,.04)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_20px_40px_rgba(45,20,70,.10)]"
-            >
-
-                <div
-                    class="flex h-12 w-12 items-center justify-center rounded-[9px] bg-[#f4f1f7] text-[#b22962] transition group-hover:bg-[#b22962] group-hover:text-white"
-                >
-
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        class="h-6 w-6"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        stroke-width="1.8"
-                    >
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            d="M5 13l4 4L19 7"
-                        />
-
-                    </svg>
-
-                </div>
-
-                <h3 class="mt-6 text-xl font-extrabold text-[#211b30]">
-                    Check-In & Attendance
-                </h3>
-
-                <p class="mt-3 leading-7 text-[#8b8595]">
-                    Track service attendance and understand participation
-                    trends across your church.
-                </p>
-
-            </div>
-
-
-            {{-- Reports --}}
-
-            <div
-                class="group rounded-[20px] border border-[#ddd9e5] bg-white p-7 shadow-[0_10px_30px_rgba(45,20,70,.04)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_20px_40px_rgba(45,20,70,.10)]"
-            >
-
-                <div
-                    class="flex h-12 w-12 items-center justify-center rounded-[9px] bg-[#f4f1f7] text-[#7021a8] transition group-hover:bg-[#7021a8] group-hover:text-white"
-                >
-
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        class="h-6 w-6"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        stroke-width="1.8"
-                    >
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            d="M4 19V5"
-                        />
-
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            d="M4 19h16"
-                        />
-
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            d="M8 16v-4"
-                        />
-
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            d="M12 16V8"
-                        />
-
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            d="M16 16v-7"
-                        />
-
-                    </svg>
-
-                </div>
-
-                <h3 class="mt-6 text-xl font-extrabold text-[#211b30]">
-                    Reports & Analytics
-                </h3>
-
-                <p class="mt-3 leading-7 text-[#8b8595]">
-                    Turn church data into useful reports that support
-                    better leadership decisions.
-                </p>
-
-            </div>
-
-
-            {{-- Roles --}}
-
-            <div
-                class="group rounded-[20px] border border-[#ddd9e5] bg-white p-7 shadow-[0_10px_30px_rgba(45,20,70,.04)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_20px_40px_rgba(45,20,70,.10)]"
-            >
-
-                <div
-                    class="flex h-12 w-12 items-center justify-center rounded-[9px] bg-[#f4f1f7] text-[#b22962] transition group-hover:bg-[#b22962] group-hover:text-white"
-                >
-
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        class="h-6 w-6"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        stroke-width="1.8"
-                    >
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            d="M12 15a3 3 0 100-6 3 3 0 000 6z"
-                        />
-
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06-1.42 1.42-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V20h-2v-.08a1.65 1.65 0 00-1-1.51 1.65 1.65 0 00-1.82.33l-.06.06-1.42-1.42.06-.06A1.65 1.65 0 008.6 15a1.65 1.65 0 00-1.51-1H7v-2h.08a1.65 1.65 0 001.51-1 1.65 1.65 0 00-.33-1.82L8.2 9.12l1.42-1.42.06.06A1.65 1.65 0 0011.5 8a1.65 1.65 0 001-1.51V6h2v.08a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06 1.42 1.42-.06.06A1.65 1.65 0 0018.6 10a1.65 1.65 0 001.51 1H20v2h-.08a1.65 1.65 0 00-1.51 1z"
-                        />
-
-                    </svg>
-
-                </div>
-
-                <h3 class="mt-6 text-xl font-extrabold text-[#211b30]">
-                    Roles & Permissions
-                </h3>
-
-                <p class="mt-3 leading-7 text-[#8b8595]">
-                    Control what administrators and team members
-                    can access within ChurchFlow.
-                </p>
-
-            </div>
-
-
-            {{-- Notifications --}}
-
-            <div
-                class="group rounded-[20px] border border-[#ddd9e5] bg-white p-7 shadow-[0_10px_30px_rgba(45,20,70,.04)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_20px_40px_rgba(45,20,70,.10)]"
-            >
-
-                <div
-                    class="flex h-12 w-12 items-center justify-center rounded-[9px] bg-[#f4f1f7] text-[#7021a8] transition group-hover:bg-[#7021a8] group-hover:text-white"
-                >
-
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        class="h-6 w-6"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        stroke-width="1.8"
-                    >
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            d="M18 8a6 6 0 00-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"
-                        />
-
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            d="M13.73 21a2 2 0 01-3.46 0"
-                        />
-
-                    </svg>
-
-                </div>
-
-                <h3 class="mt-6 text-xl font-extrabold text-[#211b30]">
-                    Notifications
-                </h3>
-
-                <p class="mt-3 leading-7 text-[#8b8595]">
-                    Keep your church team informed with timely
-                    notifications and important updates.
-                </p>
-
-            </div>
-
-
-            {{-- Activity Logs --}}
-
-            <div
-                class="group rounded-[20px] border border-[#ddd9e5] bg-white p-7 shadow-[0_10px_30px_rgba(45,20,70,.04)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_20px_40px_rgba(45,20,70,.10)]"
-            >
-
-                <div
-                    class="flex h-12 w-12 items-center justify-center rounded-[9px] bg-[#f4f1f7] text-[#b22962] transition group-hover:bg-[#b22962] group-hover:text-white"
-                >
-
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        class="h-6 w-6"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        stroke-width="1.8"
-                    >
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            d="M12 8v4l3 2"
-                        />
-
-                        <circle
-                            cx="12"
-                            cy="12"
-                            r="9"
-                        />
-
-                    </svg>
-
-                </div>
-
-                <h3 class="mt-6 text-xl font-extrabold text-[#211b30]">
-                    Activity Logs
-                </h3>
-
-                <p class="mt-3 leading-7 text-[#8b8595]">
-                    Maintain a clear history of important actions
-                    performed within your church account.
-                </p>
-
-            </div>
-
-
-            {{-- Dashboard --}}
-
-            <div
-                class="group rounded-[20px] border border-[#ddd9e5] bg-white p-7 shadow-[0_10px_30px_rgba(45,20,70,.04)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_20px_40px_rgba(45,20,70,.10)]"
-            >
-
-                <div
-                    class="flex h-12 w-12 items-center justify-center rounded-[9px] bg-[#f4f1f7] text-[#7021a8] transition group-hover:bg-[#7021a8] group-hover:text-white"
-                >
-
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        class="h-6 w-6"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        stroke-width="1.8"
-                    >
-                        <rect
-                            x="3"
-                            y="3"
-                            width="18"
-                            height="18"
-                            rx="2"
-                            ry="2"
-                        />
-
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            d="M3 9h18"
-                        />
-
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            d="M9 21V9"
-                        />
-
-                    </svg>
-
-                </div>
-
-                <h3 class="mt-6 text-xl font-extrabold text-[#211b30]">
-                    Church Dashboard
-                </h3>
-
-                <p class="mt-3 leading-7 text-[#8b8595]">
-                    See important church information from a single
-                    centralized dashboard.
-                </p>
-
-            </div>
-
 
         </div>
 
 
-        {{-- Feature CTA --}}
+        {{-- =====================================================
+             FEATURE 02 — MEMBERS
+        ====================================================== --}}
+        <div class="mt-28 grid items-center gap-12 lg:grid-cols-2 lg:gap-20">
 
-        <div class="mt-14 text-center">
+            {{-- Member Preview --}}
+            <div class="relative order-2 lg:order-1">
 
-            <a
-                href="{{ route('register') }}"
-                class="inline-flex items-center gap-2 text-sm font-extrabold text-[#7021a8] transition hover:text-[#b22962]"
-            >
-                Start managing your church with ChurchFlow
+                <div class="absolute -inset-5 rounded-[2rem] bg-pink-300/20 blur-2xl"></div>
 
-                <span>
-                    →
-                </span>
+                <div
+                    class="relative overflow-hidden rounded-2xl border border-[#d7d0dd] bg-white shadow-[0_25px_70px_rgba(33,27,48,0.15)]"
+                >
 
-            </a>
+                    <div class="flex items-center justify-between border-b border-[#eeeaf1] px-6 py-4">
+
+                        <div>
+                            <p class="text-[10px] font-semibold uppercase tracking-wider text-[#aaa3b0]">
+                                Members
+                            </p>
+
+                            <p class="mt-1 text-sm font-bold text-[#211b30]">
+                                Member Directory
+                            </p>
+                        </div>
+
+                        <button
+                            type="button"
+                            class="rounded-lg px-3 py-1.5 text-[10px] font-semibold text-white"
+                            style="background: linear-gradient(90deg, #7021a8, #b22962);"
+                        >
+                            + Add Member
+                        </button>
+
+                    </div>
+
+                    <div class="p-6">
+
+                        <div class="mb-5 flex items-center justify-between">
+
+                            <div>
+                                <p class="text-2xl font-bold text-[#211b30]">
+                                    1,284
+                                </p>
+
+                                <p class="mt-1 text-[10px] text-[#99929f]">
+                                    Total members
+                                </p>
+                            </div>
+
+                            <div class="rounded-xl bg-[#f5edf8] px-4 py-3 text-right">
+
+                                <p class="text-[9px] text-[#99929f]">
+                                    Active
+                                </p>
+
+                                <p class="mt-1 text-sm font-bold text-[#7021a8]">
+                                    1,192
+                                </p>
+
+                            </div>
+
+                        </div>
+
+
+                        {{-- Member Rows --}}
+                        <div class="overflow-hidden rounded-xl border border-[#eeeaf1]">
+
+                            <div class="grid grid-cols-3 border-b border-[#eeeaf1] bg-[#faf9fb] px-4 py-3 text-[9px] font-bold uppercase tracking-wider text-[#aaa3b0]">
+                                <span>Name</span>
+                                <span>Status</span>
+                                <span>Joined</span>
+                            </div>
+
+                            <div class="divide-y divide-[#eeeaf1]">
+
+                                <div class="grid grid-cols-3 items-center px-4 py-3">
+
+                                    <div class="flex items-center gap-2">
+
+                                        <div class="flex h-7 w-7 items-center justify-center rounded-full bg-[#eee3f5] text-[9px] font-bold text-[#7021a8]">
+                                            AO
+                                        </div>
+
+                                        <span class="text-[10px] font-semibold text-[#211b30]">
+                                            Member
+                                        </span>
+
+                                    </div>
+
+                                    <span class="text-[9px] text-[#7021a8]">
+                                        Active
+                                    </span>
+
+                                    <span class="text-[9px] text-[#99929f]">
+                                        Sep 2026
+                                    </span>
+
+                                </div>
+
+
+                                <div class="grid grid-cols-3 items-center px-4 py-3">
+
+                                    <div class="flex items-center gap-2">
+
+                                        <div class="flex h-7 w-7 items-center justify-center rounded-full bg-[#fbeaf2] text-[9px] font-bold text-[#b22962]">
+                                            BO
+                                        </div>
+
+                                        <span class="text-[10px] font-semibold text-[#211b30]">
+                                            Member
+                                        </span>
+
+                                    </div>
+
+                                    <span class="text-[9px] text-[#7021a8]">
+                                        Active
+                                    </span>
+
+                                    <span class="text-[9px] text-[#99929f]">
+                                        Aug 2026
+                                    </span>
+
+                                </div>
+
+
+                                <div class="grid grid-cols-3 items-center px-4 py-3">
+
+                                    <div class="flex items-center gap-2">
+
+                                        <div class="flex h-7 w-7 items-center justify-center rounded-full bg-[#eee3f5] text-[9px] font-bold text-[#7021a8]">
+                                            CO
+                                        </div>
+
+                                        <span class="text-[10px] font-semibold text-[#211b30]">
+                                            Member
+                                        </span>
+
+                                    </div>
+
+                                    <span class="text-[9px] text-[#7021a8]">
+                                        Active
+                                    </span>
+
+                                    <span class="text-[9px] text-[#99929f]">
+                                        Aug 2026
+                                    </span>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            {{-- Content --}}
+            <div class="order-1 lg:order-2">
+
+                <div
+                    class="flex h-12 w-12 items-center justify-center rounded-xl text-white shadow-lg shadow-pink-300/30"
+                    style="background: linear-gradient(135deg, #8f2da1, #b22962);"
+                >
+                    <svg
+                        class="h-5 w-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"
+                        />
+                    </svg>
+                </div>
+
+                <p class="mt-7 text-xs font-bold uppercase tracking-[0.18em] text-[#756d80]">
+                    MEMBER MANAGEMENT
+                </p>
+
+                <h3 class="mt-3 text-3xl font-black tracking-tight text-[#181525] sm:text-4xl">
+                    Know your church community.
+                </h3>
+
+                <p class="mt-5 text-base leading-7 text-[#625a6b]">
+                    Keep member records organized and accessible.
+                    Give your team a reliable place to manage member
+                    information and understand your church community.
+                </p>
+
+                <div class="mt-7 space-y-3">
+
+                    <div class="flex items-center gap-3 text-sm text-[#51495c]">
+                        <span class="flex h-6 w-6 items-center justify-center rounded-full bg-[#f7eaf1] text-xs font-bold text-[#b22962]">
+                            ✓
+                        </span>
+                        Centralized member records
+                    </div>
+
+                    <div class="flex items-center gap-3 text-sm text-[#51495c]">
+                        <span class="flex h-6 w-6 items-center justify-center rounded-full bg-[#f7eaf1] text-xs font-bold text-[#b22962]">
+                            ✓
+                        </span>
+                        Search and manage members
+                    </div>
+
+                    <div class="flex items-center gap-3 text-sm text-[#51495c]">
+                        <span class="flex h-6 w-6 items-center justify-center rounded-full bg-[#f7eaf1] text-xs font-bold text-[#b22962]">
+                            ✓
+                        </span>
+                        Keep member information organized
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        {{-- =====================================================
+             FEATURE 03 — ATTENDANCE
+        ====================================================== --}}
+        <div class="mt-28 grid items-center gap-12 lg:grid-cols-2 lg:gap-20">
+
+            {{-- Content --}}
+            <div>
+
+                <div
+                    class="flex h-12 w-12 items-center justify-center rounded-xl text-white shadow-lg shadow-purple-300/30"
+                    style="background: linear-gradient(135deg, #7021a8, #9a2c8b);"
+                >
+                    <svg
+                        class="h-5 w-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                        />
+                    </svg>
+                </div>
+
+                <p class="mt-7 text-xs font-bold uppercase tracking-[0.18em] text-[#756d80]">
+                    ATTENDANCE & CHECK-IN
+                </p>
+
+                <h3 class="mt-3 text-3xl font-black tracking-tight text-[#181525] sm:text-4xl">
+                    See your church engagement.
+                </h3>
+
+                <p class="mt-5 text-base leading-7 text-[#625a6b]">
+                    Record attendance, manage check-ins and get a clearer
+                    view of participation across your services and church
+                    activities.
+                </p>
+
+                <div class="mt-7 space-y-3">
+
+                    <div class="flex items-center gap-3 text-sm text-[#51495c]">
+                        <span class="flex h-6 w-6 items-center justify-center rounded-full bg-[#eee3f5] text-xs font-bold text-[#7021a8]">
+                            ✓
+                        </span>
+                        Service attendance
+                    </div>
+
+                    <div class="flex items-center gap-3 text-sm text-[#51495c]">
+                        <span class="flex h-6 w-6 items-center justify-center rounded-full bg-[#eee3f5] text-xs font-bold text-[#7021a8]">
+                            ✓
+                        </span>
+                        Fast member check-in
+                    </div>
+
+                    <div class="flex items-center gap-3 text-sm text-[#51495c]">
+                        <span class="flex h-6 w-6 items-center justify-center rounded-full bg-[#eee3f5] text-xs font-bold text-[#7021a8]">
+                            ✓
+                        </span>
+                        Attendance reporting
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            {{-- Attendance Preview --}}
+            <div class="relative">
+
+                <div class="absolute -inset-5 rounded-[2rem] bg-purple-300/20 blur-2xl"></div>
+
+                <div
+                    class="relative overflow-hidden rounded-2xl border border-[#d7d0dd] bg-white shadow-[0_25px_70px_rgba(33,27,48,0.15)]"
+                >
+
+                    <div class="border-b border-[#eeeaf1] px-6 py-4">
+
+                        <p class="text-[10px] font-semibold uppercase tracking-wider text-[#aaa3b0]">
+                            Attendance
+                        </p>
+
+                        <p class="mt-1 text-sm font-bold text-[#211b30]">
+                            Sunday Service
+                        </p>
+
+                    </div>
+
+                    <div class="p-6">
+
+                        <div class="flex items-center justify-between">
+
+                            <div>
+
+                                <p class="text-3xl font-black text-[#211b30]">
+                                    76%
+                                </p>
+
+                                <p class="mt-1 text-[10px] text-[#99929f]">
+                                    Attendance rate
+                                </p>
+
+                            </div>
+
+                            <div class="flex h-20 w-20 items-center justify-center rounded-full border-[8px] border-[#eee3f5]">
+                                <span class="text-sm font-bold text-[#7021a8]">
+                                    76%
+                                </span>
+                            </div>
+
+                        </div>
+
+
+                        <div class="mt-7 space-y-4">
+
+                            {{-- Adults --}}
+                            <div>
+
+                                <div class="mb-1.5 flex justify-between text-[10px]">
+
+                                    <span class="text-[#817a89]">
+                                        Adults
+                                    </span>
+
+                                    <span class="font-semibold text-[#211b30]">
+                                        612
+                                    </span>
+
+                                </div>
+
+                                <div class="h-2 overflow-hidden rounded-full bg-[#f0edf2]">
+
+                                    <div
+                                        class="h-full w-[78%] rounded-full"
+                                        style="background: linear-gradient(90deg, #7021a8, #b22962);"
+                                    ></div>
+
+                                </div>
+
+                            </div>
+
+
+                            {{-- Youth --}}
+                            <div>
+
+                                <div class="mb-1.5 flex justify-between text-[10px]">
+
+                                    <span class="text-[#817a89]">
+                                        Youth
+                                    </span>
+
+                                    <span class="font-semibold text-[#211b30]">
+                                        184
+                                    </span>
+
+                                </div>
+
+                                <div class="h-2 overflow-hidden rounded-full bg-[#f0edf2]">
+
+                                    <div
+                                        class="h-full w-[55%] rounded-full"
+                                        style="background: linear-gradient(90deg, #7021a8, #b22962);"
+                                    ></div>
+
+                                </div>
+
+                            </div>
+
+
+                            {{-- Children --}}
+                            <div>
+
+                                <div class="mb-1.5 flex justify-between text-[10px]">
+
+                                    <span class="text-[#817a89]">
+                                        Children
+                                    </span>
+
+                                    <span class="font-semibold text-[#211b30]">
+                                        126
+                                    </span>
+
+                                </div>
+
+                                <div class="h-2 overflow-hidden rounded-full bg-[#f0edf2]">
+
+                                    <div
+                                        class="h-full w-[42%] rounded-full"
+                                        style="background: linear-gradient(90deg, #7021a8, #b22962);"
+                                    ></div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        {{-- =====================================================
+             FEATURE 04 — REPORTING
+        ====================================================== --}}
+        <div class="mt-28 rounded-3xl bg-[#211b30] p-8 sm:p-10 lg:p-14">
+
+            <div class="grid items-center gap-12 lg:grid-cols-2 lg:gap-20">
+
+                {{-- Content --}}
+                <div>
+
+                    <p class="text-xs font-bold uppercase tracking-[0.18em] text-[#d5b5e3]">
+                        REPORTS & ANALYTICS
+                    </p>
+
+                    <h3 class="mt-4 text-3xl font-black tracking-tight text-white sm:text-4xl">
+                        Turn church records into useful insight.
+                    </h3>
+
+                    <p class="mt-5 text-base leading-7 text-[#b9b3c0]">
+                        Get a clearer picture of your church through
+                        organized reports covering finances, attendance,
+                        members and other important activity.
+                    </p>
+
+                    <a
+                        href="{{ route('register') }}"
+                        class="mt-8 inline-flex items-center rounded-xl bg-white px-6 py-3.5 text-sm font-bold text-[#7021a8] transition hover:-translate-y-0.5"
+                    >
+                        Start Your Free Trial
+                        <span class="ml-2">→</span>
+                    </a>
+
+                </div>
+
+
+                {{-- Report Preview --}}
+                <div class="rounded-2xl bg-white p-5 shadow-2xl">
+
+                    <div class="flex items-center justify-between border-b border-[#eeeaf1] pb-4">
+
+                        <div>
+
+                            <p class="text-[10px] uppercase tracking-wider text-[#aaa3b0]">
+                                Monthly Report
+                            </p>
+
+                            <p class="mt-1 text-sm font-bold text-[#211b30]">
+                                Church Performance
+                            </p>
+
+                        </div>
+
+                        <span class="rounded-lg bg-[#f5edf8] px-3 py-1.5 text-[9px] font-semibold text-[#7021a8]">
+                            September
+                        </span>
+
+                    </div>
+
+
+                    <div class="mt-5 grid grid-cols-3 gap-3">
+
+                        <div class="rounded-xl bg-[#f8f6fa] p-3">
+                            <p class="text-[9px] text-[#99929f]">
+                                Income
+                            </p>
+
+                            <p class="mt-1 text-sm font-bold text-[#211b30]">
+                                ₦4.8M
+                            </p>
+                        </div>
+
+                        <div class="rounded-xl bg-[#f8f6fa] p-3">
+                            <p class="text-[9px] text-[#99929f]">
+                                Members
+                            </p>
+
+                            <p class="mt-1 text-sm font-bold text-[#211b30]">
+                                1,284
+                            </p>
+                        </div>
+
+                        <div class="rounded-xl bg-[#f8f6fa] p-3">
+                            <p class="text-[9px] text-[#99929f]">
+                                Attendance
+                            </p>
+
+                            <p class="mt-1 text-sm font-bold text-[#211b30]">
+                                76%
+                            </p>
+                        </div>
+
+                    </div>
+
+
+                    {{-- Chart --}}
+                    <div class="mt-5 h-28 rounded-xl bg-[#f8f6fa] p-4">
+
+                        <div class="flex h-full items-end gap-2">
+
+                            <div class="flex-1 rounded-t bg-[#d9c6e5]" style="height:40%"></div>
+                            <div class="flex-1 rounded-t bg-[#d9c6e5]" style="height:52%"></div>
+                            <div class="flex-1 rounded-t bg-[#7021a8]" style="height:67%"></div>
+                            <div class="flex-1 rounded-t bg-[#7021a8]" style="height:60%"></div>
+                            <div class="flex-1 rounded-t bg-[#9a2c8b]" style="height:78%"></div>
+                            <div class="flex-1 rounded-t bg-[#b22962]" style="height:88%"></div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="mt-4 flex items-center justify-between">
+
+                        <span class="text-[9px] text-[#99929f]">
+                            Generated from ChurchFlow
+                        </span>
+
+                        <span class="text-[9px] font-semibold text-[#7021a8]">
+                            View report →
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        {{-- =====================================================
+             FEATURE SUMMARY
+        ====================================================== --}}
+        <div class="mt-16 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+
+            <div class="rounded-xl border border-[#d4cbdc] bg-white p-5 shadow-sm">
+
+                <p class="text-sm font-bold text-[#211b30]">
+                    Roles & Permissions
+                </p>
+
+                <p class="mt-2 text-xs leading-5 text-[#817a89]">
+                    Control what each member of your team can access.
+                </p>
+
+            </div>
+
+
+            <div class="rounded-xl border border-[#d4cbdc] bg-white p-5 shadow-sm">
+
+                <p class="text-sm font-bold text-[#211b30]">
+                    Activity Logs
+                </p>
+
+                <p class="mt-2 text-xs leading-5 text-[#817a89]">
+                    Keep track of important activity across your platform.
+                </p>
+
+            </div>
+
+
+            <div class="rounded-xl border border-[#d4cbdc] bg-white p-5 shadow-sm">
+
+                <p class="text-sm font-bold text-[#211b30]">
+                    Giving
+                </p>
+
+                <p class="mt-2 text-xs leading-5 text-[#817a89]">
+                    Keep your church giving records organized and accessible.
+                </p>
+
+            </div>
+
+
+            <div class="rounded-xl border border-[#d4cbdc] bg-white p-5 shadow-sm">
+
+                <p class="text-sm font-bold text-[#211b30]">
+                    Church Dashboard
+                </p>
+
+                <p class="mt-2 text-xs leading-5 text-[#817a89]">
+                    See important church information at a glance.
+                </p>
+
+            </div>
 
         </div>
 

@@ -1,220 +1,154 @@
-<section
-    class="bg-[#f4f1f7] py-24"
->
+{{-- =========================================================
+     HOW CHURCHFLOW WORKS
+========================================================= --}}
+<section class="relative overflow-hidden bg-white py-24 lg:py-32">
 
     <div class="mx-auto max-w-7xl px-6 lg:px-8">
 
-
-        {{-- Section Heading --}}
-
+        {{-- Heading --}}
         <div class="mx-auto max-w-3xl text-center">
 
-            <p
-                class="text-sm font-extrabold uppercase tracking-[0.18em] text-[#7021a8]"
-            >
-                Get Started
+            <p class="text-xs font-bold uppercase tracking-[0.2em] text-[#b22962]">
+                GET STARTED
             </p>
 
-            <h2
-                class="mt-4 text-4xl font-extrabold leading-tight tracking-tight text-[#211b30] sm:text-5xl"
-            >
-                Start managing your church in four simple steps.
+            <h2 class="mt-5 text-4xl font-black tracking-[-0.03em] text-[#211b30] sm:text-5xl lg:text-6xl">
+                Up and running
+                <span
+                    class="bg-clip-text text-transparent"
+                    style="background-image: linear-gradient(90deg, #7021a8, #b22962);"
+                >
+                    in minutes.
+                </span>
             </h2>
 
-            <p
-                class="mt-6 text-lg leading-8 text-[#8b8595]"
-            >
-                Getting started with ChurchFlow is simple. Create your
-                church account, complete your setup and start managing
-                your church from one place.
+            <p class="mx-auto mt-6 max-w-2xl text-lg leading-8 text-[#817a89]">
+                Getting your church onto ChurchFlow is simple.
+                Create your account, set up your church and start managing.
             </p>
 
         </div>
 
 
         {{-- Steps --}}
-
-        <div
-            class="relative mt-16 grid gap-8 md:grid-cols-2 lg:grid-cols-4"
-        >
-
+        <div class="relative mt-16">
 
             {{-- Connecting Line --}}
+            <div class="absolute left-[16.67%] right-[16.67%] top-10 hidden h-px bg-[#ddd7e2] lg:block"></div>
 
-            <div
-                class="absolute left-[12%] right-[12%] top-8 hidden h-px bg-gradient-to-r from-[#7021a8]/20 via-[#7021a8] to-[#b22962]/20 lg:block"
-            ></div>
+            <div class="relative grid gap-10 lg:grid-cols-3">
 
+                {{-- Step 01 --}}
+                <div class="text-center">
 
-            {{-- Step 01 --}}
+                    <div class="relative mx-auto flex h-20 w-20 items-center justify-center rounded-2xl border border-[#e1d9e6] bg-white shadow-lg shadow-purple-100">
 
-            <div class="relative text-center">
+                        <div
+                            class="flex h-12 w-12 items-center justify-center rounded-xl text-sm font-black text-white"
+                            style="background: linear-gradient(135deg, #7021a8, #b22962);"
+                        >
+                            01
+                        </div>
 
-                <div
-                    class="relative mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-white text-lg font-extrabold text-[#7021a8] shadow-[0_10px_30px_rgba(45,20,70,.10)] ring-8 ring-[#f4f1f7]"
-                >
-                    01
+                    </div>
+
+                    <p class="mt-7 text-xs font-bold uppercase tracking-[0.18em] text-[#9a94a2]">
+                        CREATE
+                    </p>
+
+                    <h3 class="mt-2 text-2xl font-bold text-[#211b30]">
+                        Create your account
+                    </h3>
+
+                    <p class="mx-auto mt-3 max-w-sm text-sm leading-6 text-[#817a89]">
+                        Start your 30-day free trial and create your
+                        ChurchFlow account in just a few steps.
+                    </p>
+
                 </div>
 
-                <h3
-                    class="mt-7 text-xl font-extrabold text-[#211b30]"
-                >
-                    Create Your Account
-                </h3>
 
-                <p
-                    class="mt-3 text-sm leading-7 text-[#8b8595]"
-                >
-                    Register your church and provide the basic
-                    information we need.
-                </p>
+                {{-- Step 02 --}}
+                <div class="text-center">
 
-            </div>
+                    <div class="relative mx-auto flex h-20 w-20 items-center justify-center rounded-2xl border border-[#e1d9e6] bg-white shadow-lg shadow-purple-100">
 
+                        <div
+                            class="flex h-12 w-12 items-center justify-center rounded-xl text-sm font-black text-white"
+                            style="background: linear-gradient(135deg, #7f279d, #a52c7e);"
+                        >
+                            02
+                        </div>
 
-            {{-- Step 02 --}}
+                    </div>
 
-            <div class="relative text-center">
+                    <p class="mt-7 text-xs font-bold uppercase tracking-[0.18em] text-[#9a94a2]">
+                        CONFIGURE
+                    </p>
 
-                <div
-                    class="relative mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-white text-lg font-extrabold text-[#b22962] shadow-[0_10px_30px_rgba(45,20,70,.10)] ring-8 ring-[#f4f1f7]"
-                >
-                    02
+                    <h3 class="mt-2 text-2xl font-bold text-[#211b30]">
+                        Set up your church
+                    </h3>
+
+                    <p class="mx-auto mt-3 max-w-sm text-sm leading-6 text-[#817a89]">
+                        Add your church information, configure your
+                        team and organize the areas you want to manage.
+                    </p>
+
                 </div>
 
-                <h3
-                    class="mt-7 text-xl font-extrabold text-[#211b30]"
-                >
-                    Set Up Your Church
-                </h3>
 
-                <p
-                    class="mt-3 text-sm leading-7 text-[#8b8595]"
-                >
-                    Configure your church profile, departments,
-                    roles and settings.
-                </p>
+                {{-- Step 03 --}}
+                <div class="text-center">
 
-            </div>
+                    <div class="relative mx-auto flex h-20 w-20 items-center justify-center rounded-2xl border border-[#e1d9e6] bg-white shadow-lg shadow-purple-100">
 
+                        <div
+                            class="flex h-12 w-12 items-center justify-center rounded-xl text-sm font-black text-white"
+                            style="background: linear-gradient(135deg, #962b88, #b22962);"
+                        >
+                            03
+                        </div>
 
-            {{-- Step 03 --}}
+                    </div>
 
-            <div class="relative text-center">
+                    <p class="mt-7 text-xs font-bold uppercase tracking-[0.18em] text-[#9a94a2]">
+                        MANAGE
+                    </p>
 
-                <div
-                    class="relative mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-white text-lg font-extrabold text-[#7021a8] shadow-[0_10px_30px_rgba(45,20,70,.10)] ring-8 ring-[#f4f1f7]"
-                >
-                    03
+                    <h3 class="mt-2 text-2xl font-bold text-[#211b30]">
+                        Run your church
+                    </h3>
+
+                    <p class="mx-auto mt-3 max-w-sm text-sm leading-6 text-[#817a89]">
+                        Manage finances, members, attendance and reports
+                        from one connected platform.
+                    </p>
+
                 </div>
 
-                <h3
-                    class="mt-7 text-xl font-extrabold text-[#211b30]"
-                >
-                    Invite Your Team
-                </h3>
-
-                <p
-                    class="mt-3 text-sm leading-7 text-[#8b8595]"
-                >
-                    Give authorized team members access to
-                    the areas they need.
-                </p>
-
             </div>
-
-
-            {{-- Step 04 --}}
-
-            <div class="relative text-center">
-
-                <div
-                    class="relative mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-r from-[#7021a8] to-[#b22962] text-lg font-extrabold text-white shadow-[0_10px_30px_rgba(45,20,70,.18)] ring-8 ring-[#f4f1f7]"
-                >
-                    04
-                </div>
-
-                <h3
-                    class="mt-7 text-xl font-extrabold text-[#211b30]"
-                >
-                    Start Managing
-                </h3>
-
-                <p
-                    class="mt-3 text-sm leading-7 text-[#8b8595]"
-                >
-                    Begin managing finances, members, check-ins
-                    and reports.
-                </p>
-
-            </div>
-
 
         </div>
 
 
-        {{-- Trial Message --}}
+        {{-- CTA --}}
+        <div class="mt-16 text-center">
 
-        <div
-            class="mx-auto mt-16 max-w-3xl rounded-[20px] border border-[#ddd9e5] bg-white p-6 shadow-[0_10px_30px_rgba(45,20,70,.06)]"
-        >
-
-            <div
-                class="flex flex-col items-center gap-4 text-center sm:flex-row sm:text-left"
+            <a
+                href="{{ route('register') }}"
+                class="inline-flex items-center rounded-xl px-7 py-4 text-sm font-bold text-white shadow-xl shadow-purple-200 transition duration-200 hover:-translate-y-1"
+                style="background: linear-gradient(90deg, #7021a8, #b22962);"
             >
+                Start Your 30-Day Free Trial
+                <span class="ml-2 text-lg">→</span>
+            </a>
 
-                <div
-                    class="flex h-12 w-12 shrink-0 items-center justify-center rounded-[9px] bg-[#f4f1f7] text-[#7021a8]"
-                >
-
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        class="h-6 w-6"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        stroke-width="1.8"
-                    >
-                        <circle
-                            cx="12"
-                            cy="12"
-                            r="9"
-                        />
-
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            d="M12 7v5l3 2"
-                        />
-
-                    </svg>
-
-                </div>
-
-                <div class="flex-1">
-
-                    <p class="font-extrabold text-[#211b30]">
-                        Your first 30 days are on us.
-                    </p>
-
-                    <p class="mt-1 text-sm leading-6 text-[#8b8595]">
-                        Explore ChurchFlow, set up your church and
-                        experience the platform before choosing a subscription plan.
-                    </p>
-
-                </div>
-
-                <a
-                    href="{{ route('register') }}"
-                    class="cf-gradient-button shrink-0 rounded-[9px] px-5 py-3 text-sm font-extrabold text-white"
-                >
-                    Start Free Trial →
-                </a>
-
-            </div>
+            <p class="mt-4 text-xs text-[#9a94a2]">
+                No credit card required.
+            </p>
 
         </div>
 
     </div>
-
 </section>

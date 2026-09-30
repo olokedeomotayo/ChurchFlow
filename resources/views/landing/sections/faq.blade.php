@@ -1,131 +1,175 @@
-<section
-    id="faq"
-    class="bg-white py-24"
->
+{{-- =========================================================
+     FAQ
+========================================================= --}}
+<section id="faq" class="bg-[#f4f1f7] py-20 sm:py-24">
 
     <div class="mx-auto max-w-4xl px-6 lg:px-8">
 
+        {{-- Header --}}
+        <div class="text-center">
 
-        {{-- Section Heading --}}
-
-        <div class="mx-auto max-w-3xl text-center">
-
-            <p
-                class="text-sm font-extrabold uppercase tracking-[0.18em] text-[#7021a8]"
-            >
+            <span class="inline-flex items-center rounded-full border border-[#ddd9e5] bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-[#7021a8]">
                 FAQ
-            </p>
+            </span>
 
-            <h2
-                class="mt-4 text-4xl font-extrabold tracking-tight text-[#211b30] sm:text-5xl"
-            >
-                Frequently asked questions.
+            <h2 class="mt-6 text-3xl font-bold tracking-tight text-[#211b30] sm:text-4xl">
+                Questions, answered.
             </h2>
 
-            <p
-                class="mt-5 text-lg leading-8 text-[#8b8595]"
-            >
-                Everything you need to know about getting started
-                with ChurchFlow.
+            <p class="mx-auto mt-4 max-w-2xl text-base leading-7 text-[#8b8595]">
+                A few things you may want to know before getting started.
             </p>
 
         </div>
 
 
-        {{-- FAQ List --}}
+        {{-- Questions --}}
+        <div class="mt-10 space-y-3">
 
-        <div class="mt-14 space-y-3">
+            {{-- 01 --}}
+            <details class="group rounded-2xl border border-[#ddd9e5] bg-white">
 
-            @foreach([
-                [
-                    'q' => 'How long is the free trial?',
-                    'a' => 'Every new church account starts with a 30-day trial period. You can explore ChurchFlow, set up your church and begin using the platform before choosing a subscription plan.'
-                ],
-                [
-                    'q' => 'Do I need a credit card to start?',
-                    'a' => 'No. You can create your ChurchFlow account and start your 30-day trial without entering payment details.'
-                ],
-                [
-                    'q' => 'Can multiple people manage our church?',
-                    'a' => 'Yes. Church administrators can invite authorized team members and assign appropriate roles and permissions based on their responsibilities.'
-                ],
-                [
-                    'q' => 'Can we manage church finances?',
-                    'a' => 'Yes. ChurchFlow provides tools for recording income, expenses, giving and other financial activities while helping leadership understand the church’s financial position.'
-                ],
-                [
-                    'q' => 'Can members check in for services?',
-                    'a' => 'Yes. The Check-In and Attendance module is designed to make service attendance easier to record, organize and understand.'
-                ],
-                [
-                    'q' => 'What happens after the trial?',
-                    'a' => 'After the 30-day trial, your church can select the subscription plan that best fits its needs and continue using ChurchFlow.'
-                ]
-            ] as $faq)
+                <summary class="flex cursor-pointer list-none items-center justify-between gap-6 px-6 py-5 text-sm font-semibold text-[#211b30]">
 
-                <details
-                    class="group rounded-[14px] border border-[#ddd9e5] bg-[#f4f1f7] px-6 transition duration-300 open:bg-white open:shadow-[0_10px_30px_rgba(45,20,70,.06)]"
-                >
+                    <span>
+                        How long is the free trial?
+                    </span>
 
-                    <summary
-                        class="flex cursor-pointer list-none items-center justify-between gap-6 py-6 text-sm font-extrabold text-[#211b30] marker:hidden"
-                    >
+                    <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#f4f1f7] text-[#7021a8] transition group-open:rotate-45">
+                        +
+                    </span>
 
-                        <span>
-                            {{ $faq['q'] }}
-                        </span>
+                </summary>
+
+                <div class="border-t border-[#eeeaf1] px-6 py-5 text-sm leading-6 text-[#8b8595]">
+                    ChurchFlow includes a 30-day free trial so your church can
+                    explore the platform before choosing a paid plan.
+                </div>
+
+            </details>
 
 
-                        <span
-                            class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white text-lg font-medium text-[#7021a8] shadow-sm transition duration-300 group-open:rotate-45 group-open:bg-[#7021a8] group-open:text-white"
-                        >
-                            +
-                        </span>
+            {{-- 02 --}}
+            <details class="group rounded-2xl border border-[#ddd9e5] bg-white">
 
-                    </summary>
+                <summary class="flex cursor-pointer list-none items-center justify-between gap-6 px-6 py-5 text-sm font-semibold text-[#211b30]">
+
+                    <span>
+                        Do I need a credit card to start?
+                    </span>
+
+                    <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#f4f1f7] text-[#7021a8] transition group-open:rotate-45">
+                        +
+                    </span>
+
+                </summary>
+
+                <div class="border-t border-[#eeeaf1] px-6 py-5 text-sm leading-6 text-[#8b8595]">
+                    No. You can start your 30-day trial without providing
+                    credit card details.
+                </div>
+
+            </details>
 
 
-                    <div class="pb-6 pr-12">
+            {{-- 03 --}}
+            <details class="group rounded-2xl border border-[#ddd9e5] bg-white">
 
-                        <p
-                            class="text-sm leading-7 text-[#8b8595]"
-                        >
-                            {{ $faq['a'] }}
-                        </p>
+                <summary class="flex cursor-pointer list-none items-center justify-between gap-6 px-6 py-5 text-sm font-semibold text-[#211b30]">
 
-                    </div>
+                    <span>
+                        Can multiple people manage our church?
+                    </span>
 
-                </details>
+                    <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#f4f1f7] text-[#7021a8] transition group-open:rotate-45">
+                        +
+                    </span>
 
-            @endforeach
+                </summary>
+
+                <div class="border-t border-[#eeeaf1] px-6 py-5 text-sm leading-6 text-[#8b8595]">
+                    Yes. ChurchFlow supports role-based access so different
+                    members of your church team can work within the platform
+                    according to their responsibilities.
+                </div>
+
+            </details>
+
+
+            {{-- 04 --}}
+            <details class="group rounded-2xl border border-[#ddd9e5] bg-white">
+
+                <summary class="flex cursor-pointer list-none items-center justify-between gap-6 px-6 py-5 text-sm font-semibold text-[#211b30]">
+
+                    <span>
+                        Can we manage our church finances?
+                    </span>
+
+                    <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#f4f1f7] text-[#7021a8] transition group-open:rotate-45">
+                        +
+                    </span>
+
+                </summary>
+
+                <div class="border-t border-[#eeeaf1] px-6 py-5 text-sm leading-6 text-[#8b8595]">
+                    Yes. ChurchFlow provides tools for recording and organizing
+                    church income, expenses and other financial information.
+                </div>
+
+            </details>
+
+
+            {{-- 05 --}}
+            <details class="group rounded-2xl border border-[#ddd9e5] bg-white">
+
+                <summary class="flex cursor-pointer list-none items-center justify-between gap-6 px-6 py-5 text-sm font-semibold text-[#211b30]">
+
+                    <span>
+                        Can we track attendance and check-ins?
+                    </span>
+
+                    <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#f4f1f7] text-[#7021a8] transition group-open:rotate-45">
+                        +
+                    </span>
+
+                </summary>
+
+                <div class="border-t border-[#eeeaf1] px-6 py-5 text-sm leading-6 text-[#8b8595]">
+                    Yes. ChurchFlow can help your team record attendance and
+                    check-ins and use that information for reporting.
+                </div>
+
+            </details>
 
         </div>
 
 
-        {{-- FAQ CTA --}}
+        {{-- Contact Link --}}
+        <div class="mt-8 text-center">
 
-        <div
-            class="mt-12 rounded-[20px] border border-[#ddd9e5] bg-[#f4f1f7] p-7 text-center"
-        >
-
-            <p
-                class="font-extrabold text-[#211b30]"
-            >
+            <p class="text-sm text-[#8b8595]">
                 Still have questions?
             </p>
 
-            <p
-                class="mt-2 text-sm text-[#8b8595]"
-            >
-                We're happy to help you understand how ChurchFlow
-                can work for your church.
-            </p>
-
             <a
-                href="{{ route('register') }}"
-                class="cf-gradient-button mt-5 inline-flex rounded-[9px] px-6 py-3 text-sm font-extrabold text-white"
+                href="#contact"
+                class="mt-2 inline-flex items-center gap-2 text-sm font-semibold text-[#7021a8] transition hover:text-[#b22962]"
             >
-                Get Started →
+                Talk to our team
+
+                <svg
+                    class="h-4 w-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M5 12h14M13 6l6 6-6 6"
+                    />
+                </svg>
             </a>
 
         </div>

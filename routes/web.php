@@ -39,6 +39,8 @@ Route::view('/', 'landing.index')
 Route::post('/contact', [ContactController::class, 'store'])
     ->name('contact.store');
 
+Route::view('/pricing', 'pricing')->name('pricing');
+
 
 /*
 |--------------------------------------------------------------------------

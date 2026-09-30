@@ -1,65 +1,99 @@
+{{-- =========================================================
+     HEADER
+========================================================= --}}
 <header
-    class="fixed inset-x-0 top-0 z-50 border-b border-[#eeeaf2] bg-white/95 backdrop-blur-xl"
+    class="fixed inset-x-0 top-0 z-50 border-b border-[#ddd9e5]/70 bg-[#f4f1f7]/90 backdrop-blur-xl"
 >
 
     <div class="mx-auto flex h-20 max-w-7xl items-center justify-between px-6 lg:px-8">
 
-        {{-- Logo --}}
-
+        {{-- Brand --}}
         <a
             href="{{ route('landing') }}"
             class="flex items-center gap-3"
+            aria-label="ChurchFlow Home"
         >
 
-            <img
-                src="{{ asset('images/techcrossbreed-logo.png') }}"
-                alt="ChurchFlow"
-                class="h-11 w-11 object-contain"
+            {{-- Church Icon --}}
+            <div
+                class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#7021a8] to-[#b22962] text-white shadow-lg shadow-[#7021a8]/15"
             >
 
-            <div class="text-xl font-extrabold tracking-tight">
+                <svg
+                    class="h-5 w-5"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    aria-hidden="true"
+                >
+                    <path
+                        d="M12 3L4 9V21H20V9L12 3Z"
+                        stroke="currentColor"
+                        stroke-width="1.8"
+                        stroke-linejoin="round"
+                    />
 
-                <span class="text-[#7021a8]">
-                    Church
-                </span>
+                    <path
+                        d="M12 3V21"
+                        stroke="currentColor"
+                        stroke-width="1.8"
+                        stroke-linecap="round"
+                    />
 
-                <span class="font-normal text-[#b22962]">
-                    Flow
-                </span>
+                    <path
+                        d="M8 21V14H16V21"
+                        stroke="currentColor"
+                        stroke-width="1.8"
+                        stroke-linejoin="round"
+                    />
+
+                    <path
+                        d="M9 9H15"
+                        stroke="currentColor"
+                        stroke-width="1.8"
+                        stroke-linecap="round"
+                    />
+                </svg>
 
             </div>
+
+            <span class="text-xl font-bold tracking-tight text-[#211b30]">
+                Church<span class="text-[#b22962]">Flow</span>
+            </span>
 
         </a>
 
 
         {{-- Desktop Navigation --}}
-
-        <nav class="hidden items-center gap-8 lg:flex">
+        <nav
+            class="hidden items-center gap-8 lg:flex"
+            aria-label="Main navigation"
+        >
 
             <a
-                href="#features"
-                class="text-sm font-medium text-[#8b8595] transition hover:text-[#7021a8]"
+                href="{{ route('landing') }}#features"
+                class="text-sm font-medium text-[#6f6878] transition hover:text-[#7021a8]"
             >
                 Features
             </a>
 
             <a
-                href="#benefits"
-                class="text-sm font-medium text-[#8b8595] transition hover:text-[#7021a8]"
+                href="{{ route('landing') }}#dashboard"
+                class="text-sm font-medium text-[#6f6878] transition hover:text-[#7021a8]"
             >
-                Benefits
+                Dashboard
             </a>
 
             <a
-                href="#pricing"
-                class="text-sm font-medium text-[#8b8595] transition hover:text-[#7021a8]"
+                href="{{ route('pricing') }}"
+                class="text-sm font-medium text-[#6f6878] transition hover:text-[#7021a8]"
             >
                 Pricing
             </a>
 
             <a
-                href="#faq"
-                class="text-sm font-medium text-[#8b8595] transition hover:text-[#7021a8]"
+                href="{{ route('landing') }}#faq"
+                class="text-sm font-medium text-[#6f6878] transition hover:text-[#7021a8]"
             >
                 FAQ
             </a>
@@ -68,46 +102,45 @@
 
 
         {{-- Desktop Actions --}}
+        <div class="hidden items-center gap-3 lg:flex">
 
-        <div class="hidden items-center gap-5 lg:flex">
-
-           <a
-    href="/login"
-    class="text-sm font-bold text-[#7021a8] transition hover:text-[#b22962]"
->
-    Login
-</a>
+            <a
+                href="{{ route('login') }}"
+                class="rounded-xl px-5 py-2.5 text-sm font-semibold text-[#211b30] transition hover:bg-white"
+            >
+                Login
+            </a>
 
             <a
                 href="{{ route('register') }}"
-                class="cf-gradient-button rounded-[9px] px-5 py-3 text-sm font-extrabold text-white"
+                class="cf-gradient-button rounded-xl px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-[#7021a8]/15 transition hover:-translate-y-0.5"
             >
-                Start Free Trial →
+                Get Started
             </a>
 
         </div>
 
 
         {{-- Mobile Menu Button --}}
-
         <button
             type="button"
-            class="rounded-[9px] border border-[#ddd9e5] bg-white p-2.5 text-[#7021a8] transition hover:border-[#7021a8] lg:hidden"
+            class="rounded-xl border border-[#ddd9e5] bg-white px-3 py-2 text-[#211b30] transition hover:bg-[#faf9fb] lg:hidden"
             onclick="document.getElementById('mobile-menu').classList.toggle('hidden')"
             aria-label="Toggle navigation menu"
+            aria-controls="mobile-menu"
         >
 
             <svg
-                xmlns="http://www.w3.org/2000/svg"
                 class="h-5 w-5"
                 fill="none"
-                viewBox="0 0 24 24"
                 stroke="currentColor"
-                stroke-width="2"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
             >
                 <path
                     stroke-linecap="round"
                     stroke-linejoin="round"
+                    stroke-width="2"
                     d="M4 6h16M4 12h16M4 18h16"
                 />
             </svg>
@@ -118,59 +151,65 @@
 
 
     {{-- Mobile Navigation --}}
-
     <div
         id="mobile-menu"
-        class="hidden border-t border-[#eeeaf2] bg-white lg:hidden"
+        class="hidden border-t border-[#ddd9e5] bg-[#f4f1f7] lg:hidden"
     >
 
-        <div class="space-y-1 px-6 py-5">
+        <nav
+            class="space-y-1 px-6 py-5"
+            aria-label="Mobile navigation"
+        >
 
             <a
-                href="#features"
-                class="block rounded-[9px] px-4 py-3 text-sm font-semibold text-[#8b8595] transition hover:bg-[#f4f1f7] hover:text-[#7021a8]"
+                href="{{ route('landing') }}#features"
+                class="block rounded-xl px-4 py-3 text-sm font-medium text-[#211b30] transition hover:bg-white"
             >
                 Features
             </a>
 
             <a
-                href="#benefits"
-                class="block rounded-[9px] px-4 py-3 text-sm font-semibold text-[#8b8595] transition hover:bg-[#f4f1f7] hover:text-[#7021a8]"
+                href="{{ route('landing') }}#dashboard"
+                class="block rounded-xl px-4 py-3 text-sm font-medium text-[#211b30] transition hover:bg-white"
             >
-                Benefits
+                Dashboard
             </a>
 
             <a
-                href="#pricing"
-                class="block rounded-[9px] px-4 py-3 text-sm font-semibold text-[#8b8595] transition hover:bg-[#f4f1f7] hover:text-[#7021a8]"
+                href="{{ route('pricing') }}"
+                class="block rounded-xl px-4 py-3 text-sm font-medium text-[#211b30] transition hover:bg-white"
             >
                 Pricing
             </a>
 
             <a
-                href="#faq"
-                class="block rounded-[9px] px-4 py-3 text-sm font-semibold text-[#8b8595] transition hover:bg-[#f4f1f7] hover:text-[#7021a8]"
+                href="{{ route('landing') }}#faq"
+                class="block rounded-xl px-4 py-3 text-sm font-medium text-[#211b30] transition hover:bg-white"
             >
                 FAQ
             </a>
 
-            <div class="my-3 border-t border-[#eeeaf2]"></div>
 
-            <a
-                href="{{ route('login') }}"
-                class="block rounded-[9px] px-4 py-3 text-sm font-bold text-[#7021a8] transition hover:bg-[#f4f1f7]"
-            >
-                Login
-            </a>
+            {{-- Mobile Actions --}}
+            <div class="mt-4 grid grid-cols-2 gap-3">
 
-            <a
-                href="{{ route('register') }}"
-                class="cf-gradient-button mt-2 block rounded-[9px] px-4 py-3 text-center text-sm font-extrabold text-white"
-            >
-                Start Free Trial →
-            </a>
+                <a
+                    href="{{ route('login') }}"
+                    class="rounded-xl border border-[#ddd9e5] bg-white px-4 py-3 text-center text-sm font-semibold text-[#211b30] transition hover:bg-[#faf9fb]"
+                >
+                    Login
+                </a>
 
-        </div>
+                <a
+                    href="{{ route('register') }}"
+                    class="cf-gradient-button rounded-xl px-4 py-3 text-center text-sm font-semibold text-white shadow-md shadow-[#7021a8]/15 transition hover:-translate-y-0.5"
+                >
+                    Get Started
+                </a>
+
+            </div>
+
+        </nav>
 
     </div>
 
